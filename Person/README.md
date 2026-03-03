@@ -181,7 +181,7 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 
 ---
 
-## Getting Started and GameInit.pde##
+## Getting Started and GameInit.pde
 
 - To start building your game with this framework, you only need to edit GameInit.pde and create your own files to contain your classes.
 
