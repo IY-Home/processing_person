@@ -63,13 +63,13 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 
 ### **Examples**
 
-### **LoadingManager.pde**
+#### **LoadingManager.pde**
 - Example of extending GameManager to add custom features
 - `GameManagerWithLoading` adds splash screen with progress bar
 - `LoadingManager` handles staged loading with background image loading
 - `SplashScreen` animated loading display with tips
 
-### **Classes (GameHuman.pde and ObjectClasses.pde)**
+#### **Classes (GameHuman.pde and ObjectClasses.pde)**
 - **`GameHuman`** - Game player character with hunger/money systems and background updates
 - **`ImageHuman`** - Human that uses an image from ImageManager for appearance
 - **`Ball` and `BouncyBall`** - Physics objects with collision and throw mechanics
@@ -89,6 +89,17 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 - **Down Arrow/Space/Right Click** - Grab/release objects
 - **SHIFT Key** - Special interactions (eat food, stand on chair, throw balls, etc.)
 
+### **Object Interactions**
+
+1. **Eat Food**: Grab a lunchbox, press SHIFT
+2. **Unlock CashBag**: Interact with bag, enter password in InputBox
+3. **Change Shirt**: Grab shirt, press SHIFT to swap colors
+4. **Fly Drone**: Use WASD keys when drone is selected, press R to recharge
+5. **Enter Door**: Grab door to change scenes
+6. **Open Pantry**: Interact with PreFilledCupboard to access stored food
+7. **Stack Objects**: Drop items near chairs to place them
+8. **Throw Balls**: Grab a ball and press SHIFT to throw
+
 ### **Hunger System**
 - Hunger increases over time and with movement
 - Eat lunchboxes to reduce hunger (costs money)
@@ -106,11 +117,7 @@ A modular, object-oriented 2D game framework built in Processing. This project p
   - $100 bag: "Hello" (A common English greeting!)
   - $200 bag: "P@55$ec6re" (You shall never guess it.)
 
-### **Image Management**
-- Images are queued during object creation
-- Background loading with real progress tracking
-- Automatic placeholder generation for missing images
-- Shared image resources across multiple objects
+
 
 ## **Technical Highlights**
 
@@ -144,6 +151,10 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 - Thread-safe progress tracking with volatile variables
 - Automatic image conversion to PGraphics
 - Centralized resource caching to prevent duplicate loads
+- Images are queued during object creation
+- Background loading with real progress tracking
+- Automatic placeholder generation for missing images
+- Shared image resources across multiple objects
 
 ### **Customization**
 - Add new scenes by extending color/image array
@@ -152,17 +163,6 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 - Add more interactive items with `Interactable` interface
 - Create your own game mechanics by extending existing classes
 - Use ImageManager for efficient asset loading
-
-## **Example Object Interactions**
-
-1. **Eat Food**: Grab a lunchbox, press SHIFT
-2. **Unlock CashBag**: Interact with bag, enter password in InputBox
-3. **Change Shirt**: Grab shirt, press SHIFT to swap colors
-4. **Fly Drone**: Use WASD keys when drone is selected, press R to recharge
-5. **Enter Door**: Grab door to change scenes
-6. **Open Pantry**: Interact with PreFilledCupboard to access stored food
-7. **Stack Objects**: Drop items near chairs to place them
-8. **Throw Balls**: Grab a ball and press SHIFT to throw
 
 ## **Code Philosophy**
 
@@ -177,7 +177,6 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 - **Color Scheme**: Day/night cycles with distinct palettes
 - **UI**: Minimalist with contextual information
 - **Feedback**: Visual and console feedback for all actions
-- **Progression**: Hunger creates urgency, money enables survival
 - **Loading**: Smooth animated loading with real progress from ImageManager
 
 ---
