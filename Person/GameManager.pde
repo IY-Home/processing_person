@@ -446,17 +446,17 @@ class Debug {
         popMatrix();
     }
     
-    void drawVisualHelpers() {
+    void drawVisualHelpers() {  
         if (!showDebug || trackedHuman == null) return;
         
         pushMatrix();
         noFill();
         
-        // Draw grab range (GRAB_RANGE)
+        // Draw grab range
         stroke(0, 255, 0, 100);
         strokeWeight(2);
         ellipse(trackedHuman.position.x, trackedHuman.position.y, 
-                gameManager.window.physics.GRAB_RANGE * 2, gameManager.window.physics.GRAB_RANGE * 2);
+                trackedHuman.grabRange * 2, trackedHuman.grabRange * 2);
         
         // Draw 300px detection range
         stroke(255, 255, 0, 100);
@@ -751,7 +751,6 @@ class Window {
       float LEFT_BOUNDARY = 0.08f;
       float RIGHT_BOUNDARY = 0.95f;
       float GRAVITY = 6.5f;
-      float GRAB_RANGE = 100f;
       float MAX_VELOCITY = 40f; 
     }
 

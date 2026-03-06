@@ -23,14 +23,6 @@ class GameHuman extends Human {
     float bobAmount = 3;    // How many pixels to bob
     boolean wasMoving = false;
 
-    // Custom controls (can override parent if needed)
-    int leftKey = LEFT;
-    int rightKey = RIGHT;
-    int upKey = UP;
-    int downKey = DOWN;
-    int shiftKey = SHIFT;
-    Boolean mouseControls = true;
-
     GameHuman(String firstName, String lastName, String gender, int age, color hairColor,
         color shirtColor, color pantColor, color shoeColor, float speed, float money, float posX, int sceneIn) {
         // Call parent constructor with name
@@ -71,14 +63,7 @@ class GameHuman extends Human {
             }
         }
     }
-    void setControls(int left, int right, int up, int down, int shift, boolean mouse) {
-      this.leftKey = left;
-      this.rightKey = right;
-      this.upKey = up;
-      this.downKey = down;
-      this.shiftKey = shift;
-      this.mouseControls = mouse;
-    }
+    
     // Starve method when hunger hits maxHunger
     void starve() {
         gameManager.messageBox.showAlert(this.firstName + " starved!");
@@ -136,7 +121,7 @@ class GameHuman extends Human {
             for (Thing thing : gameManager.objects) {
                 if (thing instanceof Cupboard && thing.show && thing.sceneIn == this.sceneIn) {
                     float distance = abs(this.position.x - thing.position.x);
-                    if (distance <= gameManager.window.physics.GRAB_RANGE) {
+                    if (distance <= grabRange) {
                         cupboardsInRange.add(thing);
                     }
                 }
@@ -164,7 +149,7 @@ class GameHuman extends Human {
             if (thing != null && thing != this && thing.show && thing.sceneIn == this.sceneIn) {
                 float distance = abs(this.position.x - thing.position.x);
                 
-                if (distance <= gameManager.window.physics.GRAB_RANGE && !thing.occupied) {
+                if (distance <= grabRange && !thing.occupied) {
                     // Store with distance for sorting
                     candidates.add(thing);
                 }
@@ -260,84 +245,51 @@ class GameHuman extends Human {
         else return color(255, 0, 0);
     }
 
-    // Enhanced controls method with chair, jumping, and SHIFT interactions
-    void controls() {
-        // Handle SHIFT interactions with grabbed gameManager.objects
-        if (gameManager.keyManager.isKeyPressed(shiftKey) && grabbed && grabObj instanceof Interactable) {
-            // Check if enough time has passed since last SHIFT press
-            if (millis() - lastShiftPress >= shiftCooldown) {
-                lastShiftPress = millis(); // Record the time  
-                ((Interactable) grabObj).onInteract(this);
-                return; // Exit early to prevent other SHIFT actions
-            }
+    @Override
+    void leftKeyDown() {
+        float groundAngle = gameManager.window.getGroundAngleAt(position.x);
+        float baseSpeed = -speed / (frameRate/60);
+        
+        float steepness = abs(groundAngle);
+        float maxSteepness = 0.7;
+        
+        float slopeEffect;
+        if (groundAngle > 0) { 
+            slopeEffect = 1.0 - 1.5 * pow(steepness / maxSteepness, 2);
+        } else { 
+            slopeEffect = 1.0 + 1.2 * pow(steepness / maxSteepness, 2);
         }
+        
+        slopeEffect = constrain(slopeEffect, 0.15, 4.0);
+        this.acceleration.x = baseSpeed * slopeEffect;
+    }
 
-        // Jump/up movement
-        if (gameManager.keyManager.isKeyPressed(upKey) || (mousePressed && mouseButton == CENTER && mouseControls)) {
-            if (this.rested || this.position.y >= height*gameManager.window.getGroundHeightAt(position.x) - groundHeightOffset) {
-                this.velocity.y = -50;
-                this.rested = false;
-
-                // If standing on chair, get off when jumping
-                if (standingOnChair != null) {
-                    this.getOffChair();
-                }
-            }
-            this.jumping = true;
+    @Override
+    void rightKeyDown() {
+        float groundAngle = gameManager.window.getGroundAngleAt(position.x);
+        float baseSpeed = speed / (frameRate/60);
+        
+        float steepness = abs(groundAngle);
+        float maxSteepness = 0.7;
+        
+        float slopeEffect;
+        if (groundAngle > 0) {
+            slopeEffect = 1.0 + 1.2 * pow(steepness / maxSteepness, 2);
         } else {
-            this.jumping = false;
+            slopeEffect = 1.0 - 1.5 * pow(steepness / maxSteepness, 2);
+        }
+        
+        slopeEffect = constrain(slopeEffect, 0.15, 4.0);
+        this.acceleration.x = baseSpeed * slopeEffect;
+    }
 
-            // Get off chair with DOWN or UP key
-            if (standingOnChair != null && (gameManager.keyManager.isKeyPressed(upKey) || gameManager.keyManager.isKeyPressed(downKey))) {
-                this.getOffChair();
-            }
-            // Grab/release gameManager.objects
-            else if (gameManager.keyManager.isKeyPressed(downKey) || (mousePressed && mouseButton == RIGHT && mouseControls)) {
-                if (millis() - this.grabms >= 500) {
-                    this.grabms = millis();
-                    if (this.grabbed) {
-                        this.release();
-                    } else {
-                        this.grabClosest(gameManager.objects);
-                    }
-                }
-            } else if (gameManager.keyManager.isKeyPressed(rightKey) || (mousePressed && mouseX >= width / 2 && mouseControls)) {
-                float groundAngle = gameManager.window.getGroundAngleAt(position.x);
-                float baseSpeed = speed / (frameRate/60);
-                
-                float steepness = abs(groundAngle);
-                float maxSteepness = 0.7;
-                
-                float slopeEffect;
-                if (groundAngle > 0) {
-                    slopeEffect = 1.0 + 1.2 * pow(steepness / maxSteepness, 2);
-                } else {
-                    slopeEffect = 1.0 - 1.5 * pow(steepness / maxSteepness, 2);
-                }
-                
-                slopeEffect = constrain(slopeEffect, 0.15, 4.0);
-                this.acceleration.x = baseSpeed * slopeEffect;
-                
-            } else if (gameManager.keyManager.isKeyPressed(leftKey) || (mousePressed && mouseControls)) {
-                float groundAngle = gameManager.window.getGroundAngleAt(position.x);
-                float baseSpeed = -speed / (frameRate/60);
-                
-                float steepness = abs(groundAngle);
-                float maxSteepness = 0.7;
-                
-                float slopeEffect;
-                if (groundAngle > 0) { 
-                    slopeEffect = 1.0 - 1.5 * pow(steepness / maxSteepness, 2);
-                } else { 
-                    slopeEffect = 1.0 + 1.2 * pow(steepness / maxSteepness, 2);
-                }
-                
-                slopeEffect = constrain(slopeEffect, 0.15, 4.0);
-                this.acceleration.x = baseSpeed * slopeEffect;
-            } else {
-                this.velocity.x = 0;
-                this.acceleration.x = 0;
-            }
+    @Override
+    void upKeyDown() {
+        super.upKeyDown();
+
+        // If standing on chair, get off when jumping
+        if (standingOnChair != null) {
+            this.getOffChair();
         }
     }
 
@@ -355,12 +307,14 @@ class GameHuman extends Human {
 
     // Main update loop for human
     void live() {
+        if (!isDead) {
             this.update();
             this.updateHunger();
             this.display();
             this.controls();
             this.checkEdges();
             this.checkObj();
+        }
     }
     
     // Background update loop for human

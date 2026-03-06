@@ -139,9 +139,20 @@ class Human extends Thing {
     boolean grabbed;
     Thing grabObj;
     
+    float grabRange;
+
     float lastShiftPress = 0;
     float shiftCooldown = 300; // 300ms cooldown between SHIFT actions
     boolean shiftPressed = false;
+
+    // Controls
+    boolean hasControls = true;
+    int leftKey = LEFT;
+    int rightKey = RIGHT;
+    int upKey = UP;
+    int downKey = DOWN;
+    int shiftKey = SHIFT;
+    boolean mouseControls = true;
 
     Human(String name, color hairColor,
         color shirtColor, color pantColor, color shoeColor, float posX, int sceneIn) {
@@ -158,6 +169,7 @@ class Human extends Thing {
         this.grabbed = false;
         this.grabObj = null;
         this.grabms = 0;
+        this.grabRange = 100f;
         this.grabbable = false;
         this.rested = false;
         this.friction = 1;
@@ -177,7 +189,7 @@ class Human extends Thing {
         for (Thing thing : objects) {
             if (thing != null && thing != this && thing.show && thing.sceneIn == this.sceneIn) {
                 float distance = abs(this.position.x - thing.position.x);
-                if (distance <= gameManager.window.physics.GRAB_RANGE && !thing.occupied) {
+                if (distance <= grabRange && !thing.occupied) {
                     inRange.add(thing);
                 }
             }
@@ -204,26 +216,6 @@ class Human extends Thing {
       grabObj.position.set(this.position.x, this.position.y + 135);
       grabObj.velocity.set(this.velocity);
       grabObj.held = true;
-    }
-    
-    // Grab an object
-    Boolean grab(Thing thing) {
-        if (thing == null || thing.sceneIn != this.sceneIn || thing.held || !thing.show) return false;
-        if (thing instanceof Interactable) {
-            Interactable interactable = (Interactable) thing;
-            if (interactable.isGrabbable()) {
-                this.setGrabObj(thing);
-                interactable.onGrab(this);
-                return true;
-            } else if (thing.show) {
-                interactable.onGrab(this);
-                return true;
-            }
-        } else if (thing.grabbable && thing.show) {
-            this.setGrabObj(thing);
-            return true;
-        } else if (!thing.grabbable && thing.show) { return false; }
-        return false;
     }
 
     // Draw human's head
@@ -361,6 +353,26 @@ class Human extends Thing {
         drawBody();
     }
 
+    // Grab an object
+    Boolean grab(Thing thing) {
+        if (thing == null || thing.sceneIn != this.sceneIn || thing.held || !thing.show) return false;
+        if (thing instanceof Interactable) {
+            Interactable interactable = (Interactable) thing;
+            if (interactable.isGrabbable()) {
+                this.setGrabObj(thing);
+                interactable.onGrab(this);
+                return true;
+            } else if (thing.show) {
+                interactable.onGrab(this);
+                return true;
+            }
+        } else if (thing.grabbable && thing.show) {
+            this.setGrabObj(thing);
+            return true;
+        } else if (!thing.grabbable && thing.show) { return false; }
+        return false;
+    }
+
     // Release currently grabbed object
     void release() {
         this.grabbed = false;
@@ -377,6 +389,95 @@ class Human extends Thing {
             
             grabObj = null; // make grabObj null again
         }
+    }
+
+    void leftKeyDown() {
+        this.acceleration.x = -3f;
+    }
+    void rightKeyDown() {
+        this.acceleration.x = 3f;
+    }
+    void upKeyDown() {
+        if (this.rested || this.position.y >= height*gameManager.window.getGroundHeightAt(position.x) - groundHeightOffset) {
+            this.velocity.y = -50;
+            this.rested = false;
+        }
+    }
+    void downKeyDown() {
+        if (millis() - this.grabms >= 500) {
+            this.grabms = millis();
+            if (this.grabbed) {
+                this.release();
+            } else {
+                this.grabClosest(gameManager.objects);
+            }
+        }
+    }
+    void shiftKeyDown() {
+        if (grabbed && grabObj instanceof Interactable) {
+            // Check if enough time has passed since last SHIFT press
+            if (millis() - lastShiftPress >= shiftCooldown) {
+                lastShiftPress = millis(); // Record the time  
+                ((Interactable) grabObj).onInteract(this);
+            }
+        }
+    }
+    void mouseCenterDown() {
+        this.upKeyDown();
+    }
+    void mouseLeftDown() {
+        if (mouseX >= width / 2) {
+            rightKeyDown();
+        } else {
+            leftKeyDown();
+        }
+    }
+    
+    void mouseRightDown() {
+        this.downKeyDown();
+    }
+    void noKeyDown() {
+        this.velocity.x = 0;
+        this.acceleration.x = 0;
+    }
+
+    // Enhanced controls method with chair, jumping, and SHIFT interactions
+    void controls() {
+        if (this.hasControls) {
+            // Handle key functions
+            if (gameManager.keyManager.isKeyPressed(shiftKey)) {
+                this.shiftKeyDown();
+            }
+            if (gameManager.keyManager.isKeyPressed(upKey)) {
+                this.upKeyDown();
+            } else if (gameManager.keyManager.isKeyPressed(downKey)) {
+                this.downKeyDown();
+            } 
+            if (gameManager.keyManager.isKeyPressed(rightKey)) {
+                this.rightKeyDown();
+            } else if (gameManager.keyManager.isKeyPressed(leftKey)) {
+                this.leftKeyDown();
+            } else if (this.mouseControls && mousePressed){
+                if (mouseButton == CENTER) {
+                    this.mouseCenterDown();
+                } else if (mouseButton == LEFT) {
+                    this.mouseLeftDown();
+                } else if (mouseButton == RIGHT) {
+                    this.mouseRightDown();
+                }
+            } else {
+                this.noKeyDown();
+            }
+        }
+    }
+
+    void setControls(int left, int right, int up, int down, int shift, boolean mouse) {
+      this.leftKey = left;
+      this.rightKey = right;
+      this.upKey = up;
+      this.downKey = down;
+      this.shiftKey = shift;
+      this.mouseControls = mouse;
     }
 
     void checkEdges() {
@@ -406,6 +507,7 @@ class Human extends Thing {
     void live() {
         this.update();
         this.display();
+        this.controls();
         this.checkEdges();
         this.checkObj();
     }
