@@ -1,7 +1,5 @@
 import java.util.*;
 
-public final String FRAMEWORK_VERSION = "3.5.4";
-
 class GameManager {
     String programName;
     String version;
@@ -11,6 +9,8 @@ class GameManager {
     ArrayList<Thing> objects;
     ArrayList<Human> mainHumans;
     ArrayList<InputBox> activeInputBoxes;
+
+    Human trackedHuman = null; // Follow the scene of that human
          
     // Systems
     Window window;
@@ -84,9 +84,21 @@ class GameManager {
         
         // Update humans
         for (Human human : mainHumans) {
+            if (human == trackedHuman) {                     
+                if (human.sceneIn != this.window.scene) {
+                    this.window.goToScene(human.sceneIn);
+                }
+            }
             if (human.inScene()) {
                 push();
                 human.live();
+                if (human == trackedHuman) {
+                    // Indicate tracked human
+                    noFill();
+                    stroke(0, 255, 0);
+                    strokeWeight(4);
+                    ellipse(human.position.x, human.position.y - human.trackedIndicatorHeight, 10, 10);
+                }
                 pop();
             }
         }
@@ -714,11 +726,7 @@ class Window {
     
     int trashScene = 999;
     
-    PhysicsValues physics;
-    
-    // Reference to ImageManager
-    ImageManager imageManager;
-    int lastDrawnScene = -1;  // Track last scene to detect changes
+    ImageManager imageManager; // Reference to ImageManager
 
     // Constructor
     Window(ImageManager imageManager, color backgroundColor, color groundColor, float speed) {
@@ -731,7 +739,6 @@ class Window {
         this.scenes.setLoop(loopScenes);
         this.scenes.setDefaultReturnValue(backgroundColor);
         this.imageManager = imageManager;
-        this.physics = new PhysicsValues();
     }
     
     // Keyframe class to store terrain points
@@ -744,16 +751,6 @@ class Window {
             this.height = constrain(height, 0.1, 0.95); // Reasonable bounds
         }
     }
-
-    public class PhysicsValues {  
-      // Physics constants - not final, as game may need changing gravity, groundHeight, grabRange, etc.
-      float CEILING_HEIGHT = 0.2f;
-      float LEFT_BOUNDARY = 0.08f;
-      float RIGHT_BOUNDARY = 0.95f;
-      float GRAVITY = 6.5f;
-      float MAX_VELOCITY = 40f; 
-    }
-
 
     // Add scenes in bulk
     void addScenes(Object[] sceneArray, Boolean[] groundArray) {
@@ -1240,4 +1237,24 @@ class ImageManager {
     boolean isComplete() {
         return !isLoading && loadedAssets == totalAssets;
     }
+}
+
+public static class Constants { 
+    public static final class Framework {
+        public static final String NAME = "Person Framework"; 
+        public static final String FRAMEWORK_VERSION = "3.7.0";
+    }
+
+    // Physics constants - not final, as game may need changing gravity, groundHeight, grabRange, etc.
+    public static class Physics {
+        public static float CEILING_HEIGHT = 0.2f;
+        public static float LEFT_BOUNDARY = 0.08f;
+        public static float RIGHT_BOUNDARY = 0.95f;
+        public static float GRAVITY = 6.5f;
+        public static float MAX_VELOCITY = 40f; 
+    }
+}
+
+void setTrackedHuman(Human human) {
+    gameManager.trackedHuman = human;
 }

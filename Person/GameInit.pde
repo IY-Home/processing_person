@@ -126,6 +126,7 @@ void createHumans(ArrayList <Human> humans) {
                       color(0), color(0, 0, 255), color(50), color(0), 
                       humanSpeed, humanMoney, width * 0.68, humanScene);
     humans.add(isaac);
+    setTrackedHuman(isaac);
 
     String humanName2 = "Nick";
     humanScene = 0;
@@ -195,7 +196,6 @@ void loop() {
                 GameHuman gh = (GameHuman) human;
                 gameManager.messageBox.showAlert("Oops, " + gh.firstName + " fell into a hole and died!");
                 gameManager.messageBox.showAlert("Remember, the prize awaits behind that golden door!");
-                gameManager.window.scene = 0;
                 gh.sceneIn = 0;
                 gh.position.y = 0;
                 gh.velocity.x = -40;

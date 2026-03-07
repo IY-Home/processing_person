@@ -48,8 +48,10 @@ class GameHuman extends Human {
 
     // Update hunger over time
     void updateHunger() {
-        if (!hasHungerAndMoney) return;
+        if (!hasHungerAndMoney) { this.trackedIndicatorHeight = 50; return; };
         
+        this.trackedIndicatorHeight = 108;
+
         // Increase hunger based on velocity (more movement = more hunger)
         hunger += abs(this.velocity.x / velocityHungerUsed);
 
@@ -332,7 +334,8 @@ class ImageHuman extends Human {
     gameManager.imageManager.addImage(imagePath, imagePath, 360, 360);
   }
   void display() {
-    image(gameManager.imageManager.getImage(imagePath), this.position.x, this.position.y - 128);
+    PGraphics drawImage = gameManager.imageManager.getImage(imagePath);
+    image(drawImage, this.position.x - (drawImage.width/2), this.position.y - 128);
   }
  
 }

@@ -60,9 +60,9 @@ abstract class Thing {
     // Update object physics
     void update() {
         if (hasPhysics && !this.held && !this.rested) {
-            acceleration.y = gameManager.window.physics.GRAVITY;
+            acceleration.y = Constants.Physics.GRAVITY;
             velocity.add(acceleration);
-            velocity.limit(gameManager.window.physics.MAX_VELOCITY);
+            velocity.limit(Constants.Physics.MAX_VELOCITY);
             position.add(velocity);
         }
     }
@@ -71,13 +71,13 @@ abstract class Thing {
     void checkEdges() {
         if (!hasPhysics) return;
         
-        position.x = constrain(position.x, width * gameManager.window.physics.LEFT_BOUNDARY, width * gameManager.window.physics.RIGHT_BOUNDARY);
+        position.x = constrain(position.x, width * Constants.Physics.LEFT_BOUNDARY, width * Constants.Physics.RIGHT_BOUNDARY);
         
         // Get dynamic ground height at current X position
         float groundY = height * gameManager.window.getGroundHeightAt(position.x);
         float effectiveGroundY = groundY - groundHeightOffset;
         
-        position.y = constrain(position.y, height * gameManager.window.physics.CEILING_HEIGHT, effectiveGroundY);
+        position.y = constrain(position.y, height * Constants.Physics.CEILING_HEIGHT, effectiveGroundY);
 
         // Handle ground collision with bounce
         if (position.y >= effectiveGroundY && abs(velocity.y) > 0.1) {
@@ -121,7 +121,7 @@ abstract class Thing {
         return this.sceneIn == gameManager.window.scene;
     }
     void hide() {
-        this.sceneIn = 999;
+        this.sceneIn = gameManager.window.trashScene;
         this.show = false;
     }
     void show() {
@@ -153,6 +153,8 @@ class Human extends Thing {
     int downKey = DOWN;
     int shiftKey = SHIFT;
     boolean mouseControls = true;
+
+    float trackedIndicatorHeight = 50; // Height above head to draw tracked indicator
 
     Human(String name, color hairColor,
         color shirtColor, color pantColor, color shoeColor, float posX, int sceneIn) {
@@ -422,9 +424,7 @@ class Human extends Thing {
             }
         }
     }
-    void mouseCenterDown() {
-        this.upKeyDown();
-    }
+
     void mouseLeftDown() {
         if (mouseX >= width / 2) {
             rightKeyDown();
@@ -433,6 +433,10 @@ class Human extends Thing {
         }
     }
     
+    void mouseCenterDown() {
+        this.shiftKeyDown();
+    }
+
     void mouseRightDown() {
         this.downKeyDown();
     }
@@ -481,17 +485,17 @@ class Human extends Thing {
     }
 
     void checkEdges() {
-        if (this.position.x >= width * gameManager.window.physics.RIGHT_BOUNDARY) {
+        if (this.position.x >= width * Constants.Physics.RIGHT_BOUNDARY) {
             this.position.x = width * 0.94;
-        } else if (this.position.x < width * gameManager.window.physics.LEFT_BOUNDARY) {
+        } else if (this.position.x < width * Constants.Physics.LEFT_BOUNDARY) {
             this.position.x = width * 0.09;
         }
         float groundY = height * gameManager.window.getGroundHeightAt(position.x);
         if (this.position.y >= groundY - groundHeightOffset) {
             this.position.y = groundY - groundHeightOffset;
         }
-        if (this.position.y <= height * gameManager.window.physics.CEILING_HEIGHT) {
-            this.position.y = height * gameManager.window.physics.CEILING_HEIGHT;
+        if (this.position.y <= height * Constants.Physics.CEILING_HEIGHT) {
+            this.position.y = height * Constants.Physics.CEILING_HEIGHT;
         }
     }
 

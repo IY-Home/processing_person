@@ -333,7 +333,6 @@ class Door extends Thing implements Interactable {
     void onGrab(Human human) {  
         checkDestination(human);
         human.sceneIn = targetScene;
-        gameManager.window.goToScene(targetScene);
         gameManager.messageBox.showEvent(human.name + " entered scene " + targetScene + "!");
         human.position.x = this.posXNew < width / 2 ? this.posXNew + 120 + random(-20, 20) : this.posXNew - 120 - random(-20, 20);
         human.grabbed = false;
