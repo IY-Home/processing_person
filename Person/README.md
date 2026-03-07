@@ -322,6 +322,8 @@ Extended humans available (examples):
 - GameHuman: Adds hunger/money systems and background updates
 - ImageHuman: Uses an image from ImageManager for appearance
 
+To make the game track the scene of the human, use ```setTrackedHuman(Human human)```.
+
 Parameters:
     humans - ArrayList to add Human objects to
 
@@ -334,8 +336,10 @@ Example:
             2.5, 200.0, width * 0.68, 0
         );
         humans.add(player);
+        setTrackedHuman(player);
         
         ImageHuman npc = new ImageHuman("Joe", "person.png", width * 0.3, 0);
+        npc.hasControls = false;
         humans.add(npc);
     }
 ```
