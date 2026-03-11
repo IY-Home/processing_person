@@ -237,18 +237,9 @@ class Debug {
         
         // Draw line to closest object
         Thing closest = null;
-        float closestDist = Float.MAX_VALUE;
-        for (Thing obj : gameManager.objects) {
-            if (obj != trackedHuman && obj.show && 
-                obj.sceneIn == trackedHuman.sceneIn) {
-                float dist = PVector.dist(trackedHuman.position, obj.position);
-                if (dist < closestDist && dist < 300) {
-                    closestDist = dist;
-                    closest = obj;
-                }
-            }
-        }
-        
+        ArrayList<Thing> nearby = trackedHuman.getClosestObjects(gameManager.objects, trackedHuman.grabRange);
+        closest = nearby.size() > 0 ? nearby.get(0) : null;
+        println("Grabrange: " + trackedHuman.grabRange + ", Nearby count: " + nearby.size());
         if (closest != null) {
             stroke(255, 255, 0, 200);
             strokeWeight(1);

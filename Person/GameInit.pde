@@ -1,3 +1,5 @@
+Debug debugger;
+
 GameManager createGameManager() {
     // Executed at the very start of the program, with definition gameManager = createGameManager.  
     // If you need to, put any other code you want to have executed at the very start of the program here.
@@ -128,6 +130,9 @@ void createHumans(ArrayList <Human> humans) {
     humans.add(isaac);
     setTrackedHuman(isaac);
 
+    debugger = new Debug();
+    debugger.setDebug(isaac, true); // Set to true to show debug
+
     String humanName2 = "Nick";
     humanScene = 0;
     Human nick = new Human(humanName2, color(200, 200, 0), color(255, 0, 0), color(50), color(0), width * 0.3, humanScene);
@@ -189,6 +194,9 @@ void createObjects(ArrayList <Thing> things) {
 }
 
 void loop() {
+    debugger.display();
+    debugger.drawVisualHelpers();
+
     // If humans fall into a hole, they die.
     for (int i = gameManager.mainHumans.size() - 1; i >= 0; i--) {
         Human human = gameManager.mainHumans.get(i);

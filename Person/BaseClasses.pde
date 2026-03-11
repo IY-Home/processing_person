@@ -116,6 +116,24 @@ abstract class Thing {
     // Executes this if updateInBackground is true and object not in current scene
     void backgroundUpdate() {}
     
+    ArrayList<Thing> getClosestObjects(ArrayList<Thing> objects, float radius) {
+        ArrayList<Thing> nearby = new ArrayList<Thing>();
+        for (Thing thing : objects) {
+            if (thing != null && thing != this && thing.show && thing.sceneIn == this.sceneIn) {
+                float dist = PVector.dist(this.position, thing.position);
+                if (dist <= radius) {
+                    nearby.add(thing);
+                }
+            }
+        }
+        nearby.sort((a, b) -> {
+            float distA = abs(this.position.x - a.position.x);
+            float distB = abs(this.position.x - b.position.x);
+            return Float.compare(distA, distB);
+        });
+        return nearby;
+    }
+
     // Check if object is in current scene
     boolean inScene() {
         return this.sceneIn == gameManager.window.scene;
@@ -171,7 +189,7 @@ class Human extends Thing {
         this.grabbed = false;
         this.grabObj = null;
         this.grabms = 0;
-        this.grabRange = 100f;
+        this.grabRange = 300f;
         this.grabbable = false;
         this.rested = false;
         this.friction = 1;
@@ -185,24 +203,7 @@ class Human extends Thing {
         this.release();  // Release current object
         
         // Find all objects within range, sorted by distance
-        ArrayList<Thing> inRange = new ArrayList<Thing>();
-        
-        // First, collect all potential objects in range
-        for (Thing thing : objects) {
-            if (thing != null && thing != this && thing.show && thing.sceneIn == this.sceneIn) {
-                float distance = abs(this.position.x - thing.position.x);
-                if (distance <= grabRange && !thing.occupied) {
-                    inRange.add(thing);
-                }
-            }
-        }
-        
-        // Sort by distance (closest first)
-        inRange.sort((a, b) -> {
-            float distA = abs(this.position.x - a.position.x);
-            float distB = abs(this.position.x - b.position.x);
-            return Float.compare(distA, distB);
-        });
+        ArrayList<Thing> inRange = this.getClosestObjects(objects, grabRange);
         
         // Try each object in order until one is successfully grabbed
         for (Thing thing : inRange) {
@@ -596,6 +597,8 @@ class InputBox implements KeyEvents {
     void display() {
         if (!visible) return;
         
+        push();
+
         // Draw semi-transparent overlay
         fill(0, 150);
         noStroke();
@@ -684,6 +687,8 @@ class InputBox implements KeyEvents {
         text("Press ENTER to submit, DELETE when empty to cancel", x + boxWidth/2, y + boxHeight - 20);
         
         textAlign(LEFT); // Reset
+
+        pop();
     }
     
     void keyDown(char key, int keyCode) {

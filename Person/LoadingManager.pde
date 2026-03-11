@@ -278,119 +278,120 @@ class LoadingManager {
     void setFramesPerStage(int frames) {
         this.framesPerStage = frames;
     }
+
+    class SplashScreen {
+        PGraphics buffer;
+        boolean active = true;
+        String message = "";
+        float progress = 0;
+        long startTime;
+        String gameTitle;
+        String gameVersion;
+        String[] tips;
+        
+        color backgroundColor1;
+        color backgroundColor2;
+        color progressBarColor;
+        
+        SplashScreen(String title, String version, color bg1, color bg2, color pb) {
+            this.gameTitle = title;
+            this.gameVersion = version;
+            this.buffer = createGraphics(width, height);
+            this.startTime = millis();
+            
+            this.backgroundColor1 = bg1; 
+            this.backgroundColor2 = bg2;
+            this.progressBarColor = pb;
+            
+            // Default tips - can be overridden
+            this.tips = new String[] {
+                "Loading...",
+                "Please wait...",
+                "Almost there..."
+            };
+        }
+        
+        void setTips(String[] customTips) {
+            this.tips = customTips;
+        }
+        
+        void update(String msg, float prog) {
+            message = msg;
+            progress = prog;
+        }
+        
+        void draw() {
+            if (!active) return;
+            
+            buffer.beginDraw();
+            
+            // Animated background
+            float pulse = (sin((millis() - startTime) * 0.005) + 1) * 0.5;
+            buffer.background(lerpColor(backgroundColor1, backgroundColor2, pulse));
+            
+            // Game title
+            buffer.fill(255);
+            buffer.textSize(64);
+            buffer.textAlign(CENTER, CENTER);
+            buffer.text(gameTitle, width/2, height/3);
+            
+            buffer.textSize(24);
+            buffer.text("Version " + gameVersion, width/2, height/3 + 50);
+            
+            // Loading message
+            buffer.textSize(20);
+            buffer.fill(200);
+            buffer.text(message, width/2, height/2 - 30);
+            
+            // Progress bar
+            float barWidth = width * 0.6;
+            float barX = width/2 - barWidth/2;
+            float barY = height/2 + 20;
+            
+            // Glow effect
+            for (int i = 3; i > 0; i--) {
+                buffer.fill(red(progressBarColor), green(progressBarColor), blue(progressBarColor), 30 / i);
+                buffer.noStroke();
+                buffer.rect(barX - i, barY - i, barWidth + i*2, 30 + i*2, 15);
+            }
+            
+            // Bar background
+            buffer.fill(60);
+            buffer.stroke(150);
+            buffer.strokeWeight(2);
+            buffer.rect(barX, barY, barWidth, 30, 10);
+            
+            // Bar fill
+            buffer.noStroke();
+            buffer.fill(progressBarColor);
+            buffer.rect(barX + 2, barY + 2, (barWidth - 4) * progress, 26, 8);
+            
+            // Percentage
+            buffer.fill(255);
+            buffer.textSize(20);
+            buffer.text(int(progress * 100) + "%", width/2, barY + 14);
+            
+            // Random tip
+            if (tips.length > 0) {
+                buffer.fill(150);
+                buffer.textSize(18);
+                int tipIndex = int(progress * (tips.length - 1));
+                buffer.text("[!] " + tips[tipIndex], width/2, height - 50);
+            }
+            
+            buffer.endDraw();
+            
+            // Draw to screen
+            image(buffer, 0, 0);
+        }
+        
+        void deactivate() {
+            active = false;
+        }
+        
+        boolean isActive() {
+            return active;
+        }
+    }
 }
 
-class SplashScreen {
-    PGraphics buffer;
-    boolean active = true;
-    String message = "";
-    float progress = 0;
-    long startTime;
-    String gameTitle;
-    String gameVersion;
-    String[] tips;
-    
-    color backgroundColor1;
-    color backgroundColor2;
-    color progressBarColor;
-    
-    SplashScreen(String title, String version, color bg1, color bg2, color pb) {
-        this.gameTitle = title;
-        this.gameVersion = version;
-        this.buffer = createGraphics(width, height);
-        this.startTime = millis();
-        
-        this.backgroundColor1 = bg1; 
-        this.backgroundColor2 = bg2;
-        this.progressBarColor = pb;
-        
-        // Default tips - can be overridden
-        this.tips = new String[] {
-            "Loading...",
-            "Please wait...",
-            "Almost there..."
-        };
-    }
-    
-    void setTips(String[] customTips) {
-        this.tips = customTips;
-    }
-    
-    void update(String msg, float prog) {
-        message = msg;
-        progress = prog;
-    }
-    
-    void draw() {
-        if (!active) return;
-        
-        buffer.beginDraw();
-        
-        // Animated background
-        float pulse = (sin((millis() - startTime) * 0.005) + 1) * 0.5;
-        buffer.background(lerpColor(backgroundColor1, backgroundColor2, pulse));
-        
-        // Game title
-        buffer.fill(255);
-        buffer.textSize(64);
-        buffer.textAlign(CENTER, CENTER);
-        buffer.text(gameTitle, width/2, height/3);
-        
-        buffer.textSize(24);
-        buffer.text("Version " + gameVersion, width/2, height/3 + 50);
-        
-        // Loading message
-        buffer.textSize(20);
-        buffer.fill(200);
-        buffer.text(message, width/2, height/2 - 30);
-        
-        // Progress bar
-        float barWidth = width * 0.6;
-        float barX = width/2 - barWidth/2;
-        float barY = height/2 + 20;
-        
-        // Glow effect
-        for (int i = 3; i > 0; i--) {
-            buffer.fill(red(progressBarColor), green(progressBarColor), blue(progressBarColor), 30 / i);
-            buffer.noStroke();
-            buffer.rect(barX - i, barY - i, barWidth + i*2, 30 + i*2, 15);
-        }
-        
-        // Bar background
-        buffer.fill(60);
-        buffer.stroke(150);
-        buffer.strokeWeight(2);
-        buffer.rect(barX, barY, barWidth, 30, 10);
-        
-        // Bar fill
-        buffer.noStroke();
-        buffer.fill(progressBarColor);
-        buffer.rect(barX + 2, barY + 2, (barWidth - 4) * progress, 26, 8);
-        
-        // Percentage
-        buffer.fill(255);
-        buffer.textSize(20);
-        buffer.text(int(progress * 100) + "%", width/2, barY + 14);
-        
-        // Random tip
-        if (tips.length > 0) {
-            buffer.fill(150);
-            buffer.textSize(18);
-            int tipIndex = int(progress * (tips.length - 1));
-            buffer.text("[!] " + tips[tipIndex], width/2, height - 50);
-        }
-        
-        buffer.endDraw();
-        
-        // Draw to screen
-        image(buffer, 0, 0);
-    }
-    
-    void deactivate() {
-        active = false;
-    }
-    
-    boolean isActive() {
-        return active;
-    }
-}

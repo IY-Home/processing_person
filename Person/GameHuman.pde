@@ -118,27 +118,11 @@ class GameHuman extends Human {
         // FIRST PRIORITY: Cupboard when SHIFT is pressed
         if (gameManager.keyManager.isKeyPressed(shiftKey)) {
             // Find all cupboards in range
-            ArrayList<Thing> cupboardsInRange = new ArrayList<Thing>();
-            
-            for (Thing thing : gameManager.objects) {
-                if (thing instanceof Cupboard && thing.show && thing.sceneIn == this.sceneIn) {
-                    float distance = abs(this.position.x - thing.position.x);
-                    if (distance <= grabRange) {
-                        cupboardsInRange.add(thing);
-                    }
-                }
-            }
-            
-            // Sort cupboards by distance
-            cupboardsInRange.sort((a, b) -> {
-                float distA = abs(this.position.x - a.position.x);
-                float distB = abs(this.position.x - b.position.x);
-                return Float.compare(distA, distB);
-            });
+            ArrayList<Thing> cupboardsInRange = this.getClosestObjects(objects, grabRange);
             
             // Try each cupboard until one can be grabbed
             for (Thing cupboard : cupboardsInRange) {
-                if (this.grab(cupboard)) {
+                if (cupboard instanceof Cupboard && this.grab(cupboard)) {
                     return;  // Successfully grabbed a cupboard!
                 }
             }
