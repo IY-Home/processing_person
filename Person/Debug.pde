@@ -1,3 +1,7 @@
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
+import java.lang.reflect.Method;
+
 class Debug {
     // Which human to track - instance variables
     Human trackedHuman = null;
@@ -370,15 +374,27 @@ class Debug {
         println("systemLoadAverage = " + osBean.getSystemLoadAverage());
         
         // Try to get more OS info if available (may not work on all platforms)
-        if (osBean instanceof com.sun.management.OperatingSystemMXBean) {
-            com.sun.management.OperatingSystemMXBean sunOsBean = (com.sun.management.OperatingSystemMXBean) osBean;
-            println("totalPhysicalMemory = " + sunOsBean.getTotalPhysicalMemorySize()/1024/1024 + " MB");
-            println("freePhysicalMemory = " + sunOsBean.getFreePhysicalMemorySize()/1024/1024 + " MB");
-            println("totalSwapSpace = " + sunOsBean.getTotalSwapSpaceSize()/1024/1024 + " MB");
-            println("freeSwapSpace = " + sunOsBean.getFreeSwapSpaceSize()/1024/1024 + " MB");
-            println("committedVirtualMemory = " + sunOsBean.getCommittedVirtualMemorySize()/1024/1024 + " MB");
-            println("processCpuLoad = " + sunOsBean.getProcessCpuLoad());
-            println("systemCpuLoad = " + sunOsBean.getSystemCpuLoad());
+        try {
+          Class<?> sunClass = Class.forName("com.sun.management.OperatingSystemMXBean");
+          
+          if (sunClass.isInstance(osBean)) {
+            println("--- Sun/Oracle Specific Stats ---");
+            
+            // 2. Helper to invoke methods by name safely
+            printStat(osBean, sunClass, "Total Physical Memory", "getTotalPhysicalMemorySize");
+            printStat(osBean, sunClass, "Free Physical Memory", "getFreePhysicalMemorySize");
+            printStat(osBean, sunClass, "Total Swap Space", "getTotalSwapSpaceSize");
+            printStat(osBean, sunClass, "Free Swap Space", "getFreeSwapSpaceSize");
+            printStat(osBean, sunClass, "Committed Virtual Memory", "getCommittedVirtualMemorySize");
+            
+            // 3. CPU loads (usually returns a double between 0.0 and 1.0)
+            printRawStat(osBean, sunClass, "Process CPU Load", "getProcessCpuLoad");
+            printRawStat(osBean, sunClass, "System CPU Load", "getSystemCpuLoad");
+
+          }
+        } catch (Exception e) {
+            // The class doesn't exist on this JVM (e.g., IBM J9 or some restricted environments)
+            println("Sun-specific MXBean not available.");
         }
         
         // ===== FILE SYSTEM INFO =====
@@ -447,5 +463,17 @@ class Debug {
         
         println("\n========== END DUMP ==========");
     }
+    // Helper for Memory stats (converts to MB)
+    private void printStat(Object bean, Class<?> clazz, String label, String methodName) throws Exception {
+        Method method = clazz.getMethod(methodName);
+        long value = (Long) method.invoke(bean);
+        println(label + " = " + (value / 1024 / 1024) + " MB");
+    }
     
+    // Helper for CPU stats (raw double)
+    private void printRawStat(Object bean, Class<?> clazz, String label, String methodName) throws Exception {
+        Method method = clazz.getMethod(methodName);
+        Object value = method.invoke(bean);
+        println(label + " = " + value);
+    }
 }
