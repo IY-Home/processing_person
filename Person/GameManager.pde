@@ -10,7 +10,7 @@ class GameManager {
     ArrayList<Human> mainHumans;
     ArrayList<InputBox> activeInputBoxes;
 
-    Human trackedHuman = null; // Follow the scene of that human
+    Human trackedHuman = null; // Follow the scene of that human 
          
     // Systems
     Window window;

@@ -1,4 +1,4 @@
-// Game Human class - extends BasicHuman with additional game mechanics
+// Game Human class - extends BasicHuman with additional game mechanics 
 class GameHuman extends Human {
     // Basic attributes
     String firstName, lastName, gender;

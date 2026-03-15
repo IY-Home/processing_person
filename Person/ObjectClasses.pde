@@ -1,4 +1,4 @@
-// Ball object class
+// Ball object class 
 class Ball extends Thing {
     color ballColor;
     float size;

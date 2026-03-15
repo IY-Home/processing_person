@@ -21,7 +21,7 @@ class KeyManager {
 }
 
 
-// Handle key presses
+// Handle key presses 
 void keyPressed() {
     gameManager.keyManager.setKeyPressed(keyCode, true);
     

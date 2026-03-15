@@ -1,4 +1,4 @@
-// Interface for objects that can be interacted with
+// Interface for objects that can be interacted with 
 interface Interactable {
     void onGrab(Human human);          // Called when object is grabbed
     boolean isGrabbable();             // Returns if object can be grabbed

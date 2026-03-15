@@ -1,5 +1,5 @@
 class GameManagerWithLoading extends GameManager {
-    // Loading screen
+    // Loading screen 
     boolean showLoadingScreen = true;
     float loadingProgress = 0;
     String loadingMessage = "Starting...";
@@ -394,4 +394,3 @@ class LoadingManager {
         }
     }
 }
-

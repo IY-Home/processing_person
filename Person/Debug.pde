@@ -3,7 +3,7 @@ import java.lang.management.OperatingSystemMXBean;
 import java.lang.reflect.Method;
 
 class Debug {
-    // Which human to track - instance variables
+    // Which human to track - instance variables 
     Human trackedHuman = null;
     
     // Debug settings - instance variables
