@@ -1,4 +1,4 @@
-# 'Person' - Processing Game Framework
+# 'Person' - Processing Game Framework v4
 
 ## **Overview**
 A modular, object-oriented 2D game framework built in Processing. This project provides a solid foundation for creating interactive games with physics, inventory systems, UI elements, and character interactions.
