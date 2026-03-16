@@ -7,7 +7,7 @@ To export your finished game for macOS with an app that works for both Intel 64-
 ## Steps:
 ### 1. Exporting your app with Processing IDE
 **_For detailed steps, visit [the Processing documentation](https://github.com/processing/processing4/wiki/Exporting-Applications#macos)._**
-- Open your code project (/Source) in the Processing IDE.
+- Open your code project (```/Source```) in the Processing IDE.
 - Go to ```File > Export Application...``` or press ```Cmd+Shift+E```.
 - A menu should pop up with options to export for macOS (Intel 64-bit), macOS (Apple Silicon), Windows (Intel 64-bit), Linux (Intel 64-bit), Linux (Raspberry Pi 32-bit), and Linux (Raspberry Pi 64-bit).
 - Check only macOS (Intel 64-bit) and macOS (Apple Silicon). Then, press **```Export```**.
