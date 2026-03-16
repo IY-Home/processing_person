@@ -42,7 +42,7 @@ class GameManager {
         messageBox.maxMessages = 3;
         messageBox.visible = false;
     }
-    
+
     void init() {
         println(startupMessage);
         println("Initializing GameManager...");
@@ -795,17 +795,54 @@ class ImageManager {
 class SaveManager {
     int currentMaxID = 0;
     int currentMaxSaveID = 1;
-    String saveFilePath = "saves/";
+    String savePath = "saves";
     String defaultSaveName = "gameSave";
-    
+
     // Ensure saves directory exists
     SaveManager() {
-        File savesDir = new File(sketchPath(), "saves");
+        File savesDir = new File(getSavePath(), getLastFolderName(savePath));
         if (!savesDir.exists()) {
             savesDir.mkdir();
+            println("Made /saves directory");
         }
     }
     
+    String getLastFolderName(String path) {
+        if (path == null || path.isEmpty()) {
+            return "";
+        }
+        
+        // Remove trailing separator if present
+        String cleanPath = path.endsWith(File.separator) ? 
+                        path.substring(0, path.length() - 1) : path;
+        
+        int lastSeparator = cleanPath.lastIndexOf(File.separator);
+        if (lastSeparator == -1) {
+            return cleanPath; // No separator, return the whole string
+        }
+        
+        return cleanPath.substring(lastSeparator + 1);
+    }
+
+    String getSavePath() {
+        if (isBundledApp()) {
+            // Save in Application Support folder (macOS standard)
+            String home = System.getProperty("user.home");
+            String appName = gameManager.programName.replace(" ", "");
+            return home + "/Library/Application Support/" + appName + "/" + getLastFolderName(savePath) + "/";
+        } else {
+            // Save next to sketch in development
+            return sketchPath() + "/" + getLastFolderName(savePath) + "/";
+        }
+    }
+
+    boolean isBundledApp() {
+        String path = System.getProperty("user.dir");
+        // When running as .app, path ends with .app/Contents/MacOS
+        // When running in IDE, path is the sketch folder
+        return path.contains(".app/Contents/");
+    }
+
     // Assign sequential IDs to objects as they're created
     int getNextID() {
         currentMaxID++;
@@ -875,8 +912,8 @@ class SaveManager {
         }
         
         // Write to file
-        saveJSONObject(saveData, saveFilePath + filename + ".json");
-        println("Game saved to " + saveFilePath + filename + ".json");
+        saveJSONObject(saveData, getSavePath() + filename + ".json");
+        println("Game saved to " + getSavePath() + filename + ".json");
     }
     
     void addThingToArray(Thing thing, JSONArray array) {
@@ -935,13 +972,12 @@ class SaveManager {
     }
     
     void loadGame(String filename) {
-        String fullPath = saveFilePath + filename + ".json";
-        File file = new File(sketchPath(), fullPath);
+        String fullPath = getSavePath() + filename + ".json";
+        File file = new File(fullPath);
         
         // Check if file exists
         if (!file.exists()) {
             println("   ERROR: Save file not found: " + fullPath);
-            println("   Current directory: " + sketchPath());
             return;
         }
         
@@ -1079,7 +1115,7 @@ class SaveManager {
         
         println("   Updated " + objectsArray.size() + " objects");
         println("   Updated " + humansArray.size() + " humans");
-        println("   Game loaded from " + saveFilePath + filename + ".json!");
+        println("   Game loaded from " + getSavePath() + filename + ".json!");
         gameManager.messageBox.showEvent("Game loaded from " + filename + ".json!");
     }
     
