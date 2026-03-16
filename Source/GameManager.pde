@@ -793,6 +793,7 @@ class ImageManager {
 
 class SaveManager {
     int currentMaxID = 0;
+    int currentMaxSaveID = 1;
     String saveFilePath = "saves/";
     String defaultSaveName = "gameSave";
     
@@ -814,11 +815,34 @@ class SaveManager {
         JSONObject saveData = new JSONObject();
         
         // Save metadata
-        saveData.setInt("saveVersion", 1);
         saveData.setLong("timestamp", System.currentTimeMillis());
         saveData.setInt("currentMaxID", currentMaxID);
         saveData.setInt("currentScene", gameManager.window.scene);
+        saveData.setInt("saveID", currentMaxSaveID);
         
+        currentMaxSaveID++;
+
+        // ===== SAVE CONSTANTS =====
+        JSONObject constantsData = new JSONObject();
+        
+        // Physics constants
+        JSONObject physicsData = new JSONObject();
+        physicsData.setFloat("GRAVITY", Constants.Physics.GRAVITY);
+        physicsData.setFloat("MAX_VELOCITY", Constants.Physics.MAX_VELOCITY);
+        physicsData.setFloat("CEILING_HEIGHT", Constants.Physics.CEILING_HEIGHT);
+        physicsData.setFloat("LEFT_BOUNDARY", Constants.Physics.LEFT_BOUNDARY);
+        physicsData.setFloat("RIGHT_BOUNDARY", Constants.Physics.RIGHT_BOUNDARY);
+        constantsData.setJSONObject("Physics", physicsData);
+        
+        // Framework info (read-only, saved for reference)
+        JSONObject frameworkData = new JSONObject();
+        frameworkData.setString("NAME", Constants.Framework.NAME);
+        frameworkData.setString("VERSION", Constants.Framework.FRAMEWORK_VERSION);
+        frameworkData.setBoolean("BETA", Constants.Framework.BETA);
+        constantsData.setJSONObject("Framework", frameworkData);
+        
+        saveData.setJSONObject("constants", constantsData);
+
         // Save ALL objects (including humans!)
         JSONArray objectsArray = new JSONArray();
         
@@ -933,8 +957,35 @@ class SaveManager {
  
         // Load metadata
         currentMaxID = saveData.getInt("currentMaxID");
+        currentMaxSaveID = saveData.getInt("saveID");
+        currentMaxSaveID++; 
         int savedScene = saveData.getInt("currentScene");
         
+        // ===== LOAD CONSTANTS =====
+        if (saveData.hasKey("constants")) {
+            JSONObject constantsData = saveData.getJSONObject("constants");
+            
+            // Load physics constants
+            if (constantsData.hasKey("Physics")) {
+                JSONObject physicsData = constantsData.getJSONObject("Physics");
+                
+                if (physicsData.hasKey("GRAVITY")) 
+                    Constants.Physics.GRAVITY = physicsData.getFloat("GRAVITY");
+                if (physicsData.hasKey("MAX_VELOCITY")) 
+                    Constants.Physics.MAX_VELOCITY = physicsData.getFloat("MAX_VELOCITY");
+                if (physicsData.hasKey("CEILING_HEIGHT")) 
+                    Constants.Physics.CEILING_HEIGHT = physicsData.getFloat("CEILING_HEIGHT");
+                if (physicsData.hasKey("LEFT_BOUNDARY")) 
+                    Constants.Physics.LEFT_BOUNDARY = physicsData.getFloat("LEFT_BOUNDARY");
+                if (physicsData.hasKey("RIGHT_BOUNDARY")) 
+                    Constants.Physics.RIGHT_BOUNDARY = physicsData.getFloat("RIGHT_BOUNDARY");
+                    
+                println("Loaded physics constants:");
+                println("  GRAVITY: " + Constants.Physics.GRAVITY);
+                println("  MAX_VELOCITY: " + Constants.Physics.MAX_VELOCITY);
+            }
+        }
+
         // Create a map of existing objects by ID
         HashMap<Integer, Thing> existingThings = new HashMap<Integer, Thing>();
         for (Thing obj : gameManager.objects) {
@@ -1092,7 +1143,7 @@ class SaveManager {
 public static class Constants { 
     public static final class Framework {
         public static final String NAME = "Person Framework"; 
-        public static final String FRAMEWORK_VERSION = "4.1.0";
+        public static final String FRAMEWORK_VERSION = "4.1.1";
         public static final boolean BETA = false;
     }
 
@@ -1109,3 +1160,4 @@ public static class Constants {
 void setTrackedHuman(Human human) {
     gameManager.trackedHuman = human;
 }
+
