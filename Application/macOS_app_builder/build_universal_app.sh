@@ -248,11 +248,12 @@ cat > "$OUTPUT_APP/Contents/Info.plist" << EOF
 </plist>
 EOF
 
-# Step 10: Create PkgInfo
+# Step 10: Create PkgInfo 
 echo "APPL????" > "$OUTPUT_APP/Contents/PkgInfo"
 
-# Step 11: Set permissions
+# Step 11: Set permissions and remove quarantine
 chmod -R 755 "$OUTPUT_APP"
+xattr -d com.apple.quarantine "$OUTPUT_APP"
 
 # Step 12: Clean up icon generation files (optional - comment out if you want to keep them)
 echo "🧹 Cleaning up temporary icon files..."
