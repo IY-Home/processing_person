@@ -1,4 +1,5 @@
 import java.util.*;
+import java.time.LocalDateTime;
 
 class GameManager {
     String programName;
@@ -204,14 +205,14 @@ class GameManager {
     void setObjectIDs() {
       for (Thing obj : objects) {
           obj.id = saveManager.getNextID();
-          println(obj.getClass().getSimpleName() + " assigned ID: " + obj.id);
       }
       for (Human human : mainHumans) {
           if (!objects.contains(human)) {
               human.id = saveManager.getNextID();
-              println("Human " + human.name + " assigned ID: " + human.id);
+              println("    Human (" + human.getClass().getSimpleName() + ") " + human.name + " assigned ID: " + human.id);
           }
       }
+       println("    Assigned IDs to objects and humans from ID 1 to " + saveManager.currentMaxID);
     }
 }
 
@@ -813,9 +814,10 @@ class SaveManager {
     
     void saveGame(String filename) {
         JSONObject saveData = new JSONObject();
-        
+
         // Save metadata
         saveData.setLong("timestamp", System.currentTimeMillis());
+        saveData.setString("saveDate", LocalDateTime.now().toString());
         saveData.setInt("currentMaxID", currentMaxID);
         saveData.setInt("currentScene", gameManager.window.scene);
         saveData.setInt("saveID", currentMaxSaveID);
@@ -938,20 +940,15 @@ class SaveManager {
         
         // Check if file exists
         if (!file.exists()) {
-            println("ERROR: Save file not found: " + fullPath);
-            println("Current directory: " + sketchPath());
-            
-            // Optional: Show message to player
-            if (gameManager.messageBox != null) {
-                gameManager.messageBox.showAlert("Save file not found: " + filename);
-            }
+            println("   ERROR: Save file not found: " + fullPath);
+            println("   Current directory: " + sketchPath());
             return;
         }
         
         // File exists, proceed with loading
         JSONObject saveData = loadJSONObject(fullPath);
         if (saveData == null) {
-            println("ERROR: Could not parse save file: " + fullPath);
+            println("   ERROR: Could not parse save file: " + fullPath);
             return;
         }
  
@@ -980,9 +977,17 @@ class SaveManager {
                 if (physicsData.hasKey("RIGHT_BOUNDARY")) 
                     Constants.Physics.RIGHT_BOUNDARY = physicsData.getFloat("RIGHT_BOUNDARY");
                     
-                println("Loaded physics constants:");
-                println("  GRAVITY: " + Constants.Physics.GRAVITY);
-                println("  MAX_VELOCITY: " + Constants.Physics.MAX_VELOCITY);
+                println("   Loaded physics constants.");
+            }
+            if (constantsData.hasKey("Framework")) {
+                JSONObject frameworkData = constantsData.getJSONObject("Framework");
+                if (frameworkData.hasKey("FRAMEWORK_VERSION")) {
+                    String version = frameworkData.getString("FRAMEWORK_VERSION");
+                    if (!version.equals(Constants.Framework.FRAMEWORK_VERSION)) {
+                        println("   WARNING: Save file's framework version is " + version + 
+                                ", but current version is " + Constants.Framework.FRAMEWORK_VERSION + ". This may cause compatibility issues.");
+                    }
+                }
             }
         }
 
@@ -990,17 +995,16 @@ class SaveManager {
         HashMap<Integer, Thing> existingThings = new HashMap<Integer, Thing>();
         for (Thing obj : gameManager.objects) {
             existingThings.put(obj.id, obj);
-            println("Existing object: " + obj.getClass().getSimpleName() + " with ID: " + obj.id);
         }
         for (Human human : gameManager.mainHumans) {
             existingThings.put(human.id, human);
-            println("Existing human: " + human.name + " with ID: " + human.id);
         }
         
         // Load objects data and update existing instances
         JSONArray objectsArray = saveData.getJSONArray("objects");
         JSONArray humansArray = new JSONArray();
                     
+        println("   Loading objects...");
         for (int i = 0; i < objectsArray.size(); i++) {
             JSONObject objData = objectsArray.getJSONObject(i);
             JSONObject dataJSON = objData.getJSONObject("data");
@@ -1014,10 +1018,8 @@ class SaveManager {
                 // Convert JSONObject to HashMap and load
                 HashMap<String, Object> dataMap = jsonToHashMap(dataJSON);
                 existingThing.load(dataMap);
-                println("Updated: " + existingThing.getClass().getSimpleName() + " ID: " + objId);
             } else {
-                println("WARNING: No existing object found with ID: " + objId);
-                println("Available IDs: " + existingThings.keySet());
+                println("   WARNING: No existing object found with ID: " + objId);
             }
         }
         
@@ -1026,9 +1028,7 @@ class SaveManager {
             humansArray = saveData.getJSONArray("mainHumans");
             gameManager.mainHumans.clear();
             
-            println("Loading mainHumans...");
-            println("humansArray size: " + humansArray.size());
-            println("existingThings keys: " + existingThings.keySet());
+            println("   Loading mainHumans...");
             
             // First, find the human data from objectsArray
             HashMap<Integer, JSONObject> objectDataMap = new HashMap<Integer, JSONObject>();
@@ -1041,31 +1041,27 @@ class SaveManager {
             
             for (int i = 0; i < humansArray.size(); i++) {
                 int humanID = humansArray.getInt(i);
-                println("Looking for human ID: " + humanID);
                 
                 Thing human = existingThings.get(humanID);
                 if (human == null) {
-                    println("  Human not found in existingThings!");
+                    println("   Human not found in existingThings!");
                     continue;
                 }
                 
-                println("  Found human: " + human.getClass().getSimpleName());
-                
-                // Load the human's data!
+                // Load the human's data
                 JSONObject humanData = objectDataMap.get(humanID);
                 if (humanData != null) {
-                    println("  Found save data for human ID " + humanID);
                     HashMap<String, Object> dataMap = jsonToHashMap(humanData);
                     human.load(dataMap);
                     
                     gameManager.mainHumans.add((Human) human);
-                    println("  Added to mainHumans");
+                    println("   Loaded " + human.getClass().getSimpleName() + " (ID " + humanID + ")");
                 } else {
-                    println("  No save data found for human ID " + humanID);
+                    println("   No save data found for human ID " + humanID);
                 }
             }
         } else {
-          println("No mainHumans were found!");
+          println("   No mainHumans were found!");
         }
         
         // Load tracked human
@@ -1074,16 +1070,17 @@ class SaveManager {
             Thing tracked = existingThings.get(trackedID);
             if (tracked instanceof Human) {
                 gameManager.trackedHuman = (Human) tracked;
-                println("Tracked human set to ID: " + trackedID);
+                println("   Tracked human set to ID: " + trackedID);
             }
         }
         
         // Set current scene
         gameManager.window.scene = savedScene;
         
-        println("Game loaded from " + saveFilePath + filename + ".json");
-        println("Updated " + objectsArray.size() + " objects");
-        println("Updated " + humansArray.size() + " humans");
+        println("   Updated " + objectsArray.size() + " objects");
+        println("   Updated " + humansArray.size() + " humans");
+        println("   Game loaded from " + saveFilePath + filename + ".json!");
+        gameManager.messageBox.showEvent("Game loaded from " + filename + ".json!");
     }
     
     void loadGame() {
