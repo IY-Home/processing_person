@@ -134,7 +134,6 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 ### **Save/Load System (v4.1.0+)**
 - **Automatic ID assignment**: Every object gets a sequential ID based on creation order in `GameInit.pde`
 - **Saveable interface**: Objects implement `save()` and `load()` methods to serialize their state
-- **Two-pass loading**: First loads all object data, then resolves cross-references (grabbed objects, chair occupancy, cupboard contents)
 - **JSON serialization**: Human-readable save files in the `saves/` folder
 - **Reference resolution**: Objects store IDs of referenced objects (e.g., `grabObjID`, `restedObjID`) for proper relationship restoration
 - **Transient state handling**: Temporary variables like grab cooldowns are reset on load
@@ -608,7 +607,6 @@ The framework includes a comprehensive save/load system that persists the entire
 ### **How It Works**
 - **Automatic ID assignment**: Every object gets a unique sequential ID based on creation order in `GameInit.pde`
 - **Saveable interface**: Objects implement `save()` and `load()` methods to serialize their state
-- **Two-pass loading**: First loads all object data, then resolves cross-references (grabbed objects, chair occupancy, cupboard contents)
 - **JSON serialization**: Human-readable save files in the `saves/` folder
 - **Transient state handling**: Temporary variables like grab cooldowns are reset on load
 
