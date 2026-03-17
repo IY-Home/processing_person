@@ -825,7 +825,7 @@ class SaveManager {
     }
 
     String getSavePath() {
-        return sketchPath() + "/" + getLastFolderName(savePath);
+        return sketchPath() + "/" + getLastFolderName(savePath) + "/";
     }
 
     // Assign sequential IDs to objects as they're created
