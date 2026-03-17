@@ -259,30 +259,41 @@ xattr -d com.apple.quarantine "$OUTPUT_APP"
 echo "🧹 Cleaning up temporary icon files..."
 rm -rf "$ICON_OUTPUT_DIR"
 
-# Step 13: Create DMG if create-dmg is available
+# Step 13: Create DMG with app folder structure
 if command -v create-dmg &> /dev/null; then
     echo "💿 Creating DMG for distribution..."
+    
+    # Create a temporary folder with the right structure
+    TEMP_FOLDER="$BASE_DIR/Application/macOS_app_builder/temp_dist"
+    APP_FOLDER_NAME="$APP_NAME"
+    APP_FOLDER="$TEMP_FOLDER/$APP_FOLDER_NAME"
+    
+    mkdir -p "$APP_FOLDER"
+    cp -R "$OUTPUT_APP" "$APP_FOLDER/"
+    
     DMG_NAME="${APP_NAME}-${VERSION}.dmg"
+    
     create-dmg \
         --volname "$APP_NAME" \
         --window-pos 200 120 \
         --window-size 800 400 \
         --icon-size 100 \
-        --app-drop-link 600 185 \
-        --icon "$APP_NAME.app" 200 185 \
+        --app-drop-link 600 105 \
+        --icon "$APP_FOLDER_NAME" 200 105 \
         "$BASE_DIR/Application/macOS_app_builder/$DMG_NAME" \
-        "$OUTPUT_APP" > /dev/null 2>&1
+        "$TEMP_FOLDER" > /dev/null 2>&1
     
-    if [ -f "$SOURCE_DIR/$DMG_NAME" ]; then
+    # Clean up
+    rm -rf "$TEMP_FOLDER"
+    
+    if [ -f "$BASE_DIR/Application/macOS_app_builder/$DMG_NAME" ]; then
         echo "   ✅ DMG created: $BASE_DIR/Application/macOS_app_builder/$DMG_NAME"
+        echo "   📁 Contains: $APP_FOLDER_NAME/ folder with app + saves"
     else
         echo "   ⚠️  DMG creation failed"
     fi
 else
     echo "📦 create-dmg not installed. To enable DMG creation: brew install create-dmg"
-    # Create zip as fallback
-    echo "📦 Creating zip archive instead..."
-    ditto -c -k --sequesterRsrc --keepParent "$OUTPUT_APP" "$BASE_DIR/Application/macOS_app_builder/${APP_NAME}-${VERSION}.zip"
 fi
 
 # Step 14: Final verification

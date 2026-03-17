@@ -39,5 +39,6 @@ APP_CATEGORY="public.app-category.games" \
 SAVE_FILE_EXTENSIONS="json,save" \
 ./build_universal_app.sh
 ```
-- Your app should be present in the ```/macOS_app_builder``` folder now, along with a .dmg file to easily move it to the ```Applications``` folder.
+- Your app should be present in the ```/macOS_app_builder``` folder now, along with a .dmg file to easily move it to the ```Applications/[your app's name]``` folder.
 - You can now delete the folders ```macos-x86_64``` and ```macos-aarch64``` in your ```Source``` folder.
+- **_Note:_ The app (.app) should not be directly moved into the ```Applications``` folder, as the game save files is stored in the same directory as the app and would be in ```Applications/saves```. Instead, store the .app in a dedicated folder. This way, the ```saves``` folder would be along the app and not loose in the ```Applications``` folder.
