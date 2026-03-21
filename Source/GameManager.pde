@@ -800,14 +800,14 @@ class SaveManager {
 
     // Ensure saves directory exists
     SaveManager() {
-        File savesDir = new File(getSavePath(), getLastFolderName(savePath));
+        File savesDir = new File(getSavePath());
         if (!savesDir.exists()) {
             savesDir.mkdir();
             println("Made /saves directory");
         }
     }
     
-    String getLastFolderName(String path) {
+    String getFolderNames(String path) {
         if (path == null || path.isEmpty()) {
             return "";
         }
@@ -815,17 +815,14 @@ class SaveManager {
         // Remove trailing separator if present
         String cleanPath = path.endsWith(File.separator) ? 
                         path.substring(0, path.length() - 1) : path;
+        cleanPath = path.startsWith(File.separator) ? 
+                        path.substring(1, path.length()) : path;
         
-        int lastSeparator = cleanPath.lastIndexOf(File.separator);
-        if (lastSeparator == -1) {
-            return cleanPath; // No separator, return the whole string
-        }
-        
-        return cleanPath.substring(lastSeparator + 1);
+        return cleanPath;
     }
 
     String getSavePath() {
-        return sketchPath() + "/" + getLastFolderName(savePath) + "/";
+        return sketchPath() + "/" + getFolderNames(savePath) + "/";
     }
 
     // Assign sequential IDs to objects as they're created
