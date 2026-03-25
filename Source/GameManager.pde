@@ -971,8 +971,8 @@ class SaveManager {
         }
  
         // Load metadata
-        currentMaxID = saveData.getInt("currentMaxID");
-        currentMaxSaveID = saveData.getInt("saveID");
+        currentMaxID = saveData.hasKey("currentMaxID") ? saveData.getInt("currentMaxID") : this.currentMaxID;
+        currentMaxSaveID = saveData.hasKey("saveID") ? saveData.getInt("saveID") : this.currentMaxSaveID;
         currentMaxSaveID++; 
         int savedScene = saveData.getInt("currentScene");
         
