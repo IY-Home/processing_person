@@ -232,6 +232,26 @@ abstract class Thing implements Saveable {
         return nearby;
     }
 
+    ArrayList<Thing> getClosestObjects(ArrayList<Thing> objects, float radius, boolean checkY) {
+        ArrayList<Thing> nearby = new ArrayList<Thing>();
+        for (Thing thing : objects) {
+            if (thing != null && thing != this && thing.show && thing.sceneIn == this.sceneIn) {
+                float dist = checkY ? 
+                    PVector.dist(thing.position, this.position) : 
+                    abs(thing.position.x - this.position.x);
+                if (dist <= radius) {
+                    nearby.add(thing);
+                }
+            }
+        }
+        nearby.sort((a, b) -> {
+            float distA = abs(this.position.x - a.position.x);
+            float distB = abs(this.position.x - b.position.x);
+            return Float.compare(distA, distB);
+        });
+        return nearby;
+    }
+
     // Check if object is in current scene
     boolean inScene() {
         return this.sceneIn == gameManager.window.scene;

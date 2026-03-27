@@ -130,25 +130,31 @@ class GameManager {
                 } else ((Human)obj).live();
                 
                 // Check collisions with other objects
-                for (int j = 0; j < objects.size(); j++) {
-                    Thing other = objects.get(j);
-                    if (other != null && other != obj && other.inScene() &&
-                        ((obj.checkTouchY && (PVector.dist(obj.position, other.position) < 200 || obj.checkTouchWide)) || 
-                         (!obj.checkTouchY && (abs(other.position.x - obj.position.x) < 200 || obj.checkTouchWide)))) {
+                ArrayList<Thing> nearbyObjects;
+                if (obj.checkTouchWide) {
+                    nearbyObjects = objects;
+                } else {
+                    nearbyObjects = obj.getClosestObjects(objects, 200, obj.checkTouchY);
+                }
+                for (Thing other : nearbyObjects) {
+                    if (other != null && other != obj) {
                         obj.checkTouch(other);
                     }
                 }
-                
+
                 // Check collisions with humans
-                for (Human human : mainHumans) {
-                    if (human != null && human.inScene() && obj != human) {
-                        float dist = obj.checkTouchY ? 
-                            PVector.dist(obj.position, human.position) : 
-                            abs(obj.position.x - human.position.x);
-                        if (dist < 250 || obj.checkTouchWide) {
-                            obj.checkTouch(human);
-                            human.checkTouch(obj);
-                        }
+                ArrayList<Thing> nearbyHumans;
+                ArrayList<Thing> humansAsThings = new ArrayList<Thing>(mainHumans);
+                if (obj.checkTouchWide) {
+                    nearbyHumans = humansAsThings;
+                } else {
+                    nearbyHumans = obj.getClosestObjects(humansAsThings, 250, obj.checkTouchY);
+                }
+                for (Thing humanThing : nearbyHumans) {
+                    Human human = (Human) humanThing;
+                    if (human != null && obj != human) {
+                        obj.checkTouch(human);
+                        human.checkTouch(obj);
                     }
                 }
             } else if (obj != null && obj.sceneIn == window.trashScene) {
