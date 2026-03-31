@@ -44,9 +44,9 @@ void keyPressed() {
     // If not handled by input box, process game keys
     if (!handledByInputBox) {
         // Existing drone controls
-        for (Thing obj: gameManager.objects) {
-            if (obj instanceof KeyEvents) {
-                ((KeyEvents) obj).keyDown(key, keyCode);
+        for (Thing thing: gameManager.things) {
+            if (thing instanceof KeyEvents) {
+                ((KeyEvents) thing).keyDown(key, keyCode);
             }
         }
     }
@@ -55,9 +55,9 @@ void keyPressed() {
 void keyReleased() {
     gameManager.keyManager.setKeyPressed(keyCode, false);
     if (gameManager.activeInputBoxes.size() == 0) {
-        for (Thing obj: gameManager.objects) {
-            if (obj instanceof KeyEvents) {
-                ((KeyEvents) obj).keyUp(key, keyCode);
+        for (Thing thing: gameManager.things) {
+            if (thing instanceof KeyEvents) {
+                ((KeyEvents) thing).keyUp(key, keyCode);
             }
         }
     }

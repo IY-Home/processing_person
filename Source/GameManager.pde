@@ -7,7 +7,7 @@ class GameManager {
     String startupMessage;
   
     // Core collections
-    ArrayList<Thing> objects;
+    ArrayList<Thing> things;
     ArrayList<Human> mainHumans;
     ArrayList<InputBox> activeInputBoxes;
 
@@ -26,7 +26,7 @@ class GameManager {
         this.programName = programName;
         this.version = programVersion;
         startupMessage = "### " + programName + " v" + version + " ###";  
-        objects = new ArrayList<Thing>();
+        things = new ArrayList<Thing>();
         mainHumans = new ArrayList<Human>();
         activeInputBoxes = new ArrayList<InputBox>();
         imageManager = new ImageManager();
@@ -48,7 +48,7 @@ class GameManager {
         println("Initializing GameManager...");
         
         // Clear existing state
-        objects.clear();
+        things.clear();
         mainHumans.clear();
         activeInputBoxes.clear();
         window.scenes.clear();
@@ -57,7 +57,7 @@ class GameManager {
         // Initialize game
         createScenes(window);
         createHumans(mainHumans);
-        createObjects(objects);
+        createThings(things);
         if (useSaveSystem) {
           setObjectIDs();
           loadGame();
@@ -77,11 +77,11 @@ class GameManager {
     }
     
     void updateThings() {
-        // Draw background objects first
-        for (Thing obj : objects) {
-            if (obj.drawBehindHumans && obj.inScene() && obj.show) {
+        // Draw background things first
+        for (Thing thing : things) {
+            if (thing.drawBehindHumans && thing.inScene() && thing.show) {
                 push();
-                obj.display();
+                thing.display();
                 pop();
             }
         }
@@ -107,67 +107,67 @@ class GameManager {
             }
         }
         
-        for (Thing obj : objects) {
-            if (obj.drawInBackground && !obj.drawBehindHumans && obj.inScene() && obj.show) {
+        for (Thing thing : things) {
+            if (thing.drawInBackground && !thing.drawBehindHumans && thing.inScene() && thing.show) {
                 push();
-                obj.display();
+                thing.display();
                 pop();
             }
         }
         
-        // Update and check collisions for all objects
-        for (int i = 0; i < objects.size(); i++) {
-            Thing obj = objects.get(i);
-            if (obj != null && obj.inScene()) {
-                if (!(obj instanceof Human)) {
-                    obj.update();
-                    if (!obj.drawInBackground && !obj.drawInForeground && !obj.drawBehindHumans && obj.show) {
+        // Update and check collisions for all things
+        for (int i = 0; i < things.size(); i++) {
+            Thing thing = things.get(i);
+            if (thing != null && thing.inScene()) {
+                if (!(thing instanceof Human)) {
+                    thing.update();
+                    if (!thing.drawInBackground && !thing.drawInForeground && !thing.drawBehindHumans && thing.show) {
                         push();
-                        obj.display();
+                        thing.display();
                         pop();
                     }
-                    obj.checkEdges();
-                } else ((Human)obj).live();
+                    thing.checkEdges();
+                } else ((Human)thing).live();
                 
-                // Check collisions with other objects
-                ArrayList<Thing> nearbyObjects;
-                if (obj.checkTouchWide) {
-                    nearbyObjects = objects;
+                // Check collisions with other things
+                ArrayList<Thing> nearbyThings;
+                if (thing.checkTouchWide) {
+                    nearbyThings = things;
                 } else {
-                    nearbyObjects = obj.getClosestObjects(objects, 200, obj.checkTouchY);
+                    nearbyThings = thing.getClosestThings(things, 200, thing.checkTouchY);
                 }
-                for (Thing other : nearbyObjects) {
-                    if (other != null && other != obj) {
-                        obj.checkTouch(other);
+                for (Thing other : nearbyThings) {
+                    if (other != null && other != thing) {
+                        thing.checkTouch(other);
                     }
                 }
 
                 // Check collisions with humans
                 ArrayList<Thing> nearbyHumans;
                 ArrayList<Thing> humansAsThings = new ArrayList<Thing>(mainHumans);
-                if (obj.checkTouchWide) {
+                if (thing.checkTouchWide) {
                     nearbyHumans = humansAsThings;
                 } else {
-                    nearbyHumans = obj.getClosestObjects(humansAsThings, 250, obj.checkTouchY);
+                    nearbyHumans = thing.getClosestThings(humansAsThings, 250, thing.checkTouchY);
                 }
                 for (Thing humanThing : nearbyHumans) {
                     Human human = (Human) humanThing;
-                    if (human != null && obj != human) {
-                        obj.checkTouch(human);
-                        human.checkTouch(obj);
+                    if (human != null && thing != human) {
+                        thing.checkTouch(human);
+                        human.checkTouch(thing);
                     }
                 }
-            } else if (obj != null && obj.sceneIn == window.trashScene) {
-                obj.show = false;
-            } else if (obj != null && !obj.inScene() && obj.updateInBackground) {
-                obj.backgroundUpdate();
+            } else if (thing != null && thing.sceneIn == window.trashScene) {
+                thing.show = false;
+            } else if (thing != null && !thing.inScene() && thing.updateInBackground) {
+                thing.backgroundUpdate();
             }
         }
-        // Finally, draw objects in the front
-        for (Thing obj : objects) {
-            if (obj.drawInForeground && !obj.drawInBackground && !obj.drawBehindHumans && obj.inScene() && obj.show) {
+        // Finally, draw things in the front
+        for (Thing thing : things) {
+            if (thing.drawInForeground && !thing.drawInBackground && !thing.drawBehindHumans && thing.inScene() && thing.show) {
                 push();
-                obj.display();
+                thing.display();
                 pop();
             }
         }
@@ -179,18 +179,18 @@ class GameManager {
     
     // Utility methods
     boolean in(Thing testObj) {
-        return objects.contains(testObj);
+        return things.contains(testObj);
     }
     
     void removeThing(Thing testObj) {
-        if (objects.contains(testObj)) {
-            objects.remove(testObj);
+        if (things.contains(testObj)) {
+            things.remove(testObj);
         }
     }
     
-    void addThing(Thing obj) {
-        if (!objects.contains(obj)) {
-            objects.add(obj);
+    void addThing(Thing thing) {
+        if (!things.contains(thing)) {
+            things.add(thing);
         }
     }
     
@@ -209,16 +209,16 @@ class GameManager {
     }
     
     void setObjectIDs() {
-      for (Thing obj : objects) {
-          obj.id = saveManager.getNextID();
+      for (Thing thing : things) {
+          thing.id = saveManager.getNextID();
       }
       for (Human human : mainHumans) {
-          if (!objects.contains(human)) {
+          if (!things.contains(human)) {
               human.id = saveManager.getNextID();
               println("    Human (" + human.getClass().getSimpleName() + ") " + human.name + " assigned ID: " + human.id);
           }
       }
-       println("    Assigned IDs to objects and humans from ID 1 to " + saveManager.currentMaxID);
+       println("    Assigned IDs to things and humans from ID 1 to " + saveManager.currentMaxID);
     }
 }
 
@@ -831,7 +831,7 @@ class SaveManager {
         return sketchPath() + "/" + getFolderNames(savePath) + "/";
     }
 
-    // Assign sequential IDs to objects as they're created
+    // Assign sequential IDs to things as they're created
     int getNextID() {
         currentMaxID++;
         return currentMaxID;
@@ -870,22 +870,22 @@ class SaveManager {
         
         saveData.setJSONObject("constants", constantsData);
 
-        // Save ALL objects (including humans!)
-        JSONArray objectsArray = new JSONArray();
+        // Save ALL things (including humans!)
+        JSONArray thingsArray = new JSONArray();
         
-        // Add all objects from objects list
-        for (Thing obj : gameManager.objects) {
-            addThingToArray(obj, objectsArray);
+        // Add all things from things list
+        for (Thing thing : gameManager.things) {
+            addThingToArray(thing, thingsArray);
         }
         
-        // ALSO ADD ALL HUMANS (if not already in objects)
+        // ALSO ADD ALL HUMANS (if not already in things)
         for (Human human : gameManager.mainHumans) {
-            if (!gameManager.objects.contains(human)) {
-                addThingToArray(human, objectsArray);
+            if (!gameManager.things.contains(human)) {
+                addThingToArray(human, thingsArray);
             }
         }
         
-        saveData.setJSONArray("objects", objectsArray);
+        saveData.setJSONArray("things", thingsArray);
         
         // Save humans list (just IDs for mainHumans tracking)
         JSONArray humansArray = new JSONArray();
@@ -1015,35 +1015,35 @@ class SaveManager {
             }
         }
 
-        // Create a map of existing objects by ID
+        // Create a map of existing things by ID
         HashMap<Integer, Thing> existingThings = new HashMap<Integer, Thing>();
-        for (Thing obj : gameManager.objects) {
-            existingThings.put(obj.id, obj);
+        for (Thing thing : gameManager.things) {
+            existingThings.put(thing.id, thing);
         }
         for (Human human : gameManager.mainHumans) {
             existingThings.put(human.id, human);
         }
         
-        // Load objects data and update existing instances
-        JSONArray objectsArray = saveData.getJSONArray("objects");
+        // Load things data and update existing instances
+        JSONArray thingsArray = saveData.getJSONArray("things");
         JSONArray humansArray = new JSONArray();
                     
-        println("   Loading objects...");
-        for (int i = 0; i < objectsArray.size(); i++) {
-            JSONObject objData = objectsArray.getJSONObject(i);
+        println("   Loading things...");
+        for (int i = 0; i < thingsArray.size(); i++) {
+            JSONObject objData = thingsArray.getJSONObject(i);
             JSONObject dataJSON = objData.getJSONObject("data");
             
             // Get ID from the data JSON
             int objId = dataJSON.getInt("id");
             
-            // Find the existing object with this ID
+            // Find the existing thing with this ID
             Thing existingThing = existingThings.get(objId);
             if (existingThing != null) {
                 // Convert JSONObject to HashMap and load
                 HashMap<String, Object> dataMap = jsonToHashMap(dataJSON);
                 existingThing.load(dataMap);
             } else {
-                println("   WARNING: No existing object found with ID: " + objId);
+                println("   WARNING: No existing thing found with ID: " + objId);
             }
         }
         
@@ -1054,13 +1054,13 @@ class SaveManager {
             
             println("   Loading mainHumans...");
             
-            // First, find the human data from objectsArray
-            HashMap<Integer, JSONObject> objectDataMap = new HashMap<Integer, JSONObject>();
-            for (int i = 0; i < objectsArray.size(); i++) {
-                JSONObject objData = objectsArray.getJSONObject(i);
+            // First, find the human data from thingsArray
+            HashMap<Integer, JSONObject> thingDataMap = new HashMap<Integer, JSONObject>();
+            for (int i = 0; i < thingsArray.size(); i++) {
+                JSONObject objData = thingsArray.getJSONObject(i);
                 JSONObject dataJSON = objData.getJSONObject("data");
                 int objId = dataJSON.getInt("id");
-                objectDataMap.put(objId, dataJSON);
+                thingDataMap.put(objId, dataJSON);
             }
             
             for (int i = 0; i < humansArray.size(); i++) {
@@ -1073,7 +1073,7 @@ class SaveManager {
                 }
                 
                 // Load the human's data
-                JSONObject humanData = objectDataMap.get(humanID);
+                JSONObject humanData = thingDataMap.get(humanID);
                 if (humanData != null) {
                     HashMap<String, Object> dataMap = jsonToHashMap(humanData);
                     human.load(dataMap);
@@ -1101,7 +1101,7 @@ class SaveManager {
         // Set current scene
         gameManager.window.scene = savedScene;
         
-        println("   Updated " + objectsArray.size() + " objects");
+        println("   Updated " + thingsArray.size() + " things");
         println("   Updated " + humansArray.size() + " humans");
         println("   Game loaded from " + getSavePath() + filename + ".json!");
         gameManager.messageBox.showEvent("Game loaded from " + filename + ".json!");

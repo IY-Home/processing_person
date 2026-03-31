@@ -146,7 +146,7 @@ void createHumans(ArrayList <Human> humans) {
     humans.add(joe);
 }
 
-void createObjects(ArrayList <Thing> things) {
+void createThings(ArrayList <Thing> things) {
     color woodColor = color(200, 100, 0);  
 
     // Add doors for scene transitions

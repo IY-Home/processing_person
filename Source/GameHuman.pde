@@ -112,13 +112,13 @@ class GameHuman extends Human {
     }
 
     // Enhanced grabClosest method with SHIFT priority for Cupboard
-    void grabClosest(ArrayList<Thing> objects) {
-        this.release();  // Release current object
+    void grabClosest(ArrayList<Thing> things) {
+        this.release();  // Release current thing
         
         // FIRST PRIORITY: Cupboard when SHIFT is pressed
         if (gameManager.keyManager.isKeyPressed(shiftKey)) {
             // Find all cupboards in range
-            ArrayList<Thing> cupboardsInRange = this.getClosestObjects(objects, grabRange);
+            ArrayList<Thing> cupboardsInRange = this.getClosestThings(things, grabRange);
             
             // Try each cupboard until one can be grabbed
             for (Thing cupboard : cupboardsInRange) {
@@ -128,8 +128,8 @@ class GameHuman extends Human {
             }
         }
         
-        // SECOND PRIORITY: Find other potential objects in range with default function
-        super.grabClosest(objects);
+        // SECOND PRIORITY: Find other potential things in range with default function
+        super.grabClosest(things);
         
     }
 
@@ -171,7 +171,7 @@ class GameHuman extends Human {
     // Enhanced display method
     void display() {
         // Check if we're stationary and not jumping
-        boolean isStationary = (velocity.x == 0 && standingOnChair == null && grabObj == null);
+        boolean isStationary = (velocity.x == 0 && standingOnChair == null && grabThing == null);
         
         pushMatrix();
         
@@ -254,9 +254,9 @@ class GameHuman extends Human {
         }
     }
 
-    // Check object interactions
-    void checkObj() {
-        super.checkObj();
+    // Check thing interactions
+    void checkThings() {
+        super.checkThings();
         // If standing on chair, maintain position
         if (standingOnChair != null) {
             this.position.x = standingOnChair.position.x;
@@ -336,15 +336,15 @@ class GameHuman extends Human {
         
         // Load chair reference
         if (data.containsKey("standingOnChairID")) {
-            this.loadStandingOnChair(gameManager.objects, ((Number) data.get("standingOnChairID")).intValue());
+            this.loadStandingOnChair(gameManager.things, ((Number) data.get("standingOnChairID")).intValue());
         }
     }
     
-    void loadStandingOnChair(ArrayList<Thing> objects, int chairId) {
+    void loadStandingOnChair(ArrayList<Thing> things, int chairId) {
         if (chairId > 0) {
-            for (Thing obj : objects) {
-                if (obj instanceof Chair && obj.id == chairId) {
-                    this.standingOnChair = (Chair) obj;
+            for (Thing thing : things) {
+                if (thing instanceof Chair && thing.id == chairId) {
+                    this.standingOnChair = (Chair) thing;
                     break;
                 }
             }
@@ -359,7 +359,7 @@ class GameHuman extends Human {
             this.display();
             this.controls();
             this.checkEdges();
-            this.checkObj();
+            this.checkThings();
         }
     }
     

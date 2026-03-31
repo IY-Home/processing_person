@@ -1,24 +1,24 @@
-// Interface for objects that can be interacted with 
+// Interface for Things that can be interacted with 
 interface Interactable {
-    void onGrab(Human human);          // Called when object is grabbed
-    boolean isGrabbable();             // Returns if object can be grabbed
-    void onRelease(Human human);       // Called when object is released
-    void onInteract(Human human);      // Called when SHIFT is pressed when object held
+    void onGrab(Human human);          // Called when Thing is grabbed
+    boolean isGrabbable();             // Returns if Thing can be grabbed
+    void onRelease(Human human);       // Called when Thing is released
+    void onInteract(Human human);      // Called when SHIFT is pressed when Thing held
 }
 
-// Interface for objects that receive key presses
+// Interface for Things that receive key presses
 interface KeyEvents {
     void keyDown(char key, int keyCode);
     void keyUp(char key, int keyCode);
 }
 
-// Interface for saveable objects
+// Interface for saveable Things
 interface Saveable {
     HashMap<String, Object> save();
     void load(HashMap<String, Object> data);
 }
 
-// Base class for all game objects
+// Base class for all game Things
 abstract class Thing implements Saveable {
     int id = 0;
     PVector position, velocity, acceleration; // Physics properties
@@ -26,7 +26,7 @@ abstract class Thing implements Saveable {
     boolean show = true; // Default is true
     boolean hasPhysics = true; 
     float elasticity = 0, friction = 0.98f;
-    int sceneIn = 0; // Scene this object belongs to
+    int sceneIn = 0; // Scene this Thing belongs to
     float groundHeightOffset = 0;
     float checkTouchRadius = 0;
     boolean checkTouchY = false;
@@ -62,7 +62,7 @@ abstract class Thing implements Saveable {
         acceleration.set(0, 0);
     }
 
-    // Update object physics
+    // Update Thing physics
     void update() {
         if (hasPhysics && !this.held && !this.rested) {
             acceleration.y = Constants.Physics.GRAVITY;
@@ -99,7 +99,7 @@ abstract class Thing implements Saveable {
         }
     }
     
-    // Check collision with another object (default empty implementation)
+    // Check collision with another Thing (default empty implementation)
     void onTouch(Thing other, float distance) {}
 
     void checkTouch(Thing other) {
@@ -118,7 +118,7 @@ abstract class Thing implements Saveable {
         }
     }
     
-    // Executes this if updateInBackground is true and object not in current scene
+    // Executes this if updateInBackground is true and Thing not in current scene
     void backgroundUpdate() {}
     
     HashMap<String, Object> save() {
@@ -214,9 +214,9 @@ abstract class Thing implements Saveable {
         if (data.containsKey("checkTouchRadius")) this.checkTouchRadius = ((Number) data.get("checkTouchRadius")).floatValue();
     }
     
-    ArrayList<Thing> getClosestObjects(ArrayList<Thing> objects, float radius) {
+    ArrayList<Thing> getClosestThings(ArrayList<Thing> things, float radius) {
         ArrayList<Thing> nearby = new ArrayList<Thing>();
-        for (Thing thing : objects) {
+        for (Thing thing : things) {
             if (thing != null && thing != this && thing.show && thing.sceneIn == this.sceneIn) {
                 float dist = PVector.dist(this.position, thing.position);
                 if (dist <= radius) {
@@ -232,9 +232,9 @@ abstract class Thing implements Saveable {
         return nearby;
     }
 
-    ArrayList<Thing> getClosestObjects(ArrayList<Thing> objects, float radius, boolean checkY) {
+    ArrayList<Thing> getClosestThings(ArrayList<Thing> things, float radius, boolean checkY) {
         ArrayList<Thing> nearby = new ArrayList<Thing>();
-        for (Thing thing : objects) {
+        for (Thing thing : things) {
             if (thing != null && thing != this && thing.show && thing.sceneIn == this.sceneIn) {
                 float dist = checkY ? 
                     PVector.dist(thing.position, this.position) : 
@@ -252,7 +252,7 @@ abstract class Thing implements Saveable {
         return nearby;
     }
 
-    // Check if object is in current scene
+    // Check if Thing is in current scene
     boolean inScene() {
         return this.sceneIn == gameManager.window.scene;
     }
@@ -273,7 +273,7 @@ class Human extends Thing {
     color hairColor, shirtColor, pantColor, shoeColor;
     float grabms;
     boolean grabbed;
-    Thing grabObj;
+    Thing grabThing;
     
     float grabRange;
 
@@ -306,7 +306,7 @@ class Human extends Thing {
         this.velocity = new PVector(0, 0);
         this.acceleration = new PVector(0, 0);
         this.grabbed = false;
-        this.grabObj = null;
+        this.grabThing = null;
         this.grabms = 0;
         this.grabRange = 300f;
         this.grabbable = false;
@@ -318,13 +318,13 @@ class Human extends Thing {
         this.show = true;
     }
 
-    void grabClosest(ArrayList<Thing> objects) {
-        this.release();  // Release current object
+    void grabClosest(ArrayList<Thing> things) {
+        this.release();  // Release current thing
         
-        // Find all objects within range, sorted by distance
-        ArrayList<Thing> inRange = this.getClosestObjects(objects, grabRange);
+        // Find all things within range, sorted by distance
+        ArrayList<Thing> inRange = this.getClosestThings(things, grabRange);
         
-        // Try each object in order until one is successfully grabbed
+        // Try each Thing in order until one is successfully grabbed
         for (Thing thing : inRange) {
             if (this.grab(thing)) {  // grab() returns true if successful
                 return;  // Found and grabbed something!
@@ -332,12 +332,12 @@ class Human extends Thing {
         }
     }
 
-    void setGrabObj(Thing thing) {
+    void setGrabThing(Thing thing) {
       this.grabbed = true;
-      this.grabObj = thing;
-      grabObj.position.set(this.position.x, this.position.y + 135);
-      grabObj.velocity.set(this.velocity);
-      grabObj.held = true;
+      this.grabThing = thing;
+      grabThing.position.set(this.position.x, this.position.y + 135);
+      grabThing.velocity.set(this.velocity);
+      grabThing.held = true;
     }
 
     // Draw human's head
@@ -475,13 +475,13 @@ class Human extends Thing {
         drawBody();
     }
 
-    // Grab an object
+    // Grab a Thing
     Boolean grab(Thing thing) {
         if (thing == null || thing.sceneIn != this.sceneIn || thing.held || !thing.show) return false;
         if (thing instanceof Interactable) {
             Interactable interactable = (Interactable) thing;
             if (interactable.isGrabbable()) {
-                this.setGrabObj(thing);
+                this.setGrabThing(thing);
                 interactable.onGrab(this);
                 return true;
             } else {
@@ -489,27 +489,27 @@ class Human extends Thing {
                 return true;
             }
         } else if (thing.grabbable) {
-            this.setGrabObj(thing);
+            this.setGrabThing(thing);
             return true;
         } else if (!thing.grabbable) { return false; }
         return false;
     }
 
-    // Release currently grabbed object
+    // Release currently grabbed Thing
     void release() {
         this.grabbed = false;
-        if (grabObj != null) {
-            grabObj.held = false;
-            grabObj.rested = false;
+        if (grabThing != null) {
+            grabThing.held = false;
+            grabThing.rested = false;
 
-            grabObj.lastReleasedMs = millis();
+            grabThing.lastReleasedMs = millis();
 
-            // Call onRelease if the object is Interactable
-            if (grabObj instanceof Interactable) {
-                ((Interactable) grabObj).onRelease(this);
+            // Call onRelease if the Thing is Interactable
+            if (grabThing instanceof Interactable) {
+                ((Interactable) grabThing).onRelease(this);
             }
             
-            grabObj = null; // make grabObj null again
+            grabThing = null; // make grabThing null again
         }
     }
 
@@ -531,16 +531,16 @@ class Human extends Thing {
             if (this.grabbed) {
                 this.release();
             } else {
-                this.grabClosest(gameManager.objects);
+                this.grabClosest(gameManager.things);
             }
         }
     }
     void shiftKeyDown() {
-        if (grabbed && grabObj instanceof Interactable) {
+        if (grabbed && grabThing instanceof Interactable) {
             // Check if enough time has passed since last SHIFT press
             if (millis() - lastShiftPress >= shiftCooldown) {
                 lastShiftPress = millis(); // Record the time  
-                ((Interactable) grabObj).onInteract(this);
+                ((Interactable) grabThing).onInteract(this);
             }
         }
     }
@@ -620,11 +620,11 @@ class Human extends Thing {
         }
     }
 
-    void checkObj() {      
-        // Update grabbed object position
-        if (this.grabbed && grabObj != null) {
-            grabObj.position.set(this.position.x, this.position.y + 135);
-            grabObj.held = true;
+    void checkThings() {      
+        // Update grabbed thing position
+        if (this.grabbed && grabThing != null) {
+            grabThing.position.set(this.position.x, this.position.y + 135);
+            grabThing.held = true;
         }
     }
 
@@ -655,9 +655,9 @@ class Human extends Thing {
         
         data.put("trackedIndicatorHeight", this.trackedIndicatorHeight);
         
-        // Save reference to grabbed object by ID (if any)
-        if (this.grabObj != null && this.grabObj instanceof Saveable) {
-            data.put("grabObjID", this.grabObj.id);
+        // Save reference to grabbed thing by ID (if any)
+        if (this.grabThing != null && this.grabThing instanceof Saveable) {
+            data.put("grabThingID", this.grabThing.id);
         }
         
         return data;
@@ -692,16 +692,16 @@ class Human extends Thing {
             this.trackedIndicatorHeight = ((Number) data.get("trackedIndicatorHeight")).floatValue();
         }
         
-        if (data.containsKey("grabObjID")) {
-            this.loadGrabObj(gameManager.objects, (int) data.get("grabObjID"));
+        if (data.containsKey("grabThingID")) {
+            this.loadGrabThing(gameManager.things, (int) data.get("grabThingID"));
         }
     }
     
-    void loadGrabObj(ArrayList<Thing> objects, int objId) {
+    void loadGrabThing(ArrayList<Thing> objects, int objId) {
         if (objId > 0) {
             for (Thing obj : objects) {
                 if (obj instanceof Saveable && obj.id == objId) {
-                    this.grabObj = obj;
+                    this.grabThing = obj;
                     break;
                 }
             }
@@ -715,7 +715,7 @@ class Human extends Thing {
         this.display();
         this.controls();
         this.checkEdges();
-        this.checkObj();
+        this.checkThings();
     }
 }
 

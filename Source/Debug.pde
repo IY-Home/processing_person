@@ -71,12 +71,12 @@ class Debug {
         yPos += lineHeight;
         
         text("Total Things:", 20, yPos);
-        text(gameManager.objects.size(), 20 + col2, yPos);
+        text(gameManager.things.size(), 20 + col2, yPos);
         yPos += lineHeight;
         
         text("Active in scene:", 20, yPos);
         int activeInScene = 0;
-        for (Thing t : gameManager.objects) {
+        for (Thing t : gameManager.things) {
             if (t.show && t.sceneIn == gameManager.window.scene) activeInScene++;
         }
         text(activeInScene, 20 + col2, yPos);
@@ -123,13 +123,13 @@ class Debug {
             // Grabbed object
             fill(trackedHuman.grabbed ? warningColor : debugColor);
             text("Grabbed:", 20, yPos);
-            if (trackedHuman.grabbed && trackedHuman.grabObj != null) {
-                String objInfo = trackedHuman.grabObj.getClass().getSimpleName();
-                if (trackedHuman.grabObj instanceof CashBag) {
-                    CashBag cb = (CashBag) trackedHuman.grabObj;
+            if (trackedHuman.grabbed && trackedHuman.grabThing != null) {
+                String objInfo = trackedHuman.grabThing.getClass().getSimpleName();
+                if (trackedHuman.grabThing instanceof CashBag) {
+                    CashBag cb = (CashBag) trackedHuman.grabThing;
                     objInfo += " $" + cb.cashAmount;
-                } else if (trackedHuman.grabObj instanceof Lunchbox) {
-                    Lunchbox lb = (Lunchbox) trackedHuman.grabObj;
+                } else if (trackedHuman.grabThing instanceof Lunchbox) {
+                    Lunchbox lb = (Lunchbox) trackedHuman.grabThing;
                     objInfo += " " + lb.label;
                 }
                 text(objInfo, 20 + col2, yPos);
@@ -162,7 +162,7 @@ class Debug {
             yPos += lineHeight;
             
             Thing closest = null;
-            ArrayList<Thing> nearby = trackedHuman.getClosestObjects(gameManager.objects, trackedHuman.grabRange);
+            ArrayList<Thing> nearby = trackedHuman.getClosestThings(gameManager.things, trackedHuman.grabRange);
             closest = nearby.size() > 0 ? nearby.get(0) : null;
 
             if (closest != null) {
@@ -231,7 +231,7 @@ class Debug {
         
         // Draw line to closest object
         Thing closest = null;
-        ArrayList<Thing> nearby = trackedHuman.getClosestObjects(gameManager.objects, trackedHuman.grabRange);
+        ArrayList<Thing> nearby = trackedHuman.getClosestThings(gameManager.things, trackedHuman.grabRange);
         closest = nearby.size() > 0 ? nearby.get(0) : null;
 
         if (closest != null) {

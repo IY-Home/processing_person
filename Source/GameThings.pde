@@ -1,4 +1,4 @@
-// Ball object class 
+// Ball Thing class 
 class Ball extends Thing {
     color ballColor;
     float size;
@@ -51,7 +51,7 @@ class BouncyBall extends Ball implements Interactable {
       this.elasticity = elasticity;
       this.imagePath = imagePath;
       gameManager.imageManager.addImage(imagePath, imagePath, round(this.radius*2), round(this.radius*2));
-      this.checkTouchRadius = 150; // check objects 70 px from self
+      this.checkTouchRadius = 150; // check Things 70 px from self
       this.checkTouchY = true;
       this.groundHeightOffset = this.radius * 0.6;
     }
@@ -114,7 +114,7 @@ class BouncyBall extends Ball implements Interactable {
 }
 
 
-// Shirt object class
+// Shirt Thing class
 class Shirt extends Thing implements Interactable {
     color shirtColor;
 
@@ -172,12 +172,12 @@ class Shirt extends Thing implements Interactable {
 
 }
 
-// Chair object class
+// Chair Thing class
 class Chair extends Thing implements Interactable {
     color chairColor;
     Thing restedObj;
     boolean humanOnChair = false;
-    boolean occupied; // Whether chair is currently occupied (by human or object)
+    boolean occupied; // Whether chair is currently occupied (by human or Thing)
 
     Chair(color chairColor, float posX, int sceneIn) {
         this.chairColor = chairColor;
@@ -238,7 +238,7 @@ class Chair extends Thing implements Interactable {
             }
         }
 
-        // Clear occupied status if rested object is no longer resting
+        // Clear occupied status if rested Thing is no longer resting
         if (restedObj == null || !restedObj.rested || restedObj.held) {
             this.occupied = false;
             this.humanOnChair = false;
@@ -303,7 +303,7 @@ class Chair extends Thing implements Interactable {
         data.put("humanOnChair", this.humanOnChair);
         data.put("occupied", this.occupied);
         
-        // Save reference to rested object if it exists and is Saveable
+        // Save reference to rested Thing if it exists and is Saveable
         if (this.restedObj != null && this.restedObj instanceof Saveable) {
             data.put("restedObjID", (this.restedObj).id);
         }
@@ -318,17 +318,17 @@ class Chair extends Thing implements Interactable {
         if (data.containsKey("humanOnChair")) this.humanOnChair = (boolean) data.get("humanOnChair");
         if (data.containsKey("occupied")) this.occupied = (boolean) data.get("occupied");
         
-        // Load rested object reference
+        // Load rested Thing reference
         if (data.containsKey("restedObjID")) {
-            this.loadRestedObj(gameManager.objects, ((Number) data.get("restedObjID")).intValue());
+            this.loadRestedObj(gameManager.things, ((Number) data.get("restedObjID")).intValue());
         }
     }
     
-    void loadRestedObj(ArrayList<Thing> objects, int objId) {
+    void loadRestedObj(ArrayList<Thing> things, int objId) {
         if (objId > 0) {
-            for (Thing obj : objects) {
-                if (obj instanceof Saveable && (obj).id == objId) {
-                    this.restedObj = obj;
+            for (Thing thing : things) {
+                if (thing instanceof Saveable && (thing).id == objId) {
+                    this.restedObj = thing;
                     break;
                 }
             }
@@ -336,7 +336,7 @@ class Chair extends Thing implements Interactable {
     }
 }
 
-// Door object class (for scene transitions)
+// Door Thing class (for scene transitions)
 class Door extends Thing implements Interactable {
     int sceneFrom; // Start scene
     int sceneDes; // Destination scene
@@ -401,7 +401,7 @@ class Door extends Thing implements Interactable {
         this.posXNew = (other.sceneIn == sceneFrom || this.isOneWay ? posXDes : posXFrom);      
     }
 
-    // Check collision with other objects - REQUIRED by abstract class Thing
+    // Check collision with other Things - REQUIRED by abstract class Thing
     void onTouch(Thing other, float distance) {
         checkDestination(other);
         if (!(other instanceof Door) && !(other instanceof Human)) {
@@ -490,13 +490,13 @@ class Door extends Thing implements Interactable {
     }
 }
 
-// Cupboard/storage object class
+// Cupboard/storage Thing class
 class Cupboard extends Thing implements Interactable {
     boolean opened = false; // Whether cupboard is open
     color woodColor; // Color of the cupboard
     float cupboardHeight, cupboardWidth; // Dimensions
-    ArrayList < Thing > shelves = new ArrayList < Thing > (); // Things inside
-    int sceneDes; // Destination scene for stored objects
+    ArrayList < Thing > cupboardItems = new ArrayList < Thing > (); // Things inside
+    int sceneDes; // Destination scene for stored Things
 
     Cupboard(color woodColor, float x, float cupboardHeight, float cupboardWidth, int sceneIn, int sceneDes) {
         this.woodColor = woodColor;
@@ -545,22 +545,22 @@ class Cupboard extends Thing implements Interactable {
     void onInteract(Human human) {
         if (!opened) {
             opened = true;
-            // Move objects from shelves to current scene
-            for (Thing obj: shelves) {
-                if (obj != null) {
-                    obj.sceneIn = this.sceneIn;
-                    obj.position.x = this.position.x + this.cupboardWidth;
+            // Move Things from storage scene to current scene
+            for (Thing thing: cupboardItems) {
+                if (thing != null) {
+                    thing.sceneIn = this.sceneIn;
+                    thing.position.x = this.position.x + this.cupboardWidth;
                 }
             }
-            shelves.clear();
+            cupboardItems.clear();
             gameManager.messageBox.showEvent("Cupboard opened");
             return;
         } else {
-            shelves.clear();
-            // Check for objects to store
-            for (Thing obj: gameManager.objects) {
-                if (obj != this) {
-                    this.checkThing(obj);
+            cupboardItems.clear();
+            // Check for Things to store
+            for (Thing thing: gameManager.things) {
+                if (thing != this) {
+                    this.checkThing(thing);
                 }
             }
             this.opened = false;
@@ -576,18 +576,18 @@ class Cupboard extends Thing implements Interactable {
         // Cupboards trigger immediately, no release needed
     }
 
-    // Check if object should be stored in cupboard
+    // Check if Thing should be stored in cupboard
     void checkThing(Thing other) {
         if (this.opened && !(other instanceof Cupboard) && !(other instanceof Door) && other.sceneIn == this.sceneIn) {
             float distance = PVector.dist(this.position, other.position);
             if (distance < 140 && !other.held) {
                 other.position.x = this.position.x;
-                shelves.add(other);
+                cupboardItems.add(other);
                 other.sceneIn = this.sceneDes;
                 other.rested = false;
                 other.velocity.x = 0;
             } else {
-                shelves.remove(other);
+                cupboardItems.remove(other);
             }
         }
     }
@@ -603,7 +603,7 @@ class Cupboard extends Thing implements Interactable {
         
         // Save shelf item IDs
         ArrayList<Integer> shelfIDs = new ArrayList<Integer>();
-        for (Thing item : shelves) {
+        for (Thing item : cupboardItems) {
             if (item instanceof Saveable) {
                 shelfIDs.add((item).id);
             }
@@ -625,16 +625,16 @@ class Cupboard extends Thing implements Interactable {
         // Load shelf references
         if (data.containsKey("shelfIDs")) {
             ArrayList<Integer> shelfIDs = (ArrayList<Integer>) data.get("shelfIDs");
-            this.loadShelves(gameManager.objects, shelfIDs);
+            this.loadShelves(gameManager.things, shelfIDs);
         }
     }
     
-    void loadShelves(ArrayList<Thing> objects, ArrayList<Integer> shelfIDs) {
-        this.shelves.clear();
+    void loadShelves(ArrayList<Thing> things, ArrayList<Integer> shelfIDs) {
+        this.cupboardItems.clear();
         for (int id : shelfIDs) {
-            for (Thing obj : objects) {
-                if (obj instanceof Saveable && (obj).id == id) {
-                    this.shelves.add(obj);
+            for (Thing thing : things) {
+                if (thing instanceof Saveable && (thing).id == id) {
+                    this.cupboardItems.add(thing);
                     break;
                 }
             }
@@ -642,7 +642,7 @@ class Cupboard extends Thing implements Interactable {
     }
 }
 
-// Drone object class
+// Drone Thing class
 class Drone extends Thing implements Interactable {
     float altitude = 10; // Current altitude
     float battery = 100; // Battery percentage
@@ -825,7 +825,7 @@ class Drone extends Thing implements Interactable {
     }
 }
 
-// Lunchbox/food object class
+// Lunchbox/food Thing class
 class Lunchbox extends Thing implements Interactable {
     color boxColor; // Color of lunchbox
     float price; // Price to buy
@@ -932,7 +932,7 @@ class Lunchbox extends Thing implements Interactable {
             gameManager.messageBox.showEvent(gameHuman.firstName + " ate " + label + "! Hunger: " + nf(gameHuman.hunger, 0, 1));
             
             // Release after eating
-            if (gameHuman.grabObj == this) {
+            if (gameHuman.grabThing == this) {
                 gameHuman.release();
             }
         } else if (gameHuman.money < price) {
@@ -1155,7 +1155,7 @@ class CashBag extends Thing implements Interactable {
             gameManager.messageBox.showEvent(gameHuman.firstName + " now has $" + nf(gameHuman.money, 0, 2));
 
             // Release if human was somehow holding this
-            if (gameHuman.grabObj == this) {
+            if (gameHuman.grabThing == this) {
                 gameHuman.release();
             }
             
@@ -1226,7 +1226,6 @@ class CashBag extends Thing implements Interactable {
 }
 
 class PreFilledCupboard extends Cupboard {
-    ArrayList<Thing> cupboardItems;
     String label = "Cupboard";
     
     PreFilledCupboard(String label, color woodColor, float x, float cupboardHeight, float cupboardWidth, 
@@ -1235,7 +1234,7 @@ class PreFilledCupboard extends Cupboard {
         this.cupboardItems = new ArrayList<Thing>(Arrays.asList(customThings));
         this.label = label;
         for (int i = 0; i < cupboardItems.size(); i++) {
-          gameManager.objects.add(cupboardItems.get(i));
+          gameManager.things.add(cupboardItems.get(i));
         }
     }
     
@@ -1258,7 +1257,7 @@ class PreFilledCupboard extends Cupboard {
                     item.held = false;
                     item.rested = false;
                     
-                    // Make sure items are drawn after cupboard by reordering in objects list
+                    // Make sure items are drawn after cupboard by reordering in Things list
                     reorderItemsInFront();
                     
                 }
@@ -1267,8 +1266,8 @@ class PreFilledCupboard extends Cupboard {
             gameManager.messageBox.showEvent("Cupboard closed. Collecting surrounding items...");
             
             // Collect nearby items like normal cupboard
-            for (Thing obj : gameManager.objects) {
-                    Thing item = obj;
+            for (Thing thing : gameManager.things) {
+                    Thing item = thing;
                     if (item.sceneIn == this.sceneIn) {
                         float distance = PVector.dist(this.position, item.position);
                         if (distance < 150 && !item.held && item.hasPhysics) {
@@ -1286,13 +1285,13 @@ class PreFilledCupboard extends Cupboard {
         }
     }
     
-    // Reorder items to be drawn after cupboard in objects list
+    // Reorder items to be drawn after cupboard in Things list
     void reorderItemsInFront() {
-        // Remove cupboard from objects temporarily
-        gameManager.objects.remove(this);
+        // Remove cupboard from Things temporarily
+        gameManager.things.remove(this);
         
         // Re-add cupboard FIRST (so it draws first, in background)
-        gameManager.objects.add(0, this);
+        gameManager.things.add(0, this);
         
         // Now items will be drawn after cupboard
     }
@@ -1368,16 +1367,16 @@ class PreFilledCupboard extends Cupboard {
         // Load cupboard item references
         if (data.containsKey("cupboardItemIDs")) {
             ArrayList<Integer> itemIDs = (ArrayList<Integer>) data.get("cupboardItemIDs");
-            this.loadCupboardItems(gameManager.objects, itemIDs);
+            this.loadCupboardItems(gameManager.things, itemIDs);
         }
     }
     
-    void loadCupboardItems(ArrayList<Thing> objects, ArrayList<Integer> itemIDs) {
+    void loadCupboardItems(ArrayList<Thing> things, ArrayList<Integer> itemIDs) {
         this.cupboardItems.clear();
         for (int id : itemIDs) {
-            for (Thing obj : objects) {
-                if (obj instanceof Saveable && (obj).id == id) {
-                    this.cupboardItems.add(obj);
+            for (Thing thing : things) {
+                if (thing instanceof Saveable && (thing).id == id) {
+                    this.cupboardItems.add(thing);
                     break;
                 }
             }
@@ -1454,7 +1453,7 @@ class SpeedBooster extends Thing implements Interactable {
       gameManager.messageBox.showEvent("SPEED BOOST! " + boostMultiplier + "x faster!");
     
       gh.release(); // Release immediately after grabbing
-      gameManager.objects.remove(this); // Remove from objects list
+      gameManager.things.remove(this); // Remove from Things list
     }
   }
   

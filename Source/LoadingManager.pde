@@ -59,13 +59,13 @@ class LoadingManager {
     GameManager gm;
     Window window;
     ImageManager im;
-    ArrayList<Thing> objects;
+    ArrayList<Thing> things;
     ArrayList<Human> humans;
     
     LoadingManager(GameManager gameManager) {
         this.gm = gameManager;
         this.window = gameManager.window;
-        this.objects = gameManager.objects;
+        this.things = gameManager.things;
         this.humans = gameManager.mainHumans;
         this.im = gameManager.imageManager;
         
@@ -204,7 +204,7 @@ class LoadingManager {
                 break;
                 
           case 1: // Clear old state
-              objects.clear();
+              things.clear();
               humans.clear();
               gm.activeInputBoxes.clear();
               window.scenes.clear();
@@ -222,9 +222,9 @@ class LoadingManager {
               println("  ✓ Characters created ");
               break;
               
-          case 4: // Create objects
-              createObjects(objects);
-              println("  ✓ Objects created ");
+          case 4: // Create things
+              createThings(things);
+              println("  ✓ Things created ");
               break;
               
           case 5: // Load objects
