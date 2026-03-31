@@ -6,7 +6,7 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 ## **Features**
 
 ### **Core Systems**
-- **Game Manager** - Central manager of objects and humans, window and scenes, and constants
+- **Game Manager** - Central manager of things and humans, window and scenes, and constants
 - **Physics Engine** - Gravity, collision detection, velocity, and friction
 - **Scene Management** - Multiple scenes with day/night transitions
 - **Input System** - Customizable input boxes for text/password entry
@@ -15,7 +15,7 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 - **Image Manager** - Asynchronous background loading of images with progress tracking
 - **Save/Load System** - Full game state persistence with JSON serialization (v4.1.0+)
 
-### **Interactive Objects**
+### **Interactive Things**
 - **CashBags** - Password-protected money containers with InputBox integration
 - **Lunchboxes** - Edible food items with price and hunger restoration. It is also the base class for any food items.
 - **Furniture** - Chairs, cupboards, pantries with storage capabilities
@@ -46,7 +46,7 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 #### **GameManager.pde**
 - **`GameManager`** - Central class containing:
   - Global variables and physics constants
-  - Collections of all objects, humans, and input boxes
+  - Collections of all things, humans, and input boxes
   - Main update loop
   - References to Window, KeyManager, ImageManager, and SaveManager systems
 - **`Window`** - Display/background and scene management
@@ -56,11 +56,11 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 - **`CircularArrayList`** - Extended ArrayList with looping and type-safe getters
 
 #### **BaseClasses.pde**
-- **`Thing`** - Abstract base class for all game objects (implements `Saveable`)
+- **`Thing`** - Abstract base class for all game things (implements `Saveable`)
 - **`Human`** - Basic human with drawing and movement logic
-- **`Interactable`** - Interface for interactive objects
-- **`KeyEvents`** - Interface for objects that respond to keyboard input
-- **`Saveable`** - Interface for objects that can be saved/loaded
+- **`Interactable`** - Interface for interactive things
+- **`KeyEvents`** - Interface for things that respond to keyboard input
+- **`Saveable`** - Interface for things that can be saved/loaded
 - **`InputBox`** - Text input UI with password support and callbacks
 
 ### **Examples**
@@ -71,13 +71,13 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 - `LoadingManager` handles staged loading with background image loading
 - `SplashScreen` animated loading display with tips
 
-#### **Classes (GameHuman.pde and ObjectClasses.pde)**
+#### **Classes (GameHuman.pde and GameThings.pde)**
 - **`GameHuman`** - Game player character with hunger/money systems and background updates
 - **`ImageHuman`** - Human that uses an image from ImageManager for appearance
 - **`Ball` and `BouncyBall`** - Physics objects with collision and throw mechanics
 - **`Shirt`** - Wearable clothing item with color swapping
-- **`Chair`** - Sit-able furniture with object stacking
-- **`Door`** - Scene transition object
+- **`Chair`** - Sit-able furniture with thing stacking
+- **`Door`** - Scene transition thing
 - **`Cupboard`/`PreFilledCupboard`** - Storage containers with item management
 - **`Drone`** - Controllable flying device with battery and recharging
 - **`Lunchbox`** - Consumable food items with price and hunger restoration
@@ -91,11 +91,11 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 ### **Character Controls**
 - **Arrow Keys/Mouse** - Move left/right
 - **Up Arrow/Middle Click** - Jump
-- **Down Arrow/Space/Right Click** - Grab/release objects
+- **Down Arrow/Space/Right Click** - Grab/release things
 - **SHIFT Key** - Special interactions (eat food, stand on chair, throw balls, etc.)
 - **S Key** - Save game (creates `saves/gameSave.json`)
 
-### **Object Interactions**
+### **Thing Interactions**
 
 1. **Eat Food**: Grab a lunchbox, press SHIFT
 2. **Unlock CashBag**: Interact with bag, enter password in InputBox
@@ -103,7 +103,7 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 4. **Fly Drone**: Use WASD keys when drone is selected, press R to recharge
 5. **Enter Door**: Grab door to change scenes
 6. **Open Pantry**: Interact with PreFilledCupboard to access stored food
-7. **Stack Objects**: Drop items near chairs to place them
+7. **Stack Things**: Drop items near chairs to place them
 8. **Throw Balls**: Grab a ball and press SHIFT to throw
 
 ### **Hunger System**
@@ -126,16 +126,16 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 ## **Technical Highlights**
 
 ### **Object-Oriented Design**
-- Clean inheritance hierarchy (`Thing` -> specific objects)
+- Clean inheritance hierarchy (`Thing` -> specific things)
 - Interface-based interactions (`Interactable`, `KeyEvents`, `Saveable`)
 - Encapsulated game state management with GameManager
 - Composition over inheritance where appropriate
 
 ### **Save/Load System (v4.1.0+)**
-- **Automatic ID assignment**: Every object gets a sequential ID based on creation order in `GameInit.pde`
-- **Saveable interface**: Objects implement `save()` and `load()` methods to serialize their state
+- **Automatic ID assignment**: Every thing gets a sequential ID based on creation order in `GameInit.pde`
+- **Saveable interface**: Things implement `save()` and `load()` methods to serialize their state
 - **JSON serialization**: Human-readable save files in the `saves/` folder
-- **Reference resolution**: Objects store IDs of referenced objects (e.g., `grabObjID`, `restedObjID`) for proper relationship restoration
+- **Reference resolution**: Things store IDs of referenced things (e.g., `grabThingID`, `restedThingID`) for proper relationship restoration
 - **Transient state handling**: Temporary variables like grab cooldowns are reset on load
 - **Press 'S' to save** - Creates `gameSave.json` in the `saves/` directory
 - **Automatic loading** - Game state restores from save file at startup if one exists
@@ -148,9 +148,9 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 
 ### **Physics Implementation**
 - Velocity/acceleration-based movement with configurable gravity
-- Elastic collisions and friction per object
+- Elastic collisions and friction per thing
 - Screen boundary constraints with configurable bounds
-- Background updates for persistent objects
+- Background updates for persistent things
 
 ### **Scene Management**
 - Mix of colors and images for backgrounds
@@ -165,19 +165,19 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 - Thread-safe progress tracking with volatile variables
 - Automatic image conversion to PGraphics
 - Centralized resource caching to prevent duplicate loads
-- Images are queued during object creation
+- Images are queued during thing creation
 - Background loading with real progress tracking
 - Automatic placeholder generation for missing images
 - Shared image resources across multiple instances
 
 ### **Customization**
 - Add new scenes by extending color/image array
-- Create new object types by extending `Thing`
+- Create new thing types by extending `Thing`
 - Modify constants and physics properties
 - Add more interactive items with `Interactable` interface
 - Create your own game mechanics by extending existing classes
 - Use ImageManager for efficient asset loading
-- **Extend save/load** by overriding `save()` and `load()` in custom objects
+- **Extend save/load** by overriding `save()` and `load()` in custom things
 
 ## **Code Philosophy**
 
@@ -193,7 +193,7 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 - **UI**: Minimalist with contextual information
 - **Feedback**: Visual and console feedback for all actions
 - **Loading**: Smooth animated loading with real progress from ImageManager
-- **Persistence**: Complete game state restoration including object references
+- **Persistence**: Complete game state restoration including thing references
 
 ---
 
@@ -201,8 +201,8 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 
 - To start building your game with this framework, you only need to edit GameInit.pde and create your own files to contain your classes.
 
-1. Import all files into Processing (download their IDE on [their website](https://processing.org)), either by cloning this repository or downloading the individual files (in `/Source`): `BaseClasses.pde` (base classes), `GameHuman.pde` (Human extensions), `ObjectClasses.pde` (sample object classes), `GameManager.pde` (core systems), `KeyHandlers.pde` (input), `LoadingManager.pde` (optional loading screen), `Main.pde` (main setup/draw), and `GameInit.pde` (your game configuration).
-2. You can edit, rename, or remove the example GameInit.pde and ObjectClasses.pde files. (You are recommended to use them as templates.)
+1. Import all files into Processing (download their IDE on [their website](https://processing.org)), either by cloning this repository or downloading the individual files (in `/Source`): `BaseClasses.pde` (base classes), `GameHuman.pde` (Human extensions), `GameThings.pde` (sample thing classes), `GameManager.pde` (core systems), `KeyHandlers.pde` (input), `LoadingManager.pde` (optional loading screen), `Main.pde` (main setup/draw), and `GameInit.pde` (your game configuration).
+2. You can edit, rename, or remove the example GameInit.pde and GameThings.pde/GameHuman.pde files. (You are recommended to use them as templates.)
 3. In your **`GameInit.pde`,** implement the following functions:
 
 ### **`GameManager createGameManager()`**
@@ -277,7 +277,7 @@ You must define:
 - The scenes themselves (colors or images)
 - Whether each scene has ground
 - The starting scene
-- The trash scene (where deleted objects go)
+- The trash scene (where deleted things go)
 - Cursor color
 
 window.addScenes() takes two parallel arrays:
@@ -360,22 +360,22 @@ void createHumans(ArrayList<Human> humans) {
 }
 ```
 
-### **`void createObjects(ArrayList<Thing> things)`**
+### **`void createThings(ArrayList<Thing> things)`**
 
-Creates all interactive objects, furniture, items, and physics objects.
+Creates all interactive things, furniture, items, and physics things.
 
-You create Thing objects and add them to the ArrayList passed in. This becomes the global objects list that the game updates, displays, and checks for collisions.
+You create Thing objects and add them to the ArrayList passed in. This becomes the global things list that the game updates, displays, and checks for collisions.
 
-**Important for save/load**: Objects receive sequential IDs based on the order they're added here. The first object gets ID 1, second gets ID 2, etc. This ensures consistent ID assignment across save/load cycles.
+**Important for save/load**: Things receive sequential IDs based on the order they're added here. The first thing gets ID 1, second gets ID 2, etc. This ensures consistent ID assignment across save/load cycles.
 
-Objects that use images (BouncyBall, ImageHuman, etc.) automatically queue them with ImageManager when constructed. No additional steps needed.
+Things that use images (BouncyBall, ImageHuman, etc.) automatically queue them with ImageManager when constructed. No additional steps needed.
 
 Parameters:
     things - ArrayList to add Thing objects to
 
 Example:
 ```java
-void createObjects(ArrayList<Thing> things) {
+void createThings(ArrayList<Thing> things) {
     color wood = color(200,100,0);
     
     things.add(new Door(width*0.9, width*0.1, wood, 0, 1));  // ID: 1
@@ -392,7 +392,7 @@ Executes every frame (60 times per second at default speed).
 
 Put any code here that needs to run continuously during the game:
 - Custom game logic
-- Spawning new objects
+- Spawning new things
 - Checking win/loss conditions
 - Debug output
 
@@ -402,29 +402,29 @@ void loop() {
     if (frameCount % 300 == 0) {  // Every 5 seconds
         println("Time passes...");
     }
-    myObject.customUpdate();
+    myThing.customUpdate();
 }
 ```
 
 ---
 
-That's the end of your GameInit.pde. But what if you want to extend your game by making your own objects?
+That's the end of your GameInit.pde. But what if you want to extend your game by making your own Things?
 
-## **Creating Custom Object Classes**
+## **Creating Custom Thing Classes**
 
-Create your own .pde file and extend existing classes. The framework supports full save/load functionality for custom objects - you just need to override the `save()` and `load()` methods to include your custom properties.
+Create your own .pde file and extend existing classes. The framework supports full save/load functionality for custom Things - you just need to override the `save()` and `load()` methods to include your custom properties.
 
-### **Basic Custom Object Template**
+### **Basic Custom Thing Template**
 
 ```java
-class MyNewObject extends Thing implements Interactable, KeyEvents {
+class MyNewThing extends Thing implements Interactable, KeyEvents {
     // Your custom properties
     int myCustomProperty;
     int myDefaultProperty = 0;
-    Thing targetObject = null;
+    Thing targetThing = null;
     
     // Constructor
-    MyNewObject(float posX, int sceneIn, int customProperty) {
+    MyNewThing(float posX, int sceneIn, int customProperty) {
         super(); // Call Thing constructor
         this.initialize(posX, height * 0.5); // Initialize with position
         // this.initialize(); // Or initialize with default position
@@ -438,7 +438,7 @@ class MyNewObject extends Thing implements Interactable, KeyEvents {
         this.checkTouchWide = false; // If true, enables distance checking of any radius, and if false, maximum distance is 200px.
         
         // Optional: Rendering layers
-        this.drawInBackground = true;  // Draw behind other objects
+        this.drawInBackground = true;  // Draw behind other Things
         this.drawInForeground = false; // Draw in front
         this.drawBehindHumans = false; // Draw relative to humans
         
@@ -468,10 +468,10 @@ class MyNewObject extends Thing implements Interactable, KeyEvents {
         data.put("myCustomProperty", this.myCustomProperty);
         data.put("myDefaultProperty", this.myDefaultProperty);
         
-        // Save references to other objects by their ID
-        // (instead of saving the entire object)
-        // if (this.targetObject != null) {
-        //     data.put("targetObjectID", this.targetObject.id);
+        // Save references to other Things by their ID
+        // (instead of saving the entire Thing)
+        // if (this.targetThing != null) {
+        //     data.put("targetThingID", this.targetThing.id);
         // }
         
         return data;
@@ -490,16 +490,16 @@ class MyNewObject extends Thing implements Interactable, KeyEvents {
             this.myDefaultProperty = (Number) data.get("myDefaultProperty");
         }
 
-        if (data.containsKey("targetObjectID")) {
-            this.loadObj(gameManager.objects, (int) data.get("grabObjID"));
+        if (data.containsKey("targetThingID")) {
+            this.loadThings(gameManager.things, (int) data.get("targetThingID"));
         }
     }
     
-    void loadObj(ArrayList<Thing> objects, int objId) {
-        if (objId > 0) {
-            for (Thing obj : objects) {
-                if (obj instanceof Saveable && obj.id == objId) {
-                    this.targetObj = obj;
+    void loadThings(ArrayList<Thing> things, int thingId) {
+        if (thingId > 0) {
+            for (Thing thing : things) {
+                if (thing instanceof Saveable && thing.id == thingId) {
+                    this.targetThing = thing;
                     break;
                 }
             }
@@ -507,18 +507,18 @@ class MyNewObject extends Thing implements Interactable, KeyEvents {
     }
     
     // ===== INTERACTABLE INTERFACE METHODS =====
-    // (optional - only if you want the object to be interactive)
+    // (optional - only if you want the thing to be interactive)
     
     @Override
     void onGrab(Human human) {
-        // Called when human grabs this object
-        gameManager.messageBox.showEvent("Object grabbed!");
+        // Called when human grabs this Thing
+        gameManager.messageBox.showEvent("Thing grabbed!");
     }
     
     @Override
     void onInteract(Human human) {
-        // Called when human presses SHIFT while holding this object
-        gameManager.messageBox.showEvent("Object interacted with!");
+        // Called when human presses SHIFT while holding this Thing
+        gameManager.messageBox.showEvent("Thing interacted with!");
     }
     
     @Override
@@ -529,11 +529,11 @@ class MyNewObject extends Thing implements Interactable, KeyEvents {
     
     @Override
     void onRelease(Human human) {
-        // Called when human releases the object
+        // Called when human releases the Thing
     }
     
     // ===== KEYEVENTS INTERFACE METHODS =====
-    // (optional - only if object responds to keyboard)
+    // (optional - only if thing responds to keyboard)
     
     @Override
     void keyDown(char key, int keyCode) {
@@ -553,10 +553,10 @@ class MyNewObject extends Thing implements Interactable, KeyEvents {
 
 1. **Always call `super.save()` and `super.load()` first** - This ensures base class properties (position, velocity, flags, ID) are properly handled.
 
-2. **Save references as IDs, not objects** - When your object references another object (like a target or owner), save its ID:
+2. **Save references as IDs, not Things** - When your Thing references another Thing (like a target or owner), save its ID:
    ```java
-   if (targetObject != null) {
-       data.put("targetID", targetObject.id);
+   if (targetThing != null) {
+       data.put("targetID", targetThing.id);
    }
    ```
    
@@ -571,15 +571,16 @@ class MyNewObject extends Thing implements Interactable, KeyEvents {
    }
    ```
 
-4. **ID assignment is automatic** - Objects receive sequential IDs based on creation order in `createObjects()`. No manual ID assignment needed!
+4. **ID assignment is automatic** - Things receive sequential IDs based on creation order in `createThings()`. No manual ID assignment needed!
 
 ---
+## More on core game systems
 
-## **ImageManager Integration**
+### **ImageManager Integration**
 
 The ImageManager handles all image loading automatically:
 
-- **Automatic queuing**: Objects queue images in their constructors via `addImage()`
+- **Automatic queuing**: Things queue images in their constructors via `addImage()`
 - **Background loading**: `startLoading()` begins the asynchronous load
 - **Progress tracking**: `getProgress()` returns 0.0-1.0 for loading screens
 - **Automatic placeholders**: Missing images show magenta/cyan checkerboard with "?"
@@ -588,40 +589,40 @@ The ImageManager handles all image loading automatically:
 Images are loaded once and shared across all instances using the same path.
 
 The ImageManager works automatically in the background:
-- Objects queue images via addImage() in their constructors
+- Things queue images via addImage() in their constructors
 - Images load asynchronously during the loading screen
 - getImage() returns the loaded PGraphics or a placeholder if not ready
 - Progress is tracked and displayed on the loading screen
 
-You don't need to interact with ImageManager directly unless creating custom image-based objects.
-To add an image to ImageManager, the default is to load the image in the constructor of the object class (see the example `BouncyBall` class) by executing `gameManager.imageManager.addImage("Unique_ID_for_Image_Usually_Same_As_Filename", "filename.png", width, height)`, and to get the image in `PGraphics` form by calling `gameManager.imageManager.getImage("Unique_ID_for_Image")`. If you need to load images at game time, they aren't automatically loaded after an `addImage()` call. You have to call `gameManager.imageManager.startLoading()` to load all new images.
+You don't need to interact with ImageManager directly unless creating custom image-based Things.
+To add an image to ImageManager, the default is to load the image in the constructor of the Thing's class (see the example `BouncyBall` class) by executing `gameManager.imageManager.addImage("Unique_ID_for_Image_Usually_Same_As_Filename", "filename.png", width, height)`, and to get the image in `PGraphics` form by calling `gameManager.imageManager.getImage("Unique_ID_for_Image")`. If you need to load images at game time, they aren't automatically loaded after an `addImage()` call. You have to call `gameManager.imageManager.startLoading()` to load all new images.
 
 **Note: do not call `startLoading()` after every `addImage`! Instead, add all images to the ImageManager queue first, then call `startLoading()` to load all of them at once.**
 
 ---
 
-## **Save/Load System (v4.1.0+)**
+### **Save/Load System (v4.1.0+)**
 
 The framework includes a comprehensive save/load system that persists the entire game state to JSON files.
 
-### **How It Works**
-- **Automatic ID assignment**: Every object gets a unique sequential ID based on creation order in `GameInit.pde`
-- **Saveable interface**: Objects implement `save()` and `load()` methods to serialize their state
+#### **How It Works**
+- **Automatic ID assignment**: Every Thing gets a unique sequential ID based on creation order in `GameInit.pde`
+- **Saveable interface**: Things implement `save()` and `load()` methods to serialize their state
 - **JSON serialization**: Human-readable save files in the `saves/` folder
 - **Transient state handling**: Temporary variables like grab cooldowns are reset on load
 
-### **Built-in Save/Load**
+#### **Built-in Save/Load**
 - Press **'S'** to save the game (creates `gameSave.json` in the `saves/` folder)
 - Loading happens automatically at startup (if a save file exists)
-- All objects and humans restore their exact state including:
+- All Things and humans restore their exact state including:
   - Positions and velocities
   - Physics properties (elasticity, friction)
   - Game state (hunger, money, unlocked status)
-  - Object references (grabbed objects, chair occupancy)
+  - Thing references (grabbed Things, chair occupancy)
   - Container contents (cupboard shelves)
   - Scene membership and visibility flags
 
-### **The Saveable Interface**
+#### **The Saveable Interface**
 ```java
 interface Saveable {
     HashMap<String, Object> save();
@@ -629,13 +630,13 @@ interface Saveable {
 }
 ```
 
-Any class implementing `Saveable` can be persisted. The `Thing` base class already implements this, so all your objects inherit save/load functionality.
+Any class implementing `Saveable` can be persisted. The `Thing` base class already implements this, so all your Things inherit save/load functionality.
 
-### **ID Assignment**
+#### **ID Assignment**
 IDs are assigned sequentially based on creation order:
-- First object in `createObjects()` gets ID 1
-- Second object gets ID 2, etc.
-- Humans in `createHumans()` get IDs after all objects
+- First Thing in `createThings()` gets ID 1
+- Second Thing gets ID 2, etc.
+- Humans in `createHumans()` get IDs after all Things
 
 This ensures consistent ID assignment across save/load cycles without any manual configuration.
 
@@ -643,12 +644,12 @@ This ensures consistent ID assignment across save/load cycles without any manual
 
 ## **Examples Provided**
 
-1. **GameInit.pde** - Complete game setup with scenes, characters, and objects
-2. **ObjectClasses.pde** - Various object types demonstrating different features including save/load
+1. **GameInit.pde** - Complete game setup with scenes, characters, and Things
+2. **GameThings.pde** - Various thing types demonstrating different features including save/load
 3. **GameHuman.pde** - Extended human with hunger/money and background updates
 4. **LoadingManager.pde** - Custom GameManager extension with loading screen
 
-Need a specific example?
+**Need a specific example?**
 - Simple physics object: See `Ball` class
 - Image-based object: See `BouncyBall` or `ImageHuman`
 - Interactive furniture: See `Chair` class
