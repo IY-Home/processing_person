@@ -1164,7 +1164,7 @@ class SaveManager {
 public static class Constants { 
     public static final class Framework {
         public static final String NAME = "Person Framework"; 
-        public static final String FRAMEWORK_VERSION = "4.2.1";
+        public static final String FRAMEWORK_VERSION = "4.3";
         public static final boolean BETA = false;
     }
 
