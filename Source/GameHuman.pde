@@ -137,7 +137,7 @@ class GameHuman extends Human {
     void getOffChair() {
         if (standingOnChair != null) {
             standingOnChair.occupied = false;
-            standingOnChair.restedObj = null;
+            standingOnChair.restedThing = null;
             this.position.y -= 20; // Move slightly up when getting off
             standingOnChair = null;
             this.rested = false;

@@ -175,7 +175,7 @@ class Shirt extends Thing implements Interactable {
 // Chair Thing class
 class Chair extends Thing implements Interactable {
     color chairColor;
-    Thing restedObj;
+    Thing restedThing;
     boolean humanOnChair = false;
     boolean occupied; // Whether chair is currently occupied (by human or Thing)
 
@@ -187,7 +187,7 @@ class Chair extends Thing implements Interactable {
         this.elasticity = 0;
         this.grabbable = true;
         this.occupied = false;
-        this.restedObj = null;
+        this.restedThing = null;
         this.sceneIn = sceneIn;
         this.checkTouchRadius = 150;
         this.checkTouchY = true;
@@ -211,7 +211,7 @@ class Chair extends Thing implements Interactable {
           other.position.y = this.position.y - (other instanceof Ball ? (36 + ((Ball)other).radius * 1.075) : 80);
           other.velocity.x = 0;
           this.occupied = true;
-          this.restedObj = other;
+          this.restedThing = other;
           this.held = false;
     }
 
@@ -239,19 +239,19 @@ class Chair extends Thing implements Interactable {
         }
 
         // Clear occupied status if rested Thing is no longer resting
-        if (restedObj == null || !restedObj.rested || restedObj.held) {
+        if (restedThing == null || !restedThing.rested || restedThing.held) {
             this.occupied = false;
             this.humanOnChair = false;
-            this.restedObj = null;
+            this.restedThing = null;
         }
     }
 
     void update() {
       super.update();
-      if (restedObj == null || !restedObj.rested || restedObj.held || !restedObj.show) {
+      if (restedThing == null || !restedThing.rested || restedThing.held || !restedThing.show) {
             this.occupied = false;
             this.humanOnChair = false;
-            this.restedObj = null;
+            this.restedThing = null;
             this.held = false;
       }
     }
@@ -275,7 +275,7 @@ class Chair extends Thing implements Interactable {
         
         gameHuman.standOnChair(this);
         this.occupied = true;
-        this.restedObj = gameHuman;
+        this.restedThing = gameHuman;
         this.humanOnChair = true;
         
         // Make sure human releases the chair
@@ -304,8 +304,8 @@ class Chair extends Thing implements Interactable {
         data.put("occupied", this.occupied);
         
         // Save reference to rested Thing if it exists and is Saveable
-        if (this.restedObj != null && this.restedObj instanceof Saveable) {
-            data.put("restedObjID", (this.restedObj).id);
+        if (this.restedThing != null && this.restedThing instanceof Saveable) {
+            data.put("restedObjID", (this.restedThing).id);
         }
         
         return data;
@@ -328,7 +328,7 @@ class Chair extends Thing implements Interactable {
         if (objId > 0) {
             for (Thing thing : things) {
                 if (thing instanceof Saveable && (thing).id == objId) {
-                    this.restedObj = thing;
+                    this.restedThing = thing;
                     break;
                 }
             }
