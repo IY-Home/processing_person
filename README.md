@@ -24,9 +24,10 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 - **Clothing** - Swappable shirts with color customization
 
 ### **UI Elements**
-- **Hunger Bar** - Visual hunger indicator with color coding
-- **Money Display** - Real-time currency tracking
-- **InputBox Class** - Reusable text input with password masking
+- **UIElement System** - Object-oriented UI with z-index layering and animations
+- **InputBox** - Reusable text input with password masking
+- **MessageBox** - Draggable message queue with auto-fade
+- **StatBar** - Progress bars with labels and percentages
 - **Custom Cursor** - Blue circular cursor design
 - **Loading Screen** - Animated splash screen with progress bar and rotating tips
 
@@ -641,6 +642,80 @@ IDs are assigned sequentially based on creation order:
 This ensures consistent ID assignment across save/load cycles without any manual configuration.
 
 ---
+
+### **UI System (v4.4.0+)**
+
+The framework includes a comprehensive, object-oriented UI system with automatic layering, animations, and input handling.
+
+#### **Core UI Features**
+- **Z-index layering** - UI elements automatically sorted by depth
+- **Smooth animations** - Fade in/out with configurable speed
+- **Event detection** - Automatic states and callbacks
+- **Fluent API** - Chain methods for clean configuration
+- **Global management** - All UI elements managed in `gameManager.uiElements`
+
+#### **Built-in UI Components**
+
+##### **InputBox**
+Modal text input with password masking and validation:
+```java
+InputBox input = new InputBox(x, y, width, height, "Title", "Hint");
+input.setPasswordMode(true)
+     .setMaxLength(20)
+     .setColors(bgColor, borderColor, textColor, hintColor);
+input.show();
+```
+
+##### **MessageBox**
+Draggable message queue with auto-fading:
+```java
+MessageBox msgBox = new MessageBox(x, y, width, height);
+msgBox.showEvent("Player picked up an item!");
+msgBox.showAlert("Danger! Low health!");
+msgBox.showMessage("Quest completed!");
+```
+
+##### **StatBar**
+Progress bar with label and percentage:
+```java
+StatBar healthBar = new StatBar("Health", x, y, width, height);
+healthBar.setColors(barColor, bgColor, borderColor, labelColor)
+         .setShowPercentage(true)
+         .setValue(currentHealth, maxHealth);
+```
+
+#### **Creating Custom UI Elements**
+
+Extend `UIElement` and implement `display()`:
+
+```java
+class MyButton extends UIElement {
+    String label;
+    color bgColor, textColor;
+    
+    MyButton(float x, float y, float w, float h, String label) {
+        super(x, y, w, h);
+        this.label = label;
+        this.bgColor = color(100);
+        this.textColor = color(255);
+        
+        // Optional: Add click handler
+        this.onClick = () -> {
+            println("Button clicked!");
+        };
+    }
+    
+    @Override
+    void display() {
+        fill(hovered ? brightness(bgColor) : bgColor);
+        rect(position.x, position.y, boxWidth, boxHeight);
+        
+        fill(textColor);
+        textAlign(CENTER, CENTER);
+        text(label, position.x + boxWidth/2, position.y + boxHeight/2);
+    }
+}
+```
 
 ## **Examples Provided**
 
