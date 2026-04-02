@@ -23,6 +23,8 @@ class GameHuman extends Human {
     float bobAmount = 3;    // How many pixels to bob
     boolean wasMoving = false;
 
+    StatBar hungerBar;
+
     GameHuman(String firstName, String lastName, String gender, int age, color hairColor,
         color shirtColor, color pantColor, color shoeColor, float speed, float money, float posX, int sceneIn) {
         // Call parent constructor with name
@@ -44,6 +46,12 @@ class GameHuman extends Human {
         this.sleeping = false;
         this.jumping = false;
         this.standingOnChair = null;
+
+        hungerBar = new StatBar("Hunger", 0, 0, 100, 12);
+        hungerBar.setColors(getHungerBarColor(), color(100), color(50), color(0))
+                 .setShowPercentage(true)
+                 .setShowLabel(true);
+        hungerBar.setZIndex(10); // Above game objects but below UI
     }
 
     // Update hunger over time
@@ -193,9 +201,17 @@ class GameHuman extends Human {
         // Draw money and hunger (these shouldn't bob)
         if (hasHungerAndMoney) {
             drawMoney();
-            drawStatBar("Hunger", 100, 12, position.x - 100 / 2.4, position.y - 128, 
-                       gameManager.window.scenes.getAs(sceneIn, Integer.class, color(255)) < -13500000 ? 255 : 0, 
-                       getHungerBarColor(), 100, (100-hunger));
+            // Update and display hunger bar (position relative to human)
+            if (hasHungerAndMoney) {
+                // Update bar position to follow the human
+                hungerBar.setPosition(position.x - 42, position.y - 128);
+                
+                // Update bar value
+                hungerBar.setValue(100 - hunger, 100);
+                
+                // Update color based on hunger level
+                hungerBar.barColor = getHungerBarColor();
+            }
         }
     }
     

@@ -722,21 +722,190 @@ class Human extends Thing {
 
 // ====== UI ELEMENTS ======
 
-// InputBox Class for text input
-class InputBox implements KeyEvents {
-    float x, y, boxWidth, boxHeight;
+abstract class UIElement implements KeyEvents {
+    PVector position;
+    float boxWidth, boxHeight;
+    boolean visible = true;
+    boolean enabled = true;
+    boolean hovered = false;
+    boolean mousePressedOnThis = false;
+    
+    boolean awaitRegister = false;
+
+    // Z-index for layering (higher = on top)
+    int zIndex = 0;
+    
+    // Optional callbacks
+    Runnable onClick;
+    Runnable onHover;
+    Runnable onRelease;
+    
+    // Animation
+    float alpha = 255;
+    float targetAlpha = 255;
+    float animationSpeed = 0.1;
+    
+    UIElement() {
+        this.position = new PVector(width / 2, height / 2);
+        this.boxWidth = 100;
+        this.boxHeight = 50;
+        register();
+    }
+    
+    UIElement(float x, float y, float w, float h) {
+        this.position = new PVector(x, y);
+        this.boxWidth = w;
+        this.boxHeight = h;
+        register();
+    }
+    
+    void register() {
+        if (gameManager == null || gameManager.uiElements == null) { this.awaitRegister = true; } else if (!gameManager.uiElements.contains(this)) {
+            gameManager.uiElements.add(this);
+            // Keep sorted by zIndex
+            gameManager.uiElements.sort((a, b) -> Integer.compare(a.zIndex, b.zIndex));
+            this.awaitRegister = false;
+        }
+    }
+    
+    void unregister() {
+        gameManager.uiElements.remove(this);
+    }
+    
+    // Core methods
+    abstract void display();
+    
+    void update() {
+        if (awaitRegister || !gameManager.uiElements.contains(this)) this.register();
+
+        if (!enabled) return;
+
+        // Smooth alpha transitions
+        if (alpha != targetAlpha) {
+            alpha = lerp(alpha, targetAlpha, animationSpeed);
+            if (abs(alpha - targetAlpha) < 0.1) alpha = targetAlpha;
+        }
+        
+        // Check hover state
+        boolean wasHovered = hovered;
+        hovered = isMouseOver();
+        
+        if (hovered && !wasHovered && onHover != null) {
+            onHover.run();
+        }
+        
+        // Handle click
+        if (visible && enabled && hovered && mousePressed && !mousePressedOnThis) {
+            mousePressedOnThis = true;
+            onClick.run();
+        }
+        
+        if (!mousePressed) {
+            if (mousePressedOnThis && hovered && onRelease != null) {
+                onRelease.run();
+            }
+            mousePressedOnThis = false;
+        }
+        
+        // Display if visible
+        if (visible) {
+            push();
+            if (alpha < 255) {
+                tint(255, alpha);
+            }
+            display();
+            if (alpha < 255) {
+                noTint();
+            }
+            pop();
+        }
+    }
+    
+    void show() {
+        visible = true;
+        targetAlpha = 255;
+    }
+    
+    void hide() {
+        targetAlpha = 0;
+        // Actually hide after animation completes
+        if (alpha <= 0) {
+            visible = false;
+        }
+    }
+    
+    void hideInstant() {
+        visible = false;
+        alpha = 0;
+        targetAlpha = 0;
+    }
+    
+    void toggle() {
+        if (visible) hide();
+        else show();
+    }
+    
+    boolean isMouseOver() {
+        return mouseX >= position.x && 
+               mouseX <= position.x + boxWidth && 
+               mouseY >= position.y && 
+               mouseY <= position.y + boxHeight;
+    }
+    
+    // Utility methods
+    UIElement setPosition(float x, float y) {
+        this.position.set(x, y);
+        return this;
+    }
+    
+    UIElement setSize(float w, float h) {
+        this.boxWidth = w;
+        this.boxHeight = h;
+        return this;
+    }
+    
+    UIElement setZIndex(int z) {
+        this.zIndex = z;
+        // Re-sort
+        gameManager.uiElements.sort((a, b) -> Integer.compare(a.zIndex, b.zIndex));
+        return this;
+    }
+    
+    UIElement setAlpha(float a) {
+        this.alpha = a;
+        this.targetAlpha = a;
+        return this;
+    }
+    
+    UIElement fadeIn(float speed) {
+        this.targetAlpha = 255;
+        this.animationSpeed = speed;
+        this.visible = true;
+        return this;
+    }
+    
+    UIElement fadeOut(float speed) {
+        this.targetAlpha = 0;
+        this.animationSpeed = speed;
+        return this;
+    }
+
+    void keyDown(char key, int keyCode) {}
+    void keyUp(char key, int keyCode) {}
+}
+
+class InputBox extends UIElement implements KeyEvents {
     String title;
     String hint;
     String currentText = "";
-    boolean visible = false;
     boolean numericOnly = false;
     boolean passwordInput = false;
     int maxLength = 20;
-    Runnable onSubmit;
-    Runnable onCancel;
     int blinkTimer = 0;
     boolean showCursor = true;
     
+    Runnable onSubmit, onCancel;
+
     // For styling
     color bgColor = color(255);
     color borderColor = color(0);
@@ -744,89 +913,84 @@ class InputBox implements KeyEvents {
     color hintColor = color(100);
     float cornerRadius = 10;
     
+    // Overlay background
+    boolean showOverlay = true;
+    color overlayColor = color(0, 150);
+    
     InputBox(float x, float y, float w, float h, String title, String hint) {
-        this.x = x;
-        this.y = y;
-        this.boxWidth = w;
-        this.boxHeight = h;
+        super(x, y, w, h);
         this.title = title;
         this.hint = hint;
+        this.zIndex = 1000; // Input boxes should be on top
     }
     
-    // Show the input box
-    void show(Runnable onSubmit, Runnable onCancel) {
-        this.visible = true;
+    @Override
+    void show() {
+        super.show();
         this.currentText = "";
-        this.onSubmit = onSubmit;
-        this.onCancel = onCancel;
         this.blinkTimer = 0;
         this.showCursor = true;
-        
-        // Register with global list
-        if (!gameManager.activeInputBoxes.contains(this)) {
-            gameManager.activeInputBoxes.add(this);
-        }
     }
     
+    @Override
     void hide() {
-        visible = false;
+        super.hideInstant();
         currentText = "";
-        
-        // Unregister from global list
-        gameManager.activeInputBoxes.remove(this);
-    }
-    
-    void toggle() {
-        visible = !visible;
-        if (visible) currentText = "";
     }
     
     boolean isVisible() {
         return visible;
     }
     
+    @Override
     void update() {
-        if (visible) display();
+        if (!visible) return;
+        
         // Blink cursor effect
         blinkTimer++;
-        if (blinkTimer > 30) { // Blink every 0.5 seconds at 60fps
+        if (blinkTimer > 30) {
             blinkTimer = 0;
             showCursor = !showCursor;
         }
+        
+        super.update(); // This handles display
     }
     
+    @Override
     void display() {
         if (!visible) return;
         
         push();
-
+        
         // Draw semi-transparent overlay
-        fill(0, 150);
-        noStroke();
-        rect(0, 0, width, height);
+        if (showOverlay) {
+            fill(overlayColor);
+            noStroke();
+            rect(0, 0, width, height);
+        }
         
         // Draw main box
         fill(bgColor);
         stroke(borderColor);
         strokeWeight(3);
-        rect(x, y, boxWidth, boxHeight, cornerRadius);
+        rect(position.x, position.y, boxWidth, boxHeight, cornerRadius);
         
         // Draw title
         fill(textColor);
         textSize(32);
         textAlign(CENTER);
-        text(title, x + boxWidth/2, y + 50);
+        text(title, position.x + boxWidth/2, position.y + 50);
         
         // Draw input field background
         fill(240);
         noStroke();
-        rect(x + 50, y + 80, boxWidth - 100, 50, cornerRadius/2);
+        rect(position.x + 50, position.y + 80, boxWidth - 100, 50, cornerRadius/2);
         
         // Draw border around input field
         stroke(borderColor);
         strokeWeight(2);
         noFill();
-        rect(x + 50, y + 80, boxWidth - 100, 50, cornerRadius/2);
+        rect(position.x + 50, position.y + 80, boxWidth - 100, 50, cornerRadius/2);
         
         // Draw text
         fill(textColor);
@@ -849,28 +1013,22 @@ class InputBox implements KeyEvents {
         textAlign(LEFT);
         
         // Calculate available width for text
-        float availableWidth = boxWidth - 120; // 50px padding on each side + 10px extra
-        float textX = x + 60;
-        float textY = y + 112;
+        float availableWidth = boxWidth - 120;
+        float textX = position.x + 60;
+        float textY = position.y + 112;
         
         // Check if text is too long and clip it
         if (textWidth(displayText) > availableWidth) {
-            // Find how many characters fit
             int charsToShow = displayText.length();
             while (charsToShow > 0 && textWidth(displayText.substring(0, charsToShow)) > availableWidth) {
                 charsToShow--;
             }
             
-            // If we can't show at least 1 char (plus cursor), show nothing
             if (charsToShow <= 0) {
                 displayText = "";
-            } 
-            // If we have at least 1 chars + cursor, show "..." at the end
-            else if (charsToShow < displayText.length() - 1) {
+            } else if (charsToShow < displayText.length() - 1) {
                 displayText = displayText.substring(0, charsToShow - 3) + "...";
-            }
-            // Otherwise just show what fits
-            else {
+            } else {
                 displayText = displayText.substring(0, charsToShow);
             }
         }
@@ -881,14 +1039,14 @@ class InputBox implements KeyEvents {
         // Draw hint
         textSize(18);
         fill(hintColor);
-        text(hint, x + boxWidth/2, y + boxHeight - 50);
+        text(hint, position.x + boxWidth/2, position.y + boxHeight - 50);
         
         // Draw instructions
         textSize(14);
-        text("Press ENTER to submit, DELETE when empty to cancel", x + boxWidth/2, y + boxHeight - 20);
+        text("Press ENTER to submit, DELETE when empty to cancel", 
+             position.x + boxWidth/2, position.y + boxHeight - 20);
         
-        textAlign(LEFT); // Reset
-
+        textAlign(LEFT);
         pop();
     }
     
@@ -896,27 +1054,24 @@ class InputBox implements KeyEvents {
         if (!visible) return;
         
         if (keyCode == ENTER || keyCode == RETURN) {
-            // Submit
             if (onSubmit != null) {
                 onSubmit.run();
             }
             hide();
         } 
         else if (keyCode == BACKSPACE || keyCode == DELETE) {
-            // Remove last character
             if (currentText.length() > 0) {
                 currentText = currentText.substring(0, currentText.length() - 1);
             } else {
-            // Cancel if empty
                 if (onCancel != null) {
                     onCancel.run();
                 }
                 hide();
             }
         }
-        else if (key >= ' ' && key <= '~') { // Printable characters
+        else if (key >= ' ' && key <= '~') {
             if (numericOnly && !(key >= '0' && key <= '9')) {
-                return; // Only accept digits
+                return;
             }
             
             if (currentText.length() < maxLength) {
@@ -925,14 +1080,7 @@ class InputBox implements KeyEvents {
         }
     }
     
-    void keyUp(char key, int keyCode) {}
-    
-    // Check if point is inside input box
-    boolean contains(float px, float py) {
-        return px >= x && px <= x + width && py >= y && py <= y + height;
-    }
-    
-    // Set styling
+    // Styling methods
     InputBox setColors(color bg, color border, color text, color hintCol) {
         this.bgColor = bg;
         this.borderColor = border;
@@ -953,7 +1101,13 @@ class InputBox implements KeyEvents {
     
     InputBox setPasswordMode(boolean isPassword) {
         this.passwordInput = isPassword;
-        return this; // For method chaining
+        return this;
+    }
+    
+    InputBox setOverlay(color overlayColor, boolean show) {
+        this.overlayColor = overlayColor;
+        this.showOverlay = show;
+        return this;
     }
     
     String getText() {
@@ -965,15 +1119,12 @@ class InputBox implements KeyEvents {
     }
 }
 
-class MessageBox {
-    // Position and size
-    float x, y, width, height;
-    float dragOffsetX, dragOffsetY; // For smooth dragging
-    boolean isDragging = false;
-    boolean draggable = true; // Toggle drag on/off
-    
+class MessageBox extends UIElement {
     // Drag handle area (top bar)
     float handleHeight = 30;
+    boolean draggable = true;
+    boolean isDragging = false;
+    PVector dragOffset;
     
     // Content
     ArrayList<String> messages = new ArrayList<String>();
@@ -992,18 +1143,15 @@ class MessageBox {
     color handleColor = color(80, 80, 80, 150);
     float cornerRadius = 15;
     float padding = 15;
-    int textSize = 16;
+    int textSizeVal = 16;
     
-    // Animation
-    boolean visible = true;
+    // Animation for individual messages
     float fadeAlpha = 255;
     boolean fading = false;
     
     MessageBox(float x, float y, float w, float h) {
-        this.x = x;
-        this.y = y;
-        this.width = w;
-        this.height = h;
+        super(x, y, w, h);
+        this.zIndex = 900; // Below input boxes, above most UI
     }
     
     // Add a message to the queue
@@ -1032,44 +1180,38 @@ class MessageBox {
         textColor = eventTextColor;
     }
     
-    // Check if mouse is over the dialogue box
-    boolean isMouseOver() {
-        return mouseX >= x && mouseX <= x + width && 
-               mouseY >= y && mouseY <= y + height;
-    }
-    
     // Check if mouse is over the drag handle (top part)
     boolean isMouseOverHandle() {
-        return mouseX >= x && mouseX <= x + width && 
-               mouseY >= y && mouseY <= y + handleHeight;
+        return mouseX >= position.x && 
+               mouseX <= position.x + boxWidth && 
+               mouseY >= position.y && 
+               mouseY <= position.y + handleHeight;
     }
     
-    // Call this in mousePressed()
-    void onMousePressed() {
-        if (!draggable || !visible || isDragging) return;
-        if (isMouseOverHandle()) {
-            isDragging = true;
-            dragOffsetX = mouseX - x;
-            dragOffsetY = mouseY - y;
-        } else if (isMouseOver()) {
-            fadeAlpha = 255;
-        }
-          
-    }
-
-    void onMouseDragged() {
-        if (isDragging) {
-            // Update position
-            x = mouseX - dragOffsetX;
-            y = mouseY - dragOffsetY;
-        }
-    }
-    
-    void onMouseReleased() {
-        isDragging = false;
-    }
-    
+    @Override
     void update() {
+        if (!visible) return;
+        
+        // Handle dragging
+        if (draggable) {
+            if (isMouseOverHandle() && mousePressed && !isDragging) {
+                isDragging = true;
+                dragOffset = new PVector(mouseX - position.x, mouseY - position.y);
+            }
+            
+            if (isDragging && mousePressed) {
+                position.x = mouseX - dragOffset.x;
+                position.y = mouseY - dragOffset.y;
+                // Constrain to screen
+                position.x = constrain(position.x, 0, width - boxWidth);
+                position.y = constrain(position.y, 0, height - boxHeight);
+            }
+            
+            if (!mousePressed) {
+                isDragging = false;
+            }
+        }
+        
         // Auto-fade after display time
         if (!fading && millis() - messageStartTime > messageDisplayTime) {
             fading = true;
@@ -1087,8 +1229,14 @@ class MessageBox {
         if (borderColor == alertBorderColor && millis() - messageStartTime > 1000) {
             borderColor = eventBorderColor;
         }
+        
+        // Update hover state for handle
+        hovered = isMouseOver();
+        
+        super.update(); // Handles display
     }
     
+    @Override
     void display() {
         if (!visible) return;
         
@@ -1096,31 +1244,34 @@ class MessageBox {
         
         // Draw drag handle if draggable
         if (draggable) {
+            boolean handleHovered = isMouseOverHandle();
             fill(red(handleColor), green(handleColor), blue(handleColor), 
-                 isMouseOverHandle() ? 200 : 100);
+                 handleHovered ? 200 : 100);
             noStroke();
-            rect(x, y, width, handleHeight, cornerRadius, cornerRadius, 0, 0);
+            rect(position.x, position.y, boxWidth, handleHeight, cornerRadius, cornerRadius, 0, 0);
             
             // Draw drag indicator (three lines)
-            stroke(255, isMouseOverHandle() ? 200 : 100);
+            stroke(255, handleHovered ? 200 : 100);
             strokeWeight(2);
-            float centerX = x + width/2;
+            float centerX = position.x + boxWidth/2;
             for (int i = -1; i <= 1; i++) {
-                line(centerX + i*15, y + handleHeight/2 - 3, 
-                     centerX + i*15, y + handleHeight/2 + 3);
+                line(centerX + i*15, position.y + handleHeight/2 - 3, 
+                     centerX + i*15, position.y + handleHeight/2 + 3);
             }
         }
         
         // Background
-        fill(red(bgColor), green(bgColor), blue(bgColor), fadeAlpha * 0.8);
-        stroke(red(borderColor), green(borderColor), blue(borderColor), fadeAlpha * 0.8);
+        float currentAlpha = fadeAlpha * 0.8 * (alpha / 255);
+        fill(red(bgColor), green(bgColor), blue(bgColor), currentAlpha);
+        stroke(red(borderColor), green(borderColor), blue(borderColor), currentAlpha);
         strokeWeight(3);
         
         // Adjust drawing based on whether we have a handle
         if (draggable) {
-            rect(x, y + handleHeight, width, height - handleHeight, 0, 0, cornerRadius, cornerRadius);
+            rect(position.x, position.y + handleHeight, boxWidth, boxHeight - handleHeight, 
+                 0, 0, cornerRadius, cornerRadius);
         } else {
-            rect(x, y, width, height, cornerRadius);
+            rect(position.x, position.y, boxWidth, boxHeight, cornerRadius);
         }
         
         // Combine messages
@@ -1132,12 +1283,14 @@ class MessageBox {
         }      
         
         // Draw text (offset by handle if needed)
-        float textY = y + padding + (draggable ? handleHeight : 0);
-
-        fill(red(textColor), green(textColor), blue(textColor), fadeAlpha);
-        textSize(textSize + 4);
+        float textY = position.y + padding + (draggable ? handleHeight : 0);
+        
+        fill(red(textColor), green(textColor), blue(textColor), fadeAlpha * (alpha / 255));
+        textSize(textSizeVal + 4);
         textAlign(LEFT, TOP);
-        text(totalMessages, x + padding, textY, width - padding * 2, height - padding * 2 - (draggable ? handleHeight : 0));
+        text(totalMessages, position.x + padding, textY, 
+             boxWidth - padding * 2, 
+             boxHeight - padding * 2 - (draggable ? handleHeight : 0));
         
         popStyle();
         textAlign(LEFT);
@@ -1148,26 +1301,115 @@ class MessageBox {
     }
     
     // Toggle draggable
-    void setDraggable(boolean canDrag) {
+    MessageBox setDraggable(boolean canDrag) {
         this.draggable = canDrag;
+        return this;
     }
     
+    MessageBox setStyle(color bg, color border, color text, float radius) {
+        this.bgColor = bg;
+        this.borderColor = border;
+        this.textColor = text;
+        this.cornerRadius = radius;
+        return this;
+    }
+    
+    MessageBox setMaxMessages(int max) {
+        this.maxMessages = max;
+        return this;
+    }
+    
+    MessageBox setDisplayTime(float ms) {
+        this.messageDisplayTime = ms;
+        return this;
+    }
 }
 
-// Helper function to draw a stat bar
-void drawStatBar(String barName, float barWidth, float barHeight, float barX, float barY, color nameColor, color barColor, float maxValue, float currentValue) {
-    // Background bar
-    fill(100);
-    rect(barX, barY, barWidth, barHeight);
+class StatBar extends UIElement {
+    String label;
+    float progress = 1.0; // 0.0 to 1.0
+    float maxValue = 100;
+    float currentValue = 100;
     
-    fill(barColor);
-    rect(barX, barY, barWidth * (currentValue/maxValue), barHeight);
-
-    fill(nameColor);
-    textAlign(CENTER);
-    textSize(14);
-    text(barName, barX - (3*barName.length() + 9), barY + barHeight/2 + (textAscent() - textDescent())/2);
-
-    // Reset text alignment
-    textAlign(LEFT);
+    // Styling
+    color barColor = color(0, 255, 0);
+    color backgroundColor = color(100);
+    color borderColor = color(50);
+    color labelColor = color(0);
+    float borderRadius = 5;
+    boolean showPercentage = true;
+    boolean showLabel = true;
+    
+    StatBar(String label, float x, float y, float w, float h) {
+        super(x, y, w, h);
+        this.label = label;
+    }
+    
+    void setValue(float current, float max) {
+        this.currentValue = constrain(current, 0, max);
+        this.maxValue = max;
+        this.progress = this.currentValue / this.maxValue;
+    }
+    
+    void setProgress(float value) {
+        this.progress = constrain(value, 0, 1);
+        this.currentValue = this.progress * this.maxValue;
+    }
+    
+    @Override
+    void display() {
+        push();
+        
+        // Draw background
+        fill(backgroundColor);
+        stroke(borderColor);
+        strokeWeight(1);
+        rect(position.x, position.y, boxWidth, boxHeight, borderRadius);
+        
+        // Draw fill bar
+        fill(barColor);
+        noStroke();
+        rect(position.x + 2, position.y + 2, (boxWidth - 4) * progress, boxHeight - 4, borderRadius - 1);
+        
+        // Draw label
+        if (showLabel) {
+            fill(labelColor);
+            textSize(14);
+            textAlign(CENTER);
+            float labelX = position.x - (3 * label.length() + 9);
+            float labelY = position.y + boxHeight/2 + (textAscent() - textDescent())/2;
+            text(label, labelX, labelY);
+        }
+        
+        // Draw percentage text
+        if (showPercentage) {
+            fill(labelColor);
+            textSize(14);
+            textAlign(CENTER);
+            float labelX = position.x + boxWidth + (3 * label.length() + 6);
+            float labelY = position.y + boxHeight/2 + (textAscent() - textDescent())/2;
+            text(int(progress * 100) + "%", labelX, labelY);
+        }
+        
+        pop();
+    }
+    
+    // Fluent styling methods
+    StatBar setColors(color bar, color bg, color border, color labelCol) {
+        this.barColor = bar;
+        this.backgroundColor = bg;
+        this.borderColor = border;
+        this.labelColor = labelCol;
+        return this;
+    }
+    
+    StatBar setShowPercentage(boolean show) {
+        this.showPercentage = show;
+        return this;
+    }
+    
+    StatBar setShowLabel(boolean show) {
+        this.showLabel = show;
+        return this;
+    }
 }

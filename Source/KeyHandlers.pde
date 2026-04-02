@@ -30,19 +30,18 @@ void keyPressed() {
       gameManager.messageBox.showEvent("Game saved!");
     }
     
-    // First, let input boxes handle keys
-    boolean handledByInputBox = false;
-    for (int i = gameManager.activeInputBoxes.size() - 1; i >= 0; i--) {
-        InputBox box = gameManager.activeInputBoxes.get(i);
-        if (box.isVisible()) {
-            box.keyDown(key, keyCode);
-            handledByInputBox = true;
-            break; // Only one input box active at a time
+    // First, let UI elements handle keys
+    boolean handledByUi = false;
+    for (int i = gameManager.uiElements.size() - 1; i >= 0; i--) {
+        UIElement box = gameManager.uiElements.get(i);
+        if (box.enabled && box.visible) {
+            ((KeyEvents)box).keyDown(key, keyCode);
+            handledByUi = true;
         }
     }
     
-    // If not handled by input box, process game keys
-    if (!handledByInputBox) {
+    // If not handled by UI elements, process game keys
+    if (!handledByUi) {
         // Existing drone controls
         for (Thing thing: gameManager.things) {
             if (thing instanceof KeyEvents) {
@@ -54,21 +53,22 @@ void keyPressed() {
 // Handle key releases
 void keyReleased() {
     gameManager.keyManager.setKeyPressed(keyCode, false);
-    if (gameManager.activeInputBoxes.size() == 0) {
+
+    // First, let UI elements handle keys
+    boolean handledByUi = false;
+    for (int i = gameManager.uiElements.size() - 1; i >= 0; i--) {
+        UIElement box = gameManager.uiElements.get(i);
+        if (box.enabled && box.visible) {
+            ((KeyEvents)box).keyUp(key, keyCode);
+            handledByUi = true;
+        }
+    }
+    
+    if (!handledByUi) {
         for (Thing thing: gameManager.things) {
             if (thing instanceof KeyEvents) {
                 ((KeyEvents) thing).keyUp(key, keyCode);
             }
         }
     }
-}
-
-void mousePressed() {
-  gameManager.messageBox.onMousePressed();
-}
-void mouseDragged() {
-  gameManager.messageBox.onMouseDragged();
-}
-void mouseReleased() {
-  gameManager.messageBox.onMouseReleased();
 }

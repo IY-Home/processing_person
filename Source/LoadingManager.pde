@@ -206,7 +206,6 @@ class LoadingManager {
           case 1: // Clear old state
               things.clear();
               humans.clear();
-              gm.activeInputBoxes.clear();
               window.scenes.clear();
               gm.keyManager.resetAllKeys();
               println("  ✓ Resources cleared ");

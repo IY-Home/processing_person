@@ -1019,6 +1019,8 @@ class CashBag extends Thing implements Interactable {
             color(0),                     // textColor
             color(100, 100, 100)          // hintColor
         );
+
+        passcodeInputBox.hideInstant();
     }
 
     // Display the cash bag - REQUIRED by abstract class Thing
@@ -1109,19 +1111,16 @@ class CashBag extends Thing implements Interactable {
                 return;
             }
             if (!passcodeInputBox.isVisible()) {
-              // Show the input box
-              passcodeInputBox.show(
-                  // onSubmit callback - called when user presses ENTER
-                  () -> {
-                      checkPasscode(passcodeInputBox.getText());
-                  },
-                  // onCancel callback - called when user presses 'DELETE' when empty
-                  () -> {
-                      gameManager.messageBox.showEvent("Passcode input cancelled");
-                      feedbackMessage = "CANCELLED";
-                      feedbackTime = millis();
-                  }
-              );
+                passcodeInputBox.onSubmit = () -> {
+                        checkPasscode(passcodeInputBox.getText());
+                    };
+                passcodeInputBox.onCancel = () -> {
+                        gameManager.messageBox.showEvent("Passcode input cancelled");
+                        feedbackMessage = "CANCELLED";
+                        feedbackTime = millis();
+                    };
+                // Show the input box
+                passcodeInputBox.show();
             }
         
         } else {

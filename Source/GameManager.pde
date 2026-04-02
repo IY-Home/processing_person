@@ -9,7 +9,7 @@ class GameManager {
     // Core collections
     ArrayList<Thing> things;
     ArrayList<Human> mainHumans;
-    ArrayList<InputBox> activeInputBoxes;
+    ArrayList<UIElement> uiElements;
 
     Human trackedHuman = null; // Follow the scene of that human 
          
@@ -28,7 +28,7 @@ class GameManager {
         startupMessage = "### " + programName + " v" + version + " ###";  
         things = new ArrayList<Thing>();
         mainHumans = new ArrayList<Human>();
-        activeInputBoxes = new ArrayList<InputBox>();
+        uiElements = new ArrayList<UIElement>();
         imageManager = new ImageManager();
         window = new Window(imageManager, color(255), color(50), 1);
         keyManager = new KeyManager();
@@ -40,7 +40,13 @@ class GameManager {
             height * 0.15  // 15% of screen height
         );
         messageBox.maxMessages = 3;
-        messageBox.visible = false;
+        messageBox.visible = true;
+        messageBox.enabled = true;
+
+        if (!uiElements.contains(messageBox)) {
+            uiElements.add(messageBox);
+            uiElements.sort((a, b) -> Integer.compare(a.zIndex, b.zIndex));
+        }
     }
 
     void init() {
@@ -50,7 +56,6 @@ class GameManager {
         // Clear existing state
         things.clear();
         mainHumans.clear();
-        activeInputBoxes.clear();
         window.scenes.clear();
         keyManager.resetAllKeys();
         
@@ -71,8 +76,9 @@ class GameManager {
         window.drawBackground();
         updateThings();
         window.drawCursor(window.cursorSize, window.cursorColor);
-        messageBox.update();
-        messageBox.display();
+        for (UIElement element : uiElements) {
+            element.update();
+        }
         loop();
     }
     
@@ -170,10 +176,6 @@ class GameManager {
                 thing.display();
                 pop();
             }
-        }
-        // Update input boxes
-        for (InputBox box : activeInputBoxes) {
-            box.update();
         }
     }
     
