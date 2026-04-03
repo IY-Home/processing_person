@@ -722,15 +722,13 @@ class Human extends Thing {
 
 // ====== UI ELEMENTS ======
 
-abstract class UIElement implements KeyEvents {
+abstract class UIElement {
     PVector position;
     float boxWidth, boxHeight;
     boolean visible = true;
     boolean enabled = true;
     boolean hovered = false;
     boolean mousePressedOnThis = false;
-    
-    boolean awaitRegister = false;
 
     // Z-index for layering (higher = on top)
     int zIndex = 0;
@@ -749,34 +747,18 @@ abstract class UIElement implements KeyEvents {
         this.position = new PVector(width / 2, height / 2);
         this.boxWidth = 100;
         this.boxHeight = 50;
-        register();
     }
     
     UIElement(float x, float y, float w, float h) {
         this.position = new PVector(x, y);
         this.boxWidth = w;
         this.boxHeight = h;
-        register();
     }
-    
-    void register() {
-        if (gameManager == null || gameManager.uiElements == null) { this.awaitRegister = true; } else if (!gameManager.uiElements.contains(this)) {
-            gameManager.uiElements.add(this);
-            // Keep sorted by zIndex
-            gameManager.uiElements.sort((a, b) -> Integer.compare(a.zIndex, b.zIndex));
-            this.awaitRegister = false;
-        }
-    }
-    
-    void unregister() {
-        gameManager.uiElements.remove(this);
-    }
-    
+
     // Core methods
     abstract void display();
     
     void update() {
-        if (awaitRegister || !gameManager.uiElements.contains(this)) this.register();
 
         if (!enabled) return;
 
@@ -797,7 +779,7 @@ abstract class UIElement implements KeyEvents {
         // Handle click
         if (visible && enabled && hovered && mousePressed && !mousePressedOnThis) {
             mousePressedOnThis = true;
-            onClick.run();
+            if (onClick != null) onClick.run();
         }
         
         if (!mousePressed) {
@@ -852,6 +834,13 @@ abstract class UIElement implements KeyEvents {
                mouseY <= position.y + boxHeight;
     }
     
+    boolean contains(float x, float y) {
+        return x >= position.x && 
+               x <= position.x + boxWidth && 
+               y >= position.y && 
+               y <= position.y + boxHeight;
+    }
+
     // Utility methods
     UIElement setPosition(float x, float y) {
         this.position.set(x, y);
@@ -866,8 +855,6 @@ abstract class UIElement implements KeyEvents {
     
     UIElement setZIndex(int z) {
         this.zIndex = z;
-        // Re-sort
-        gameManager.uiElements.sort((a, b) -> Integer.compare(a.zIndex, b.zIndex));
         return this;
     }
     
@@ -892,6 +879,7 @@ abstract class UIElement implements KeyEvents {
 
     void keyDown(char key, int keyCode) {}
     void keyUp(char key, int keyCode) {}
+
 }
 
 class InputBox extends UIElement implements KeyEvents {
@@ -1152,6 +1140,7 @@ class MessageBox extends UIElement {
     MessageBox(float x, float y, float w, float h) {
         super(x, y, w, h);
         this.zIndex = 900; // Below input boxes, above most UI
+        this.onClick = () -> { fadeAlpha = 255; fading = false; };
     }
     
     // Add a message to the queue

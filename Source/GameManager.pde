@@ -5,18 +5,15 @@ class GameManager {
     String programName;
     String version;
     String startupMessage;
-  
-    // Core collections
-    ArrayList<UIElement> uiElements;
-
-    ThingManager thingManager; 
          
     // Systems
+    ThingManager thingManager; 
     Window window;
     KeyManager keyManager;
     ImageManager imageManager;
     SaveManager saveManager;
     MessageBox messageBox;
+    UIManager uiManager;
     
     boolean useSaveSystem = true;
     
@@ -24,7 +21,7 @@ class GameManager {
         this.programName = programName;
         this.version = programVersion;
         startupMessage = "### " + programName + " v" + version + " ###";  
-        uiElements = new ArrayList<UIElement>();
+        uiManager = new UIManager();
         imageManager = new ImageManager();
         window = new Window(imageManager, color(255), color(50), 1);
         thingManager = new ThingManager(this);
@@ -40,10 +37,7 @@ class GameManager {
         messageBox.visible = true;
         messageBox.enabled = true;
 
-        if (!uiElements.contains(messageBox)) {
-            uiElements.add(messageBox);
-            uiElements.sort((a, b) -> Integer.compare(a.zIndex, b.zIndex));
-        }
+        uiManager.add(messageBox);
     }
 
     void init() {
@@ -73,9 +67,7 @@ class GameManager {
         window.drawBackground();
         thingManager.updateThings();
         window.drawCursor(window.cursorSize, window.cursorColor);
-        for (UIElement element : uiElements) {
-            element.update();
-        }
+        uiManager.update();
         loop();
     }
     
@@ -88,6 +80,32 @@ class GameManager {
       saveManager.loadGame();
     }
     
+    void handleKeyPress(char key, int keyCode) {
+        // 1. Special global shortcuts (always work)
+        if (useSaveSystem && (key == 's' || key == 'S')) {
+            saveGame();
+            messageBox.showEvent("Game saved!");
+            return; // Save takes priority
+        }
+        
+        // 2. UI gets first
+        if (uiManager.handleKeyPress(key, keyCode)) {
+            return; // UI consumed the key
+        }
+        
+        // 3. Game objects get remaining keys
+        thingManager.handleKeyPress(key, keyCode);
+    }
+    
+    void handleKeyRelease(char key, int keyCode) {
+        // 1. UI first
+        if (uiManager.handleKeyRelease(key, keyCode)) {
+            return;
+        }
+        
+        // 2. Then game objects
+        thingManager.handleKeyRelease(key, keyCode);
+    }
 }
 
 
@@ -675,6 +693,22 @@ class ThingManager {
             mainHumans.add(human);
         }
     }
+
+    void handleKeyPress(char key, int keyCode) {
+        for (Thing thing : things) {
+            if (thing instanceof KeyEvents) {
+                ((KeyEvents) thing).keyDown(key, keyCode);
+            }
+        }
+    }
+    
+    void handleKeyRelease(char key, int keyCode) {
+        for (Thing thing : things) {
+            if (thing instanceof KeyEvents) {
+                ((KeyEvents) thing).keyUp(key, keyCode);
+            }
+        }
+    }
 }
 
 class ImageManager {  
@@ -1174,6 +1208,162 @@ class SaveManager {
         }
         
         return map;
+    }
+}
+
+class UIManager {
+    ArrayList<UIElement> elements = new ArrayList<>();
+    
+    UIManager() {
+        elements = new ArrayList<UIElement>();
+    }
+
+    // Core operations
+    void add(UIElement e) {
+        elements.add(e);
+        sortByZIndex();
+    }
+    
+    void remove(UIElement e) {
+        elements.remove(e);
+    }
+    
+    void update() {
+        sortByZIndex();
+        for (UIElement e : elements) {
+            e.update();
+        }
+    }
+    
+    void sortByZIndex() {
+        elements.sort((a, b) -> Integer.compare(a.zIndex, b.zIndex));
+    }
+    
+    // Z-Index management
+    void bringToFront(UIElement e) {
+        int maxZ = getHighestZIndex();
+        e.zIndex = maxZ + 1;
+        sortByZIndex();
+    }
+    
+    void sendToBack(UIElement e) {
+        int minZ = getLowestZIndex();
+        e.zIndex = minZ - 1;
+        sortByZIndex();
+    }
+    
+    void bringForward(UIElement e) {
+        int index = elements.indexOf(e);
+        if (index < elements.size() - 1) {
+            UIElement above = elements.get(index + 1);
+            int tempZ = e.zIndex;
+            e.zIndex = above.zIndex;
+            above.zIndex = tempZ;
+            sortByZIndex();
+        }
+    }
+    
+    void sendBackward(UIElement e) {
+        int index = elements.indexOf(e);
+        if (index > 0) {
+            UIElement below = elements.get(index - 1);
+            int tempZ = e.zIndex;
+            e.zIndex = below.zIndex;
+            below.zIndex = tempZ;
+            sortByZIndex();
+        }
+    }
+    
+    int getHighestZIndex() {
+        if (elements.isEmpty()) return 0;
+        int max = elements.get(0).zIndex;
+        for (UIElement e : elements) {
+            if (e.zIndex > max) max = e.zIndex;
+        }
+        return max;
+    }
+    
+    int getLowestZIndex() {
+        if (elements.isEmpty()) return 0;
+        int min = elements.get(0).zIndex;
+        for (UIElement e : elements) {
+            if (e.zIndex < min) min = e.zIndex;
+        }
+        return min;
+    }
+    
+    // Find elements at position
+    UIElement getTopAt(float x, float y) {
+        // Search from highest zIndex to lowest
+        for (int i = elements.size() - 1; i >= 0; i--) {
+            UIElement e = elements.get(i);
+            if (e.visible && e.enabled && e.contains(x, y)) {
+                return e;
+            }
+        }
+        return null;
+    }
+    
+    ArrayList<UIElement> getAllAt(float x, float y) {
+        ArrayList<UIElement> result = new ArrayList<>();
+        for (UIElement e : elements) {
+            if (e.visible && e.enabled && e.contains(x, y)) {
+                result.add(e);
+            }
+        }
+        return result;
+    }
+    
+    // Bulk operations
+    void hideAll() {
+        for (UIElement e : elements) {
+            e.hide();
+        }
+    }
+    
+    void showAll() {
+        for (UIElement e : elements) {
+            e.show();
+        }
+    }
+    
+    void setEnabledAll(boolean enabled) {
+        for (UIElement e : elements) {
+            e.enabled = enabled;
+        }
+    }
+    
+    // Query
+    boolean contains(UIElement e) {
+        return elements.contains(e);
+    }
+    
+    void clear() {
+        elements.clear();
+    }
+
+    boolean handleKeyPress(char key, int keyCode) {
+        // Process from highest zIndex to lowest (top to bottom)
+        for (int i = elements.size() - 1; i >= 0; i--) {
+            UIElement e = elements.get(i);
+            if (e.enabled && e.visible) {
+                e.keyDown(key, keyCode);
+                return true; // UI consumes ALL keys when visible
+                // (You might want only modal elements to consume)
+            }
+        }
+        return false;
+    }
+    
+    boolean handleKeyRelease(char key, int keyCode) {
+        for (int i = elements.size() - 1; i >= 0; i--) {
+            UIElement e = elements.get(i);
+            if (e.enabled && e.visible) {
+                e.keyUp(key, keyCode);
+                return true;
+            }
+        }
+        return false;
     }
 }
 

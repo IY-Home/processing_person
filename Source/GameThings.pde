@@ -1021,6 +1021,8 @@ class CashBag extends Thing implements Interactable {
         );
 
         passcodeInputBox.hideInstant();
+
+        gameManager.uiManager.add(passcodeInputBox);
     }
 
     // Display the cash bag - REQUIRED by abstract class Thing

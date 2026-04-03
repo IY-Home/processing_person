@@ -52,6 +52,8 @@ class GameHuman extends Human {
                  .setShowPercentage(true)
                  .setShowLabel(true);
         hungerBar.setZIndex(10); // Above game objects but below UI
+
+        gameManager.uiManager.add(hungerBar);
     }
 
     // Update hunger over time

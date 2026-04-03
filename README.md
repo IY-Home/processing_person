@@ -51,10 +51,7 @@ A modular, object-oriented 2D game framework built in Processing. This project p
   - Main update loop
   - References to Window, KeyManager, ImageManager, and SaveManager systems
 - **`Window`** - Display/background and scene management
-- **`KeyManager`** - Key event handling
-- **`ImageManager`** - Image storage and asynchronous image loading and caching
-- **`SaveManager`** - Handles JSON serialization, ID assignment, and save/load operations
-- **`CircularArrayList`** - Extended ArrayList with looping and type-safe getters
+- **`Other Managers`** - Manages different systems, all controlled by `GameManager`
 
 #### **BaseClasses.pde**
 - **`Thing`** - Abstract base class for all game things (implements `Saveable`)
@@ -63,6 +60,45 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 - **`KeyEvents`** - Interface for things that respond to keyboard input
 - **`Saveable`** - Interface for things that can be saved/loaded
 - **`InputBox`** - Text input UI with password support and callbacks
+
+### **Manager Architecture**
+
+The framework uses a clean separation of concerns with dedicated managers:
+
+#### **ThingManager (v4.5.0+)**
+Manages all game objects and characters:
+- `things` - ArrayList of all game objects (extends Thing)
+- `mainHumans` - ArrayList of all player/NPC characters
+- `trackedHuman` - Currently followed human for camera/scene tracking
+- `updateThings()` - Updates physics, collisions, and rendering order
+- `handleKeyPress()/handleKeyRelease()` - Routes keyboard input to game objects
+
+#### **UIManager (v4.5.0+)**
+Manages all user interface elements:
+- `elements` - ArrayList of all UI components (extends UIElement)
+- Automatic z-index sorting for proper layering
+- Z-index manipulation methods: `bringToFront()`, `sendToBack()`, `bringForward()`, `sendBackward()`
+- Hit testing: `getTopAt(x, y)` returns topmost UI element at position
+- Bulk operations: `hideAll()`, `showAll()`, `setEnabledAll()`
+- Key event routing with priority (UI gets keys before game objects)
+
+#### **Other Managers**
+- **SaveManager** - Handles JSON serialization and game state persistence
+- **ImageManager** - Manages asynchronous asset loading and caching
+- **KeyManager** - Tracks keyboard state for all input sources
+
+### **GameManager - The Orchestrator**
+
+```java
+class GameManager {
+    ThingManager thingManager;  // Game objects
+    UIManager uiManager;        // UI components
+    SaveManager saveManager;    // Persistence
+    ImageManager imageManager;  // Assets
+    KeyManager keyManager;      // Input
+    Window window;              // Display & scenes
+}
+```
 
 ### **Examples**
 
@@ -330,7 +366,7 @@ void createScenes(Window window) {
 
 Creates all player characters and NPCs (if you have them) in the game.
 
-You create Human objects and add them to the ArrayList passed in. This ArrayList becomes the mainHumans list in the GameManager that the game updates (live()).
+You create Human objects and add them to the ArrayList passed in. This ArrayList becomes the mainHumans list in the ThingManager of GameManager that the game updates (live()).
 
 Base Human constructor:
     `Human(String name, color hairColor, color shirtColor, color pantColor, color shoeColor, float posX, int sceneIn)`
@@ -365,7 +401,7 @@ void createHumans(ArrayList<Human> humans) {
 
 Creates all interactive things, furniture, items, and physics things.
 
-You create Thing objects and add them to the ArrayList passed in. This becomes the global things list that the game updates, displays, and checks for collisions.
+You create Thing objects and add them to the ArrayList passed in. This becomes the global things list in ThingManager that the game updates, displays, and checks for collisions.
 
 **Important for save/load**: Things receive sequential IDs based on the order they're added here. The first thing gets ID 1, second gets ID 2, etc. This ensures consistent ID assignment across save/load cycles.
 
@@ -492,7 +528,7 @@ class MyNewThing extends Thing implements Interactable, KeyEvents {
         }
 
         if (data.containsKey("targetThingID")) {
-            this.loadThings(gameManager.things, (int) data.get("targetThingID"));
+            this.loadThings(gameManager.thingManager.things, (int) data.get("targetThingID"));
         }
     }
     
@@ -652,7 +688,7 @@ The framework includes a comprehensive, object-oriented UI system with automatic
 - **Smooth animations** - Fade in/out with configurable speed
 - **Event detection** - Automatic states and callbacks
 - **Fluent API** - Chain methods for clean configuration
-- **Global management** - All UI elements managed in `gameManager.uiElements`
+- **Global management** - All UI elements managed in `gameManager.uiManager`
 
 #### **Built-in UI Components**
 
@@ -686,7 +722,7 @@ healthBar.setColors(barColor, bgColor, borderColor, labelColor)
 
 #### **Creating Custom UI Elements**
 
-Extend `UIElement` and implement `display()`:
+Extend `UIElement` and implement `display()` and optional callbacks. Don't forget to add your UI element to the UIManager with `gameManager.uiManager.add(UIElement yourUIElement)`!
 
 ```java
 class MyButton extends UIElement {
