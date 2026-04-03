@@ -1376,7 +1376,7 @@ class UIManager {
 public static class Constants { 
     public static final class Framework {
         public static final String NAME = "Person Framework"; 
-        public static final String FRAMEWORK_VERSION = "4.4.0";
+        public static final String FRAMEWORK_VERSION = "4.5.0";
         public static final boolean BETA = false;
     }
 
