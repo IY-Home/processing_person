@@ -175,6 +175,7 @@ class GameManager {
 - **Reference resolution**: Things store IDs of referenced things (e.g., `grabThingID`, `restedThingID`) for proper relationship restoration
 - **Transient state handling**: Temporary variables like grab cooldowns are reset on load
 - **Press 'S' to save** - Creates `gameSave.json` in the `saves/` directory
+- **Automatic saving** - Optional with configurable auto-save interval
 - **Automatic loading** - Game state restores from save file at startup if one exists
 
 ### **Input Box System**
@@ -650,6 +651,7 @@ The framework includes a comprehensive save/load system that persists the entire
 
 #### **Built-in Save/Load**
 - Press **'S'** to save the game (creates `gameSave.json` in the `saves/` folder)
+- Game can auto-save if you configure the `autoSave` boolean and `autoSaveInterval` int in gameManager.
 - Loading happens automatically at startup (if a save file exists)
 - All Things and humans restore their exact state including:
   - Positions and velocities

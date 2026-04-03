@@ -16,6 +16,9 @@ class GameManager {
     UIManager uiManager;
     
     boolean useSaveSystem = true;
+    boolean autoSave = true;
+    int autoSaveInterval = 10000; // 10 seconds
+    int lastSaveMs = 0;
     
     GameManager(String programName, String programVersion) {
         this.programName = programName;
@@ -69,6 +72,9 @@ class GameManager {
         window.drawCursor(window.cursorSize, window.cursorColor);
         uiManager.update();
         loop();
+        if (autoSave && millis() - lastSaveMs > autoSaveInterval) { 
+            saveGame(); lastSaveMs = millis(); messageBox.showEvent("Game auto-saved!");
+        }
     }
     
     
