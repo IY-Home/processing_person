@@ -203,8 +203,8 @@ void loop() {
     debugger.drawVisualHelpers();
 
     // If humans fall into a hole, they die.
-    for (int i = gameManager.mainHumans.size() - 1; i >= 0; i--) {
-        Human human = gameManager.mainHumans.get(i);
+    for (int i = gameManager.thingManager.mainHumans.size() - 1; i >= 0; i--) {
+        Human human = gameManager.thingManager.mainHumans.get(i);
         if (human instanceof GameHuman) {  // Only game humans die
             if (human.position.y > height*0.9 - human.groundHeightOffset) {
                 GameHuman gh = (GameHuman) human;

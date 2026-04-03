@@ -43,7 +43,7 @@ void keyPressed() {
     // If not handled by UI elements, process game keys
     if (!handledByUi) {
         // Existing drone controls
-        for (Thing thing: gameManager.things) {
+        for (Thing thing: gameManager.thingManager.things) {
             if (thing instanceof KeyEvents) {
                 ((KeyEvents) thing).keyDown(key, keyCode);
             }
@@ -65,7 +65,7 @@ void keyReleased() {
     }
     
     if (!handledByUi) {
-        for (Thing thing: gameManager.things) {
+        for (Thing thing: gameManager.thingManager.things) {
             if (thing instanceof KeyEvents) {
                 ((KeyEvents) thing).keyUp(key, keyCode);
             }

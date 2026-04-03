@@ -352,7 +352,7 @@ class GameHuman extends Human {
         
         // Load chair reference
         if (data.containsKey("standingOnChairID")) {
-            this.loadStandingOnChair(gameManager.things, ((Number) data.get("standingOnChairID")).intValue());
+            this.loadStandingOnChair(gameManager.thingManager.things, ((Number) data.get("standingOnChairID")).intValue());
         }
     }
     

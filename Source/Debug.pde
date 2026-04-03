@@ -71,12 +71,12 @@ class Debug {
         yPos += lineHeight;
         
         text("Total Things:", 20, yPos);
-        text(gameManager.things.size(), 20 + col2, yPos);
+        text(gameManager.thingManager.things.size(), 20 + col2, yPos);
         yPos += lineHeight;
         
         text("Active in scene:", 20, yPos);
         int activeInScene = 0;
-        for (Thing t : gameManager.things) {
+        for (Thing t : gameManager.thingManager.things) {
             if (t.show && t.sceneIn == gameManager.window.scene) activeInScene++;
         }
         text(activeInScene, 20 + col2, yPos);
@@ -162,7 +162,7 @@ class Debug {
             yPos += lineHeight;
             
             Thing closest = null;
-            ArrayList<Thing> nearby = trackedHuman.getClosestThings(gameManager.things, trackedHuman.grabRange);
+            ArrayList<Thing> nearby = trackedHuman.getClosestThings(gameManager.thingManager.things, trackedHuman.grabRange);
             closest = nearby.size() > 0 ? nearby.get(0) : null;
 
             if (closest != null) {
@@ -231,7 +231,7 @@ class Debug {
         
         // Draw line to closest object
         Thing closest = null;
-        ArrayList<Thing> nearby = trackedHuman.getClosestThings(gameManager.things, trackedHuman.grabRange);
+        ArrayList<Thing> nearby = trackedHuman.getClosestThings(gameManager.thingManager.things, trackedHuman.grabRange);
         closest = nearby.size() > 0 ? nearby.get(0) : null;
 
         if (closest != null) {

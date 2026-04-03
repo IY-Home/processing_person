@@ -7,11 +7,9 @@ class GameManager {
     String startupMessage;
   
     // Core collections
-    ArrayList<Thing> things;
-    ArrayList<Human> mainHumans;
     ArrayList<UIElement> uiElements;
 
-    Human trackedHuman = null; // Follow the scene of that human 
+    ThingManager thingManager; 
          
     // Systems
     Window window;
@@ -26,11 +24,10 @@ class GameManager {
         this.programName = programName;
         this.version = programVersion;
         startupMessage = "### " + programName + " v" + version + " ###";  
-        things = new ArrayList<Thing>();
-        mainHumans = new ArrayList<Human>();
         uiElements = new ArrayList<UIElement>();
         imageManager = new ImageManager();
         window = new Window(imageManager, color(255), color(50), 1);
+        thingManager = new ThingManager(this);
         keyManager = new KeyManager();
         saveManager = new SaveManager();
         messageBox = new MessageBox(
@@ -54,17 +51,17 @@ class GameManager {
         println("Initializing GameManager...");
         
         // Clear existing state
-        things.clear();
-        mainHumans.clear();
+        thingManager.things.clear();
+        thingManager.mainHumans.clear();
         window.scenes.clear();
         keyManager.resetAllKeys();
         
         // Initialize game
         createScenes(window);
-        createHumans(mainHumans);
-        createThings(things);
+        createHumans(thingManager.mainHumans);
+        createThings(thingManager.things);
         if (useSaveSystem) {
-          setObjectIDs();
+          saveManager.setObjectIDs(thingManager.things, thingManager.mainHumans);
           loadGame();
         }
         imageManager.startLoading();
@@ -74,7 +71,7 @@ class GameManager {
     
     void update() {
         window.drawBackground();
-        updateThings();
+        thingManager.updateThings();
         window.drawCursor(window.cursorSize, window.cursorColor);
         for (UIElement element : uiElements) {
             element.update();
@@ -82,125 +79,6 @@ class GameManager {
         loop();
     }
     
-    void updateThings() {
-        // Draw background things first
-        for (Thing thing : things) {
-            if (thing.drawBehindHumans && thing.inScene() && thing.show) {
-                push();
-                thing.display();
-                pop();
-            }
-        }
-        
-        // Update humans
-        for (Human human : mainHumans) {
-            if (human == trackedHuman) {                     
-                if (human.sceneIn != this.window.scene) {
-                    this.window.goToScene(human.sceneIn);
-                }
-            }
-            if (human.inScene()) {
-                push();
-                human.live();
-                if (human == trackedHuman) {
-                    // Indicate tracked human
-                    noFill();
-                    stroke(0, 255, 0);
-                    strokeWeight(4);
-                    ellipse(human.position.x, human.position.y - human.trackedIndicatorHeight, 10, 10);
-                }
-                pop();
-            }
-        }
-        
-        for (Thing thing : things) {
-            if (thing.drawInBackground && !thing.drawBehindHumans && thing.inScene() && thing.show) {
-                push();
-                thing.display();
-                pop();
-            }
-        }
-        
-        // Update and check collisions for all things
-        for (int i = 0; i < things.size(); i++) {
-            Thing thing = things.get(i);
-            if (thing != null && thing.inScene()) {
-                if (!(thing instanceof Human)) {
-                    thing.update();
-                    if (!thing.drawInBackground && !thing.drawInForeground && !thing.drawBehindHumans && thing.show) {
-                        push();
-                        thing.display();
-                        pop();
-                    }
-                    thing.checkEdges();
-                } else ((Human)thing).live();
-                
-                // Check collisions with other things
-                ArrayList<Thing> nearbyThings;
-                if (thing.checkTouchWide) {
-                    nearbyThings = things;
-                } else {
-                    nearbyThings = thing.getClosestThings(things, 200, thing.checkTouchY);
-                }
-                for (Thing other : nearbyThings) {
-                    if (other != null && other != thing) {
-                        thing.checkTouch(other);
-                    }
-                }
-
-                // Check collisions with humans
-                ArrayList<Thing> nearbyHumans;
-                ArrayList<Thing> humansAsThings = new ArrayList<Thing>(mainHumans);
-                if (thing.checkTouchWide) {
-                    nearbyHumans = humansAsThings;
-                } else {
-                    nearbyHumans = thing.getClosestThings(humansAsThings, 250, thing.checkTouchY);
-                }
-                for (Thing humanThing : nearbyHumans) {
-                    Human human = (Human) humanThing;
-                    if (human != null && thing != human) {
-                        thing.checkTouch(human);
-                        human.checkTouch(thing);
-                    }
-                }
-            } else if (thing != null && thing.sceneIn == window.trashScene) {
-                thing.show = false;
-            } else if (thing != null && !thing.inScene() && thing.updateInBackground) {
-                thing.backgroundUpdate();
-            }
-        }
-        // Finally, draw things in the front
-        for (Thing thing : things) {
-            if (thing.drawInForeground && !thing.drawInBackground && !thing.drawBehindHumans && thing.inScene() && thing.show) {
-                push();
-                thing.display();
-                pop();
-            }
-        }
-    }
-    
-    // Utility methods
-    boolean in(Thing testObj) {
-        return things.contains(testObj);
-    }
-    
-    void removeThing(Thing testObj) {
-        if (things.contains(testObj)) {
-            things.remove(testObj);
-        }
-    }
-    
-    void addThing(Thing thing) {
-        if (!things.contains(thing)) {
-            things.add(thing);
-        }
-    }
-    
-    void addHuman(Human human) {
-        if (!mainHumans.contains(human)) {
-            mainHumans.add(human);
-        }
-    }
     
     void saveGame() {
       saveManager.saveGame();
@@ -210,18 +88,6 @@ class GameManager {
       saveManager.loadGame();
     }
     
-    void setObjectIDs() {
-      for (Thing thing : things) {
-          thing.id = saveManager.getNextID();
-      }
-      for (Human human : mainHumans) {
-          if (!things.contains(human)) {
-              human.id = saveManager.getNextID();
-              println("    Human (" + human.getClass().getSimpleName() + ") " + human.name + " assigned ID: " + human.id);
-          }
-      }
-       println("    Assigned IDs to things and humans from ID 1 to " + saveManager.currentMaxID);
-    }
 }
 
 
@@ -676,6 +542,141 @@ class Window {
     }
 }
 
+class ThingManager {
+    ArrayList<Thing> things;
+    ArrayList<Human> mainHumans;
+
+    GameManager gm;
+
+    Human trackedHuman = null; // Follow the scene of that human
+
+    ThingManager(GameManager gm) {
+        this.gm = gm;
+        things = new ArrayList<Thing>();
+        mainHumans = new ArrayList<Human>();
+    }
+
+    void updateThings() {
+        // Draw background things first
+        for (Thing thing : things) {
+            if (thing.drawBehindHumans && thing.inScene() && thing.show) {
+                push();
+                thing.display();
+                pop();
+            }
+        }
+        
+        // Update humans
+        for (Human human : mainHumans) {
+            if (human == trackedHuman) {                     
+                if (human.sceneIn != gm.window.scene) {
+                    gm.window.goToScene(human.sceneIn);
+                }
+            }
+            if (human.inScene()) {
+                push();
+                human.live();
+                if (human == trackedHuman) {
+                    // Indicate tracked human
+                    noFill();
+                    stroke(0, 255, 0);
+                    strokeWeight(4);
+                    ellipse(human.position.x, human.position.y - human.trackedIndicatorHeight, 10, 10);
+                }
+                pop();
+            }
+        }
+        
+        for (Thing thing : things) {
+            if (thing.drawInBackground && !thing.drawBehindHumans && thing.inScene() && thing.show) {
+                push();
+                thing.display();
+                pop();
+            }
+        }
+        
+        // Update and check collisions for all things
+        for (int i = 0; i < things.size(); i++) {
+            Thing thing = things.get(i);
+            if (thing != null && thing.inScene()) {
+                if (!(thing instanceof Human)) {
+                    thing.update();
+                    if (!thing.drawInBackground && !thing.drawInForeground && !thing.drawBehindHumans && thing.show) {
+                        push();
+                        thing.display();
+                        pop();
+                    }
+                    thing.checkEdges();
+                } else ((Human)thing).live();
+                
+                // Check collisions with other things
+                ArrayList<Thing> nearbyThings;
+                if (thing.checkTouchWide) {
+                    nearbyThings = things;
+                } else {
+                    nearbyThings = thing.getClosestThings(things, 200, thing.checkTouchY);
+                }
+                for (Thing other : nearbyThings) {
+                    if (other != null && other != thing) {
+                        thing.checkTouch(other);
+                    }
+                }
+
+                // Check collisions with humans
+                ArrayList<Thing> nearbyHumans;
+                ArrayList<Thing> humansAsThings = new ArrayList<Thing>(mainHumans);
+                if (thing.checkTouchWide) {
+                    nearbyHumans = humansAsThings;
+                } else {
+                    nearbyHumans = thing.getClosestThings(humansAsThings, 250, thing.checkTouchY);
+                }
+                for (Thing humanThing : nearbyHumans) {
+                    Human human = (Human) humanThing;
+                    if (human != null && thing != human) {
+                        thing.checkTouch(human);
+                        human.checkTouch(thing);
+                    }
+                }
+            } else if (thing != null && thing.sceneIn == gm.window.trashScene) {
+                thing.show = false;
+            } else if (thing != null && !thing.inScene() && thing.updateInBackground) {
+                thing.backgroundUpdate();
+            }
+        }
+        // Finally, draw things in the front
+        for (Thing thing : things) {
+            if (thing.drawInForeground && !thing.drawInBackground && !thing.drawBehindHumans && thing.inScene() && thing.show) {
+                push();
+                thing.display();
+                pop();
+            }
+        }
+    }
+
+    // Utility methods
+    boolean in(Thing testObj) {
+        return things.contains(testObj);
+    }
+    
+    void removeThing(Thing testObj) {
+        if (things.contains(testObj)) {
+            things.remove(testObj);
+        }
+    }
+    
+    void addThing(Thing thing) {
+        if (!things.contains(thing)) {
+            things.add(thing);
+        }
+    }
+    
+    void addHuman(Human human) {
+        if (!mainHumans.contains(human)) {
+            mainHumans.add(human);
+        }
+    }
+}
+
 class ImageManager {  
     // Image storage
     HashMap<String, PGraphics> images = new HashMap<String, PGraphics>();
@@ -839,6 +840,19 @@ class SaveManager {
         return currentMaxID;
     }
     
+    void setObjectIDs(ArrayList<Thing> things, ArrayList<Human> mainHumans) {
+      for (Thing thing : things) {
+          thing.id = this.getNextID();
+      }
+      for (Human human : mainHumans) {
+          if (!things.contains(human)) {
+              human.id = this.getNextID();
+              println("    Human (" + human.getClass().getSimpleName() + ") " + human.name + " assigned ID: " + human.id);
+          }
+      }
+       println("    Assigned IDs to things and humans from ID 1 to " + this.currentMaxID);
+    }
+
     void saveGame(String filename) {
         JSONObject saveData = new JSONObject();
 
@@ -876,13 +890,13 @@ class SaveManager {
         JSONArray thingsArray = new JSONArray();
         
         // Add all things from things list
-        for (Thing thing : gameManager.things) {
+        for (Thing thing : gameManager.thingManager.things) {
             addThingToArray(thing, thingsArray);
         }
         
         // ALSO ADD ALL HUMANS (if not already in things)
-        for (Human human : gameManager.mainHumans) {
-            if (!gameManager.things.contains(human)) {
+        for (Human human : gameManager.thingManager.mainHumans) {
+            if (!gameManager.thingManager.things.contains(human)) {
                 addThingToArray(human, thingsArray);
             }
         }
@@ -891,14 +905,14 @@ class SaveManager {
         
         // Save humans list (just IDs for mainHumans tracking)
         JSONArray humansArray = new JSONArray();
-        for (Human human : gameManager.mainHumans) {
+        for (Human human : gameManager.thingManager.mainHumans) {
             humansArray.append(human.id);
         }
         saveData.setJSONArray("mainHumans", humansArray);
         
         // Save tracked human
-        if (gameManager.trackedHuman != null) {
-            saveData.setInt("trackedHumanID", gameManager.trackedHuman.id);
+        if (gameManager.thingManager.trackedHuman != null) {
+            saveData.setInt("trackedHumanID", gameManager.thingManager.trackedHuman.id);
         }
         
         // Write to file
@@ -1019,10 +1033,10 @@ class SaveManager {
 
         // Create a map of existing things by ID
         HashMap<Integer, Thing> existingThings = new HashMap<Integer, Thing>();
-        for (Thing thing : gameManager.things) {
+        for (Thing thing : gameManager.thingManager.things) {
             existingThings.put(thing.id, thing);
         }
-        for (Human human : gameManager.mainHumans) {
+        for (Human human : gameManager.thingManager.mainHumans) {
             existingThings.put(human.id, human);
         }
         
@@ -1052,7 +1066,7 @@ class SaveManager {
         // Load mainHumans list
         if (saveData.hasKey("mainHumans")) {
             humansArray = saveData.getJSONArray("mainHumans");
-            gameManager.mainHumans.clear();
+            gameManager.thingManager.mainHumans.clear();
             
             println("   Loading mainHumans...");
             
@@ -1080,7 +1094,7 @@ class SaveManager {
                     HashMap<String, Object> dataMap = jsonToHashMap(humanData);
                     human.load(dataMap);
                     
-                    gameManager.mainHumans.add((Human) human);
+                    gameManager.thingManager.mainHumans.add((Human) human);
                     println("   Loaded " + human.getClass().getSimpleName() + " (ID " + humanID + ")");
                 } else {
                     println("   No save data found for human ID " + humanID);
@@ -1095,7 +1109,7 @@ class SaveManager {
             int trackedID = saveData.getInt("trackedHumanID");
             Thing tracked = existingThings.get(trackedID);
             if (tracked instanceof Human) {
-                gameManager.trackedHuman = (Human) tracked;
+                gameManager.thingManager.trackedHuman = (Human) tracked;
                 println("   Tracked human set to ID: " + trackedID);
             }
         }
@@ -1181,6 +1195,6 @@ public static class Constants {
 }
 
 void setTrackedHuman(Human human) {
-    gameManager.trackedHuman = human;
+    gameManager.thingManager.trackedHuman = human;
 }
 

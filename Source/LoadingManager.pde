@@ -65,8 +65,8 @@ class LoadingManager {
     LoadingManager(GameManager gameManager) {
         this.gm = gameManager;
         this.window = gameManager.window;
-        this.things = gameManager.things;
-        this.humans = gameManager.mainHumans;
+        this.things = gameManager.thingManager.things;
+        this.humans = gameManager.thingManager.mainHumans;
         this.im = gameManager.imageManager;
         
         // Default messages
@@ -228,7 +228,7 @@ class LoadingManager {
               
           case 5: // Load objects
               if (gm.useSaveSystem) {
-                  gm.setObjectIDs();
+                  gm.saveManager.setObjectIDs(gm.thingManager.things, gm.thingManager.mainHumans);
                   gm.loadGame();
                   println("  ✓ Objects placed ");
               }

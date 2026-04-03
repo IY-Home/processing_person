@@ -531,7 +531,7 @@ class Human extends Thing {
             if (this.grabbed) {
                 this.release();
             } else {
-                this.grabClosest(gameManager.things);
+                this.grabClosest(gameManager.thingManager.things);
             }
         }
     }
@@ -693,7 +693,7 @@ class Human extends Thing {
         }
         
         if (data.containsKey("grabThingID")) {
-            this.loadGrabThing(gameManager.things, (int) data.get("grabThingID"));
+            this.loadGrabThing(gameManager.thingManager.things, (int) data.get("grabThingID"));
         }
     }
     

@@ -320,7 +320,7 @@ class Chair extends Thing implements Interactable {
         
         // Load rested Thing reference
         if (data.containsKey("restedObjID")) {
-            this.loadRestedObj(gameManager.things, ((Number) data.get("restedObjID")).intValue());
+            this.loadRestedObj(gameManager.thingManager.things, ((Number) data.get("restedObjID")).intValue());
         }
     }
     
@@ -558,7 +558,7 @@ class Cupboard extends Thing implements Interactable {
         } else {
             cupboardItems.clear();
             // Check for Things to store
-            for (Thing thing: gameManager.things) {
+            for (Thing thing: gameManager.thingManager.things) {
                 if (thing != this) {
                     this.checkThing(thing);
                 }
@@ -625,7 +625,7 @@ class Cupboard extends Thing implements Interactable {
         // Load shelf references
         if (data.containsKey("shelfIDs")) {
             ArrayList<Integer> shelfIDs = (ArrayList<Integer>) data.get("shelfIDs");
-            this.loadShelves(gameManager.things, shelfIDs);
+            this.loadShelves(gameManager.thingManager.things, shelfIDs);
         }
     }
     
@@ -1233,7 +1233,7 @@ class PreFilledCupboard extends Cupboard {
         this.cupboardItems = new ArrayList<Thing>(Arrays.asList(customThings));
         this.label = label;
         for (int i = 0; i < cupboardItems.size(); i++) {
-          gameManager.things.add(cupboardItems.get(i));
+          gameManager.thingManager.things.add(cupboardItems.get(i));
         }
     }
     
@@ -1265,7 +1265,7 @@ class PreFilledCupboard extends Cupboard {
             gameManager.messageBox.showEvent("Cupboard closed. Collecting surrounding items...");
             
             // Collect nearby items like normal cupboard
-            for (Thing thing : gameManager.things) {
+            for (Thing thing : gameManager.thingManager.things) {
                     Thing item = thing;
                     if (item.sceneIn == this.sceneIn) {
                         float distance = PVector.dist(this.position, item.position);
@@ -1287,10 +1287,10 @@ class PreFilledCupboard extends Cupboard {
     // Reorder items to be drawn after cupboard in Things list
     void reorderItemsInFront() {
         // Remove cupboard from Things temporarily
-        gameManager.things.remove(this);
+        gameManager.thingManager.things.remove(this);
         
         // Re-add cupboard FIRST (so it draws first, in background)
-        gameManager.things.add(0, this);
+        gameManager.thingManager.things.add(0, this);
         
         // Now items will be drawn after cupboard
     }
@@ -1366,7 +1366,7 @@ class PreFilledCupboard extends Cupboard {
         // Load cupboard item references
         if (data.containsKey("cupboardItemIDs")) {
             ArrayList<Integer> itemIDs = (ArrayList<Integer>) data.get("cupboardItemIDs");
-            this.loadCupboardItems(gameManager.things, itemIDs);
+            this.loadCupboardItems(gameManager.thingManager.things, itemIDs);
         }
     }
     
@@ -1452,7 +1452,7 @@ class SpeedBooster extends Thing implements Interactable {
       gameManager.messageBox.showEvent("SPEED BOOST! " + boostMultiplier + "x faster!");
     
       gh.release(); // Release immediately after grabbing
-      gameManager.things.remove(this); // Remove from Things list
+      gameManager.thingManager.things.remove(this); // Remove from Things list
     }
   }
   
