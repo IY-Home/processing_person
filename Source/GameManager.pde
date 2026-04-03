@@ -18,7 +18,7 @@ class GameManager {
     boolean useSaveSystem = true;
     boolean autoSave = true;
     int autoSaveInterval = 10000; // 10 seconds
-    int lastSaveMs = 0;
+    private int lastSaveMs = 0;
     
     GameManager(String programName, String programVersion) {
         this.programName = programName;
