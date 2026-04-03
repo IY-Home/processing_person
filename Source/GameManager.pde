@@ -636,7 +636,7 @@ class ThingManager {
                 // Check collisions with other things
                 ArrayList<Thing> nearbyThings;
                 if (thing.checkTouchWide) {
-                    nearbyThings = things;
+                    nearbyThings = thing.getClosestThings(things, width, thing.checkTouchY);
                 } else {
                     nearbyThings = thing.getClosestThings(things, 200, thing.checkTouchY);
                 }
@@ -650,7 +650,7 @@ class ThingManager {
                 ArrayList<Thing> nearbyHumans;
                 ArrayList<Thing> humansAsThings = new ArrayList<Thing>(mainHumans);
                 if (thing.checkTouchWide) {
-                    nearbyHumans = humansAsThings;
+                    nearbyHumans = thing.getClosestThings(humansAsThings, width, thing.checkTouchY);
                 } else {
                     nearbyHumans = thing.getClosestThings(humansAsThings, 250, thing.checkTouchY);
                 }
