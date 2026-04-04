@@ -120,19 +120,17 @@ void createScenes(Window window) {
 void createHumans(ArrayList <Human> humans) {
     // Create main human character with $200 starting money
     String[] humanName = {"Isaac", "Tan"};
-    String humanGender = "boy";
-    int humanAge = 10;
     float humanSpeed = 2.5;
     float humanMoney = 200;
     int humanScene = 0;
-    GameHuman isaac = new GameHuman(humanName[0], humanName[1], humanGender, humanAge, 
+    GameHuman isaac = new GameHuman(humanName[0], humanName[1],
                       color(0), color(0, 0, 255), color(50), color(0), 
                       humanSpeed, humanMoney, width * 0.68, humanScene);
     humans.add(isaac);
     setTrackedHuman(isaac);
 
     debugger = new Debug();
-    debugger.setDebug(isaac, true); // Set to true to show debug
+    debugger.setDebug(isaac, false); // Set to true to show debug
 
     String humanName2 = "Nick";
     humanScene = 0;
