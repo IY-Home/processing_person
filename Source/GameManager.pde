@@ -12,8 +12,9 @@ class GameManager {
     KeyManager keyManager;
     ImageManager imageManager;
     SaveManager saveManager;
-    MessageBox messageBox;
     UIManager uiManager;
+
+    MessageBox messageBox;
     
     boolean useSaveSystem = true;
     boolean autoSave = true;
