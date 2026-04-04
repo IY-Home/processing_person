@@ -1,8 +1,7 @@
 // Game Human class - extends BasicHuman with additional game mechanics 
 class GameHuman extends Human {
     // Basic attributes
-    String firstName, lastName, gender;
-    int age;
+    String firstName, lastName;
     float speed;
     Boolean sleeping, jumping;
     Chair standingOnChair = null;
@@ -25,7 +24,7 @@ class GameHuman extends Human {
 
     StatBar hungerBar;
 
-    GameHuman(String firstName, String lastName, String gender, int age, color hairColor,
+    GameHuman(String firstName, String lastName, color hairColor,
         color shirtColor, color pantColor, color shoeColor, float speed, float money, float posX, int sceneIn) {
         // Call parent constructor with name
         super(firstName, hairColor, shirtColor, pantColor, shoeColor, posX, sceneIn);
@@ -35,8 +34,6 @@ class GameHuman extends Human {
         // Set additional properties
         this.firstName = firstName;
         this.lastName = lastName == null || lastName.isEmpty() ? "" : lastName;
-        this.gender = gender == null || gender.isEmpty() ? "boy" : gender;
-        this.age = age;
         this.speed = (speed > 0 ? speed : 2);
         
         // Initialize hunger and money
@@ -291,8 +288,6 @@ class GameHuman extends Human {
         // Basic attributes
         data.put("firstName", this.firstName);
         data.put("lastName", this.lastName);
-        data.put("gender", this.gender);
-        data.put("age", this.age);
         data.put("speed", this.speed);
         data.put("sleeping", this.sleeping);
         data.put("jumping", this.jumping);
@@ -329,8 +324,6 @@ class GameHuman extends Human {
         // Basic attributes
         if (data.containsKey("firstName")) this.firstName = (String) data.get("firstName");
         if (data.containsKey("lastName")) this.lastName = (String) data.get("lastName");
-        if (data.containsKey("gender")) this.gender = (String) data.get("gender");
-        if (data.containsKey("age")) this.age = ((Number) data.get("age")).intValue();
         if (data.containsKey("speed")) this.speed = ((Number) data.get("speed")).floatValue();
         if (data.containsKey("sleeping")) this.sleeping = (boolean) data.get("sleeping");
         if (data.containsKey("jumping")) this.jumping = (boolean) data.get("jumping");
