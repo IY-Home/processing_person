@@ -1115,7 +1115,12 @@ class Button extends UIElement {
         this.currentColor = normal;
         return this;
     }
-    
+
+    Button setText(String newText) {
+        this.text = newText;
+        return this;
+    }
+
     Button setTextColor(color c) {
         this.textColor = c;
         return this;
