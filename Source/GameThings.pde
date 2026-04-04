@@ -1401,7 +1401,6 @@ class SpeedBooster extends Thing implements Interactable {
         this.grabbable = true;
         this.checkTouchRadius = 200;
         this.checkTouchY = true;
-        this.checkTouchWide = true;
     }
     
     void display() {
