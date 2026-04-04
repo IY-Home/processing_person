@@ -47,10 +47,12 @@ class GameHuman extends Human {
         hungerBar = new StatBar("Hunger", 0, 0, 100, 12);
         hungerBar.setColors(getHungerBarColor(), color(100), color(50), color(0))
                  .setShowPercentage(true)
-                 .setShowLabel(true);
+                 .setShowLabel(true)
+                 .hideInstant();
         hungerBar.setZIndex(10); // Above game objects but below UI
 
         gameManager.uiManager.add(hungerBar);
+
     }
 
     // Update hunger over time
@@ -177,6 +179,8 @@ class GameHuman extends Human {
 
     // Enhanced display method
     void display() {
+        hungerBar.visible = true;
+
         // Check if we're stationary and not jumping
         boolean isStationary = (velocity.x == 0 && standingOnChair == null && grabThing == null);
         
@@ -378,6 +382,8 @@ class GameHuman extends Human {
     void backgroundUpdate() {
         this.update();
         this.updateHunger();
+        hungerBar.visible = false;
+        println(hungerBar.visible);
     }
 }
 
@@ -390,7 +396,7 @@ class ImageHuman extends Human {
   }
   void display() {
     PGraphics drawImage = gameManager.imageManager.getImage(imagePath);
-    image(drawImage, this.position.x - (drawImage.width/2), this.position.y - 128);
+    image(drawImage, this.position.x - (drawImage.width/2), this.position.y - 175);
   }
  
 }

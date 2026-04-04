@@ -610,6 +610,7 @@ class ThingManager {
                 }
                 pop();
             }
+            if (!human.inScene() && human.updateInBackground) human.backgroundUpdate();
         }
         
         for (Thing thing : things) {
@@ -631,7 +632,6 @@ class ThingManager {
                         thing.display();
                         pop();
                     }
-                    thing.checkEdges();
                 } else ((Human)thing).live();
                 
                 // Check collisions with other things

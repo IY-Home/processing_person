@@ -70,6 +70,7 @@ abstract class Thing implements Saveable {
             velocity.limit(Constants.Physics.MAX_VELOCITY);
             position.add(velocity);
         }
+        checkEdges();
     }
 
     // Check and handle screen boundaries
@@ -714,7 +715,6 @@ class Human extends Thing {
         this.update();
         this.display();
         this.controls();
-        this.checkEdges();
         this.checkThings();
     }
 }
@@ -759,6 +759,7 @@ abstract class UIElement {
     abstract void display();
     
     void update() {
+        if (!visible) { targetAlpha = 0; alpha = 0; }
 
         if (!enabled) return;
 
