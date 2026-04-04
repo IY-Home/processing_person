@@ -113,7 +113,7 @@ abstract class Thing implements Saveable {
             dist = abs(position.x - other.position.x);      // X-only distance
         }
         
-        if (dist < checkTouchRadius) {
+        if (dist <= checkTouchRadius) {
             this.onTouch(other, dist);
         }
     }
@@ -291,7 +291,7 @@ class Human extends Thing {
     int shiftKey = SHIFT;
     boolean mouseControls = true;
 
-    float trackedIndicatorHeight = 50; // Height above head to draw tracked indicator
+    float trackedIndicatorHeight = 165; // Height above body to draw tracked indicator
 
     Human(String name, color hairColor,
         color shirtColor, color pantColor, color shoeColor, float posX, int sceneIn) {
@@ -313,7 +313,7 @@ class Human extends Thing {
         this.rested = false;
         this.friction = 1;
         this.sceneIn = sceneIn;
-        this.groundHeightOffset = 214.144f;
+        this.groundHeightOffset = 114.144f;
         this.hasPhysics = true;
         this.show = true;
     }
@@ -348,68 +348,68 @@ class Human extends Thing {
     
         // Head drawing logic
         if (velocity.x == 0) {
-            quad(position.x - 35, position.y - 59, position.x + 35, position.y - 59,
-                position.x + 30, position.y + 10, position.x - 30, position.y + 10);
+            quad(position.x - 35, position.y - 159, position.x + 35, position.y - 159,
+                position.x + 30, position.y - 90, position.x - 30, position.y - 90);
             noFill();
-            arc(position.x + 13.25, position.y - 40.5, 20, 10, radians(180), radians(360), OPEN);
-            arc(position.x - 14, position.y - 40.5, 20, 10, radians(180), radians(360), OPEN);
+            arc(position.x + 13.25, position.y - 140.5, 20, 10, radians(180), radians(360), OPEN);
+            arc(position.x - 14, position.y - 140.5, 20, 10, radians(180), radians(360), OPEN);
     
             strokeWeight(3);
             if (millis() % 4000 <= 200) {
-                line(position.x - 15, position.y - 33, position.x - 13, position.y - 33);
-                line(position.x + 12.25, position.y - 33, position.x + 14.25, position.y - 33);
+                line(position.x - 15, position.y - 133, position.x - 13, position.y - 133);
+                line(position.x + 12.25, position.y - 133, position.x + 14.25, position.y - 133);
             } else {
-                line(position.x - 14, position.y - 36, position.x - 14, position.y - 30);
-                line(position.x + 13.25, position.y - 36, position.x + 13.25, position.y - 30);
+                line(position.x - 14, position.y - 136, position.x - 14, position.y - 130);
+                line(position.x + 13.25, position.y - 136, position.x + 13.25, position.y - 130);
             }
     
-            arc(position.x - 0.375, position.y - 10, 25, 10, radians(0), radians(180), OPEN);
+            arc(position.x - 0.375, position.y - 110, 25, 10, radians(0), radians(180), OPEN);
             strokeWeight(2);
             fill(hairColor);
-            rect(position.x - 37, position.y - 66, 74, 10);
+            rect(position.x - 37, position.y - 166, 74, 10);
     
         } else if (velocity.x < 0) {
             // Left movement head
-            quad(position.x - 35, position.y - 59, position.x + 32, position.y - 59,
-                position.x + 30, position.y + 10, position.x - 30, position.y + 10);
+            quad(position.x - 35, position.y - 159, position.x + 32, position.y - 159,
+                position.x + 30, position.y - 90, position.x - 30, position.y - 90);
             noFill();
-            arc(position.x + 8.25, position.y - 40.5, 20, 10, radians(180), radians(360), OPEN);
-            arc(position.x - 19, position.y - 40.5, 20, 10, radians(180), radians(360), OPEN);
+            arc(position.x + 8.25, position.y - 140.5, 20, 10, radians(180), radians(360), OPEN);
+            arc(position.x - 19, position.y - 140.5, 20, 10, radians(180), radians(360), OPEN);
     
             strokeWeight(3);
             if (millis() % 4000 <= 200) {
-                line(position.x - 22, position.y - 33, position.x - 17, position.y - 33);
-                line(position.x + 4.25, position.y - 33, position.x + 10.25, position.y - 33);
+                line(position.x - 22, position.y - 133, position.x - 17, position.y - 133);
+                line(position.x + 4.25, position.y - 133, position.x + 10.25, position.y - 133);
             } else {
-                line(position.x - 18, position.y - 36, position.x - 18, position.y - 30);
-                line(position.x + 9.25, position.y - 36, position.x + 9.25, position.y - 30);
+                line(position.x - 18, position.y - 136, position.x - 18, position.y - 130);
+                line(position.x + 9.25, position.y - 136, position.x + 9.25, position.y - 130);
             }
     
-            arc(position.x - 3.375, position.y - 10, 25, 10, radians(0), radians(180), OPEN);
+            arc(position.x - 3.375, position.y - 110, 25, 10, radians(0), radians(180), OPEN);
             fill(hairColor);
-            rect(position.x - 37, position.y - 66, 74, 10);
+            rect(position.x - 37, position.y - 166, 74, 10);
     
         } else {
             // Right movement head
-            quad(position.x - 32, position.y - 59, position.x + 35, position.y - 59,
-                position.x + 30, position.y + 10, position.x - 30, position.y + 10);
+            quad(position.x - 32, position.y - 159, position.x + 35, position.y - 159,
+                position.x + 30, position.y + -90, position.x - 30, position.y + -90);
             noFill();
-            arc(position.x + 19.75, position.y - 40.5, 20, 10, radians(180), radians(360), OPEN);
-            arc(position.x - 9, position.y - 40.5, 20, 10, radians(180), radians(360), OPEN);
+            arc(position.x + 19.75, position.y - 140.5, 20, 10, radians(180), radians(360), OPEN);
+            arc(position.x - 9, position.y - 140.5, 20, 10, radians(180), radians(360), OPEN);
     
             strokeWeight(3);
             if (millis() % 4000 <= 200) {
-                line(position.x - 12, position.y - 33, position.x - 11, position.y - 33);
-                line(position.x + 16.25, position.y - 33, position.x + 17.75, position.y - 33);
+                line(position.x - 12, position.y - 133, position.x - 11, position.y - 133);
+                line(position.x + 16.25, position.y - 133, position.x + 17.75, position.y - 133);
             } else {
-                line(position.x - 10, position.y - 36, position.x - 10, position.y - 30);
-                line(position.x + 18.75, position.y - 36, position.x + 18.75, position.y - 30);
+                line(position.x - 10, position.y - 136, position.x - 10, position.y - 130);
+                line(position.x + 18.75, position.y - 136, position.x + 18.75, position.y - 130);
             }
     
-            arc(position.x + 4.625, position.y - 10, 25, 10, radians(0), radians(180), OPEN);
+            arc(position.x + 4.625, position.y - 110, 25, 10, radians(0), radians(180), OPEN);
             strokeWeight(2);
             fill(hairColor);
-            rect(position.x - 37, position.y - 66, 74, 10);
+            rect(position.x - 37, position.y - 166, 74, 10);
         }
     }
     
@@ -417,55 +417,55 @@ class Human extends Thing {
     void drawBody() {
         strokeWeight(2);
         fill(248, 235, 195);
-        rect(position.x - 13, position.y + 11, 25, 10);
+        rect(position.x - 13, position.y - 89, 25, 10);
     
         if (velocity.x == 0) {
             if (grabbed) {
                 fill(shirtColor);
-                rect(position.x - 35, position.y + 22, 70, 100);
+                rect(position.x - 35, position.y + 22 - 100, 70, 100);
                 fill(248, 235, 195);
-                quad(position.x - 55, position.y + 27, position.x - 35, position.y + 24,
-                    position.x - 30, position.y + 115, position.x - 51, position.y + 108);
-                quad(position.x + 55, position.y + 27, position.x + 35, position.y + 24,
-                    position.x + 30, position.y + 115, position.x + 52, position.y + 108);
+                quad(position.x - 55, position.y + 27 - 100, position.x - 35, position.y + 24 - 100,
+                    position.x - 30, position.y + 115 - 100, position.x - 51, position.y + 108 - 100);
+                quad(position.x + 55, position.y + 27 - 100, position.x + 35, position.y + 24 - 100,
+                    position.x + 30, position.y + 115 - 100, position.x + 52, position.y + 108 - 100);
             } else {
-                quad(position.x - 52, position.y + 27, position.x - 30, position.y + 24,
-                    position.x - 50, position.y + 115, position.x - 68, position.y + 108);
-                quad(position.x + 52, position.y + 27, position.x + 30, position.y + 24,
-                    position.x + 50, position.y + 115, position.x + 69, position.y + 108);
+                quad(position.x - 52, position.y + 27 - 100, position.x - 30, position.y + 24 - 100,
+                    position.x - 50, position.y + 115 - 100, position.x - 68, position.y + 108 - 100);
+                quad(position.x + 52, position.y + 27 - 100, position.x + 30, position.y + 24 - 100,
+                    position.x + 50, position.y + 115 - 100, position.x + 69, position.y + 108 - 100);
                 fill(shirtColor);
-                rect(position.x - 35, position.y + 22, 70, 100);
+                rect(position.x - 35, position.y + 22 - 100, 70, 100);
             }
         } else if (velocity.x < 0) {
-            quad(position.x - 48, position.y + 24, position.x + 14.5, position.y + 21,
-                position.x - 105, position.y + 72, position.x - 114, position.y + 55);
-            quad(position.x + 53, position.y + 27, position.x + 35, position.y + 24,
-                position.x + 23, position.y + 115, position.x + 54, position.y + 108);
+            quad(position.x - 48, position.y + 24 - 100, position.x + 14.5, position.y + 21 - 100,
+                position.x - 105, position.y + 72 - 100, position.x - 114, position.y + 55 - 100);
+            quad(position.x + 53, position.y + 27 - 100, position.x + 35, position.y + 24 - 100,
+                position.x + 23, position.y + 115 - 100, position.x + 54, position.y + 108 - 100);
             fill(shirtColor);
-            rect(position.x - 35, position.y + 22, 70, 100);
+            rect(position.x - 35, position.y + 22 - 100, 70, 100);
         } else {
-            quad(position.x - 53, position.y + 27, position.x - 23, position.y + 24,
-                position.x - 23, position.y + 115, position.x - 53, position.y + 108);
-            quad(position.x + 52, position.y + 24, position.x + 7, position.y + 24,
-                position.x + 105, position.y + 72, position.x + 115, position.y + 55);
+            quad(position.x - 53, position.y + 27 - 100, position.x - 23, position.y + 24 - 100,
+                position.x - 23, position.y + 115 - 100, position.x - 53, position.y + 108 - 100);
+            quad(position.x + 52, position.y + 24 - 100, position.x + 7, position.y + 24 - 100,
+                position.x + 105, position.y + 72 - 100, position.x + 115, position.y + 55 - 100);
             fill(shirtColor);
-            rect(position.x - 35, position.y + 22, 70, 100);
+            rect(position.x - 35, position.y + 22 - 100, 70, 100);
         }
     
         fill(pantColor);
-        rect(position.x - 33, position.y + 122, 30, 80);
-        rect(position.x + 3, position.y + 122, 30, 80);
+        rect(position.x - 33, position.y + 122 - 100, 30, 80);
+        rect(position.x + 3, position.y + 122 - 100, 30, 80);
     
         fill(shoeColor);
-        rect(position.x - 45, position.y + 202, 42, 12);
-        rect(position.x + 3, position.y + 202, 42, 12);
+        rect(position.x - 45, position.y + 202 - 100, 42, 12);
+        rect(position.x + 3, position.y + 202 - 100, 42, 12);
     }
 
     // Draw name above human
     void drawName() {
         fill(brightness(gameManager.window.scenes.getAs(sceneIn, Integer.class, color(255))) < 128 ? 255 : 0);
         textSize(24);
-        text(name, position.x - 17 - name.length() * 2.5, position.y - 74);
+        text(name, position.x - 17 - name.length() * 2.5, position.y - 174);
     }
     
     // Display the human - REQUIRED by abstract class Thing
@@ -476,7 +476,7 @@ class Human extends Thing {
     }
 
     // Grab a Thing
-    Boolean grab(Thing thing) {
+    boolean grab(Thing thing) {
         if (thing == null || thing.sceneIn != this.sceneIn || thing.held || !thing.show) return false;
         if (thing instanceof Interactable) {
             Interactable interactable = (Interactable) thing;

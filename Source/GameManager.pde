@@ -16,7 +16,7 @@ class GameManager {
     UIManager uiManager;
     
     boolean useSaveSystem = true;
-    boolean autoSave = true;
+    boolean autoSave = false;
     int autoSaveInterval = 10000; // 10 seconds
     private int lastSaveMs = 0;
     

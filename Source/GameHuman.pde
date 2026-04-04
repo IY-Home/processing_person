@@ -58,9 +58,9 @@ class GameHuman extends Human {
 
     // Update hunger over time
     void updateHunger() {
-        if (!hasHungerAndMoney) { this.trackedIndicatorHeight = 50; return; };
-        
-        this.trackedIndicatorHeight = 108;
+        if (!hasHungerAndMoney) { this.trackedIndicatorHeight = 165; return; };
+
+        this.trackedIndicatorHeight = 165 + 48;
 
         // Increase hunger based on velocity (more movement = more hunger)
         hunger += abs(this.velocity.x / velocityHungerUsed);
@@ -173,7 +173,7 @@ class GameHuman extends Human {
         fill(gameManager.window.scenes.getAs(sceneIn, Integer.class, color(255)) < -13500000 ? 255 : 0);
         textSize(18);
         textAlign(CENTER);
-        text("$" + nf(money, 0, 2), position.x, position.y - 96);
+        text("$" + nf(money, 0, 2), position.x, position.y - 196);
         textAlign(LEFT); // Reset alignment
     }
 
@@ -206,7 +206,7 @@ class GameHuman extends Human {
             // Update and display hunger bar (position relative to human)
             if (hasHungerAndMoney) {
                 // Update bar position to follow the human
-                hungerBar.setPosition(position.x - 42, position.y - 128);
+                hungerBar.setPosition(position.x - 42, position.y - 228);
                 
                 // Update bar value
                 hungerBar.setValue(100 - hunger, 100);

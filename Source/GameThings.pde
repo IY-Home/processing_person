@@ -1386,96 +1386,108 @@ class PreFilledCupboard extends Cupboard {
 }
 
 class SpeedBooster extends Thing implements Interactable {
-  float boostMultiplier = 2.0;
-  color boosterColor;
-  boolean active = true;
+    float boostMultiplier = 2.0;
+    color boosterColor;
+    boolean active = true;
+
+    boolean hasNotified = false;
   
-  SpeedBooster(float x, int scene, float multiplier) {
-    super();
-    this.initialize(x, height * 0.5);
-    this.sceneIn = scene;
-    this.boostMultiplier = multiplier;
-    this.boosterColor = color(0, 255, 255); // Cyan
-    this.grabbable = true;
-    this.checkTouchRadius = 30;
-  }
-  
-  void display() {
-    if (active) {
-      // Pulsing effect
-      float pulse = sin(millis() * 0.01) * 0.2 + 0.8;
-      
-      pushMatrix();
-      translate(position.x, position.y);
-      scale(pulse);
-      
-      // Glow effect
-      for (int i = 3; i > 0; i--) {
-        fill(red(boosterColor), green(boosterColor), blue(boosterColor), 50 / i);
-        noStroke();
-        ellipse(0, 0, 40 + i * 10, 40 + i * 10);
-      }
-      
-      // Main body
-      fill(boosterColor);
-      stroke(255);
-      strokeWeight(2);
-      
-      // Lightning bolt shape
-      beginShape();
-      vertex(-15, -15);
-      vertex(0, -5);
-      vertex(-5, 5);
-      vertex(10, 15);
-      vertex(0, 5);
-      vertex(5, -5);
-      vertex(-15, -15);
-      endShape();
-      
-      // "x2" text
-      fill(255);
-      textSize(14);
-      textAlign(CENTER);
-      text("x" + int(boostMultiplier), 0, -25);
-      
-      popMatrix();
+    SpeedBooster(float x, int scene, float multiplier) {
+        super();
+        this.initialize(x, height * 0.5);
+        this.sceneIn = scene;
+        this.boostMultiplier = multiplier;
+        this.boosterColor = color(0, 255, 255); // Cyan
+        this.grabbable = true;
+        this.checkTouchRadius = 200;
+        this.checkTouchY = true;
+        this.checkTouchWide = true;
     }
-  }
-  
-  void onGrab(Human human) {
-    if (human instanceof GameHuman && active) {
-      GameHuman gh = (GameHuman) human;
-      
-      // Apply boost
-      gh.speed *= boostMultiplier;
-      active = false;
-      
-      // Visual feedback
-      gameManager.messageBox.showEvent("SPEED BOOST! " + boostMultiplier + "x faster!");
     
-      gh.release(); // Release immediately after grabbing
-      gameManager.thingManager.things.remove(this); // Remove from Things list
+    void display() {
+        if (active) {
+        // Pulsing effect
+        float pulse = sin(millis() * 0.01) * 0.2 + 0.8;
+        
+        pushMatrix();
+        translate(position.x, position.y);
+        scale(pulse);
+        
+        // Glow effect
+        for (int i = 3; i > 0; i--) {
+            fill(red(boosterColor), green(boosterColor), blue(boosterColor), 50 / i);
+            noStroke();
+            ellipse(0, 0, 40 + i * 10, 40 + i * 10);
+        }
+        
+        // Main body
+        fill(boosterColor);
+        stroke(255);
+        strokeWeight(2);
+        
+        // Lightning bolt shape
+        beginShape();
+        vertex(-15, -15);
+        vertex(0, -5);
+        vertex(-5, 5);
+        vertex(10, 15);
+        vertex(0, 5);
+        vertex(5, -5);
+        vertex(-15, -15);
+        endShape();
+        
+        // "x2" text
+        fill(255);
+        textSize(14);
+        textAlign(CENTER);
+        text("x" + int(boostMultiplier), 0, -25);
+        
+        popMatrix();
+        }
     }
-  }
-  
-  boolean isGrabbable() { return active; }
-  void onInteract(Human human) {}
-  void onRelease(Human human) {}
-  
-  @Override
-  HashMap<String, Object> save() {
-      HashMap<String, Object> data = super.save();
-      data.put("boostMultiplier", this.boostMultiplier);
-      data.put("boosterColor", this.boosterColor);
-      data.put("active", this.active);
-      return data;
-  }
-  
-  @Override
-  void load(HashMap<String, Object> data) {
-      super.load(data);
-      if (data.containsKey("boostMultiplier")) this.boostMultiplier = ((Number) data.get("boostMultiplier")).floatValue();
-      if (data.containsKey("boosterColor")) this.boosterColor = ((Number) data.get("boosterColor")).intValue();
-      if (data.containsKey("active")) this.active = (boolean) data.get("active");
-  }
+    
+    void onGrab(Human human) {
+        if (human instanceof GameHuman && active) {
+            GameHuman gh = (GameHuman) human;
+            
+            // Apply boost
+            gh.speed *= boostMultiplier;
+            active = false;
+            
+            // Visual feedback
+            gameManager.messageBox.showEvent("SPEED BOOST! " + boostMultiplier + "x faster!");
+            
+            gh.release(); // Release immediately after grabbing
+            gameManager.thingManager.things.remove(this); // Remove from Things list
+        }
+    }
+    
+    boolean isGrabbable() { return active; }
+    void onInteract(Human human) {}
+    void onRelease(Human human) {}
+    
+    void onTouch(Thing other, float distance) {
+        if (distance >= 120) {hasNotified = false; return; }
+        if (distance < 120 && other instanceof GameHuman && !hasNotified) {
+            gameManager.messageBox.showEvent("Grab this speed booster for " + boostMultiplier + "x speed!");
+            hasNotified = true;
+        }
+    }
+
+    @Override
+    HashMap<String, Object> save() {
+        HashMap<String, Object> data = super.save();
+        data.put("boostMultiplier", this.boostMultiplier);
+        data.put("boosterColor", this.boosterColor);
+        data.put("active", this.active);
+        return data;
+    }
+    
+    @Override
+    void load(HashMap<String, Object> data) {
+        super.load(data);
+        if (data.containsKey("boostMultiplier")) this.boostMultiplier = ((Number) data.get("boostMultiplier")).floatValue();
+        if (data.containsKey("boosterColor")) this.boosterColor = ((Number) data.get("boosterColor")).intValue();
+        if (data.containsKey("active")) this.active = (boolean) data.get("active");
+    }
 }
