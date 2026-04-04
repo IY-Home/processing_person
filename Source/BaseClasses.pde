@@ -546,9 +546,9 @@ class Human extends Thing {
     }
 
     void mouseLeftDown() {
-        if (mouseX >= mouseDragX) {
+        if (mouseX > mouseDragX) {
             rightKeyDown();
-        } else {
+        } else if (mouseX < mouseDragX) {
             leftKeyDown();
         }
     }
@@ -880,6 +880,268 @@ abstract class UIElement {
     void keyDown(char key, int keyCode) {}
     void keyUp(char key, int keyCode) {}
 
+}
+
+class Label extends UIElement {
+    String text;
+    color textColor;
+    color backgroundColor;
+    int textSize;
+    int textAlignHorizontal; // LEFT, CENTER, RIGHT
+    int textAlignVertical;   // TOP, CENTER, BOTTOM
+    boolean hasBorder;
+    color borderColor;
+    float borderWeight;
+    float cornerRadius;
+    
+    // Constructor with just text (auto positions)
+    Label(String text, float x, float y) {
+        this(text, x, y, 200, 40);
+    }
+    
+    // Full constructor
+    Label(String text, float x, float y, float w, float h) {
+        super(x, y, w, h);
+        this.text = text;
+        this.textColor = color(255);
+        this.backgroundColor = color(0, 0, 0, 0); // Transparent default
+        this.textSize = 16;
+        this.textAlignHorizontal = CENTER;
+        this.textAlignVertical = CENTER;
+        this.hasBorder = false;
+        this.borderColor = color(255);
+        this.borderWeight = 1;
+        this.cornerRadius = 5;
+    }
+    
+    void display() {
+        pushStyle();
+        
+        // Draw background
+        if (alpha(backgroundColor) > 0) {
+            fill(backgroundColor);
+            noStroke();
+            rect(position.x, position.y, boxWidth, boxHeight, cornerRadius);
+        }
+        
+        // Draw border
+        if (hasBorder) {
+            noFill();
+            stroke(borderColor);
+            strokeWeight(borderWeight);
+            rect(position.x, position.y, boxWidth, boxHeight, cornerRadius);
+        }
+        
+        // Draw text
+        fill(textColor);
+        textSize(textSize);
+        textAlign(textAlignHorizontal, textAlignVertical);
+        
+        float textX = position.x;
+        float textY = position.y;
+        
+        if (textAlignHorizontal == CENTER) textX += boxWidth / 2;
+        else if (textAlignHorizontal == RIGHT) textX += boxWidth;
+        
+        if (textAlignVertical == CENTER) textY += boxHeight / 2;
+        else if (textAlignVertical == BOTTOM) textY += boxHeight;
+        
+        text(text, textX, textY);
+        
+        popStyle();
+    }
+    
+    // Fluent setters (chainable)
+    Label setText(String newText) {
+        this.text = newText;
+        return this;
+    }
+    
+    Label setTextColor(color c) {
+        this.textColor = c;
+        return this;
+    }
+    
+    Label setBackground(color c) {
+        this.backgroundColor = c;
+        return this;
+    }
+    
+    Label setTextSize(int size) {
+        this.textSize = size;
+        return this;
+    }
+    
+    Label setAlignment(int horizontal, int vertical) {
+        this.textAlignHorizontal = horizontal;
+        this.textAlignVertical = vertical;
+        return this;
+    }
+    
+    Label setBorder(color c, float weight) {
+        this.hasBorder = true;
+        this.borderColor = c;
+        this.borderWeight = weight;
+        return this;
+    }
+    
+    Label setCornerRadius(float r) {
+        this.cornerRadius = r;
+        return this;
+    }
+}
+
+class Button extends UIElement {
+    String text;
+    color normalColor;
+    color hoverColor;
+    color pressColor;
+    color currentColor;
+    color textColor;
+    int textSize;
+    float cornerRadius;
+    boolean isPressed;
+    
+    // Optional icon
+    String icon;
+    boolean iconOnLeft;
+    
+    Button(String text, float x, float y, float w, float h) {
+        super(x, y, w, h);
+        this.text = text;
+        this.normalColor = color(70, 130, 200); // Steel blue
+        this.hoverColor = color(100, 160, 230);
+        this.pressColor = color(50, 100, 150);
+        this.currentColor = normalColor;
+        this.textColor = color(255);
+        this.textSize = 16;
+        this.cornerRadius = 8;
+        this.isPressed = false;
+        this.icon = "";
+        this.iconOnLeft = true;
+        
+        this.onClick = () -> {
+            println("Button clicked: " + text);
+        };
+    }
+    
+    void update() {
+        if (!enabled) return;
+        
+        // Update hover state
+        boolean wasHovered = hovered;
+        hovered = isMouseOver();
+        
+        // Handle click state
+        if (hovered && mousePressed && !mousePressedOnThis) {
+            mousePressedOnThis = true;
+            currentColor = pressColor;
+            isPressed = true;
+        } else if (mousePressedOnThis && !mousePressed) {
+            // Mouse released - trigger click if still hovering
+            if (hovered && onClick != null) {
+                onClick.run();
+            }
+            mousePressedOnThis = false;
+            isPressed = false;
+            currentColor = hovered ? hoverColor : normalColor;
+        } else if (hovered && !mousePressed && !isPressed) {
+            currentColor = hoverColor;
+        } else if (!hovered && !isPressed) {
+            currentColor = normalColor;
+        }
+        
+        // Handle hover callback
+        if (hovered && !wasHovered && onHover != null) {
+            onHover.run();
+        }
+        
+        // Display
+        if (visible) {
+            display();
+        }
+    }
+    
+    void display() {
+        pushStyle();
+        
+        // Draw button background
+        fill(currentColor);
+        stroke(0);
+        strokeWeight(1.5);
+        rect(position.x, position.y, boxWidth, boxHeight, cornerRadius);
+        
+        // Draw inner shadow effect when pressed
+        if (isPressed) {
+            fill(0, 0, 0, 30);
+            noStroke();
+            rect(position.x + 2, position.y + 2, boxWidth - 4, boxHeight - 4, cornerRadius - 2);
+        }
+        
+        // Draw text with icon
+        fill(textColor);
+        textSize(textSize);
+        textAlign(CENTER, CENTER);
+        
+        String displayText = text;
+        if (!icon.isEmpty()) {
+            if (iconOnLeft) {
+                displayText = icon + " " + text;
+            } else {
+                displayText = text + " " + icon;
+            }
+        }
+        
+        float textX = position.x + boxWidth / 2;
+        float textY = position.y + boxHeight / 2;
+        
+        // Slight push when pressed
+        if (isPressed) {
+            textX += 1;
+            textY += 1;
+        }
+        
+        text(displayText, textX, textY);
+        
+        popStyle();
+    }
+    
+    // Fluent setters
+    Button setColors(color normal, color hover, color press) {
+        this.normalColor = normal;
+        this.hoverColor = hover;
+        this.pressColor = press;
+        this.currentColor = normal;
+        return this;
+    }
+    
+    Button setTextColor(color c) {
+        this.textColor = c;
+        return this;
+    }
+    
+    Button setTextSize(int size) {
+        this.textSize = size;
+        return this;
+    }
+    
+    Button setIcon(String iconChar, boolean onLeft) {
+        this.icon = iconChar;
+        this.iconOnLeft = onLeft;
+        return this;
+    }
+    
+    Button setCornerRadius(float r) {
+        this.cornerRadius = r;
+        return this;
+    }
+    
+    // Manually trigger click (for keyboard shortcuts)
+    void click() {
+        if (onClick != null) {
+            onClick.run();
+        }
+    }
 }
 
 class InputBox extends UIElement implements KeyEvents {

@@ -115,6 +115,7 @@ void createScenes(Window window) {
     // window.groundColor = color(200, 100, 0);
     // window.trashScene = 999;
     // window.cursorSize = 40;
+
 }
 
 void createHumans(ArrayList <Human> humans) {
