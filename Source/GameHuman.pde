@@ -166,7 +166,7 @@ class GameHuman extends Human {
     void drawMoney() {
         if (!hasHungerAndMoney) return;
         
-        fill(gameManager.window.scenes.getAs(sceneIn, Integer.class, color(255)) < -13500000 ? 255 : 0);
+        fill(gameManager.sceneManager.scenes.getAs(sceneIn, Integer.class, color(255)) < -13500000 ? 255 : 0);
         textSize(18);
         textAlign(CENTER);
         text("$" + nf(money, 0, 2), position.x, position.y - 196);
@@ -224,7 +224,7 @@ class GameHuman extends Human {
 
     @Override
     void leftKeyDown() {
-        float groundAngle = gameManager.window.getGroundAngleAt(position.x);
+        float groundAngle = gameManager.sceneManager.getGroundAngleAt(position.x);
         float baseSpeed = -speed / (frameRate/60);
         
         float steepness = abs(groundAngle);
@@ -243,7 +243,7 @@ class GameHuman extends Human {
 
     @Override
     void rightKeyDown() {
-        float groundAngle = gameManager.window.getGroundAngleAt(position.x);
+        float groundAngle = gameManager.sceneManager.getGroundAngleAt(position.x);
         float baseSpeed = speed / (frameRate/60);
         
         float steepness = abs(groundAngle);

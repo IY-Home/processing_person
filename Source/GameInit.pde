@@ -40,7 +40,7 @@ Boolean initLoadingScreen(LoadingManager loader) {
     return true; // Enable loading screen
 }
 
-void createScenes(SceneManager window) {
+void createScenes(SceneManager sceneManager) {
     // Colors for different times of day
     color day = color(90, 210, 255);
     color evening = color(50, 95, 135);
@@ -49,72 +49,72 @@ void createScenes(SceneManager window) {
     String beach = "backgrounds/beach.png";  // only the file name is needed
     
     // Method 1: Pass parallel arrays
-    window.addScenes(
+    sceneManager.addScenes(
         new Object[]{day, beach, evening, color(240,250,255), day, night, color(255, 200, 0)},
         new Boolean[]{true, false, true, true, true, true, true}
     );
     
     // OR Method 2: Set ground for specific scenes after bulk add
-    // window.addScenes(new Object[]{day, beach, night, color(240,250,255), evening, color(240,250,255), night}, true);
-    // window.setSceneGround(1, false); // Scene 1 (beach) - no ground
-    // window.setSceneGround(7, false); // Scene 7 - no ground
+    // sceneManager.addScenes(new Object[]{day, beach, night, color(240,250,255), evening, color(240,250,255), night}, true);
+    // sceneManager.setSceneGround(1, false); // Scene 1 (beach) - no ground
+    // sceneManager.setSceneGround(7, false); // Scene 7 - no ground
     
-    window.groundHeightSampleRate = 1; 
+    sceneManager.groundHeightSampleRate = 1; 
     
-    window.addGroundKeyframe(2, 0, 0.8);    // Start at 80%
-    window.addGroundKeyframe(2, 200, 0.8);  // Still 80%, slope starts
-    window.addGroundKeyframe(2, 750, 0.5);  // Top of the hill
-    window.addGroundKeyframe(2, 1000, 0.8); // Back to 80% at end of the hill
+    sceneManager.addGroundKeyframe(2, 0, 0.8);    // Start at 80%
+    sceneManager.addGroundKeyframe(2, 200, 0.8);  // Still 80%, slope starts
+    sceneManager.addGroundKeyframe(2, 750, 0.5);  // Top of the hill
+    sceneManager.addGroundKeyframe(2, 1000, 0.8); // Back to 80% at end of the hill
     
     // Make ground bumpy like real mountain
     for (float x = 0; x < width; x += 20) {
           float shake = random(-0.02, 0.02);
-          float current = window.getGroundHeightAt(2, x);
-          window.addGroundKeyframe(2, x, current + shake);
+          float current = sceneManager.getGroundHeightAt(2, x);
+          sceneManager.addGroundKeyframe(2, x, current + shake);
     }
     
     // Make stairs
-    window.createStairs(3, 300, 600, 0.8, 0.45, 50, 0.05);
-    window.createStairs(3, 700, 1000, 0.45, 0.8, 50, 0.05);
-    window.addGroundKeyframe(3, width, 0.8); 
+    sceneManager.createStairs(3, 300, 600, 0.8, 0.45, 50, 0.05);
+    sceneManager.createStairs(3, 700, 1000, 0.45, 0.8, 50, 0.05);
+    sceneManager.addGroundKeyframe(3, width, 0.8); 
     
-    window.addGroundKeyframe(5, 0, 0.8);    // Start at 80%
-    window.addGroundKeyframe(5, 450, 0.8);  // Still at 80%
-    window.addGroundKeyframe(5, 451, 0.95); // Hole, drop to 95%
-    window.addGroundKeyframe(5, 699, 0.95); // Still hole, 95%
-    window.addGroundKeyframe(5, 700, 0.8); // Hole ends, 80%
-    window.addGroundKeyframe(5, 1000, 0.8);    // Another hole starts at 80%
-    window.addGroundKeyframe(5, 1050, 0.95);  // Drops to 95%
-    window.addGroundKeyframe(5, 1100, 0.8); // Hole ends, 80%
+    sceneManager.addGroundKeyframe(5, 0, 0.8);    // Start at 80%
+    sceneManager.addGroundKeyframe(5, 450, 0.8);  // Still at 80%
+    sceneManager.addGroundKeyframe(5, 451, 0.95); // Hole, drop to 95%
+    sceneManager.addGroundKeyframe(5, 699, 0.95); // Still hole, 95%
+    sceneManager.addGroundKeyframe(5, 700, 0.8); // Hole ends, 80%
+    sceneManager.addGroundKeyframe(5, 1000, 0.8);    // Another hole starts at 80%
+    sceneManager.addGroundKeyframe(5, 1050, 0.95);  // Drops to 95%
+    sceneManager.addGroundKeyframe(5, 1100, 0.8); // Hole ends, 80%
     
     // Make ground bumpy like real terrain
     for (float x = 0; x < width; x += 20) {
           float shake = random(-0.01, 0.01);
-          float current = window.getGroundHeightAt(5, x);
-          window.addGroundKeyframe(5, x, current + shake);
+          float current = sceneManager.getGroundHeightAt(5, x);
+          sceneManager.addGroundKeyframe(5, x, current + shake);
     }
     
-    window.addGroundKeyframe(6, 0, 0.8);
-    window.addGroundKeyframe(6, 600, 0.8);
-    window.addGroundKeyframe(6, 610, 0.6);
-    window.addGroundKeyframe(6, width, 0.6);
+    sceneManager.addGroundKeyframe(6, 0, 0.8);
+    sceneManager.addGroundKeyframe(6, 600, 0.8);
+    sceneManager.addGroundKeyframe(6, 610, 0.6);
+    sceneManager.addGroundKeyframe(6, width, 0.6);
     
-    // Configure window
-    window.scene = 0;        // initial scene
-    window.scenes.setLoop(true);
+    // Configure sceneManager
+    sceneManager.scene = 0;        // initial scene
+    sceneManager.scenes.setLoop(true);
     
-    // window.cursorColor = color(0, 120, 255);
-    window.drawingCustomCursor = true;
+    // sceneManager.cursorColor = color(0, 120, 255);
+    sceneManager.drawingCustomCursor = true;
 
     // You can change physics values, e.g.
-    // window.physics.GRAVITY = 3f;
-    // window.physics.GRAB_RANGE = 60;
+    // sceneManager.physics.GRAVITY = 3f;
+    // sceneManager.physics.GRAB_RANGE = 60;
     
-    // You can also customize other window properties, e.g.
-    // window.frameSpeed = 0.5;
-    // window.groundColor = color(200, 100, 0);
-    // window.trashScene = 999;
-    // window.cursorSize = 40;
+    // You can also customize other sceneManager properties, e.g.
+    // sceneManager.frameSpeed = 0.5;
+    // sceneManager.groundColor = color(200, 100, 0);
+    // sceneManager.trashScene = 999;
+    // sceneManager.cursorSize = 40;
 
 }
 
