@@ -60,8 +60,6 @@ class GameManager {
             performInitStage(i);
           }
         }
-        
-        println("GameManager initialized!");
     }
     
     String performInitStage(int stage) {
@@ -1471,7 +1469,6 @@ class LoadingManager {
         loadingStage = 0;
         frameCounter = 0;
         waitingForImages = false;
-        println(gm.startupMessage);
         println("Loading started...");
     }
     
