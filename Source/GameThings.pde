@@ -267,7 +267,7 @@ class Chair extends Thing implements Interactable {
         
         // Calculate proper standing position
         float standX = this.position.x;
-        float standY = this.position.y - 260; // Standing on the chair seat
+        float standY = this.position.y - gameHuman.chairHeightOffset; // Standing on the chair seat
         
         // Set human position properly
         gameHuman.position.x = standX;

@@ -292,7 +292,7 @@ class Human extends Thing {
     int shiftKey = SHIFT;
     boolean mouseControls = true;
 
-    float trackedIndicatorHeight = 165; // Height above body to draw tracked indicator
+    float trackedIndicatorHeight = 216; // Height above body to draw tracked indicator
 
     Human(String name, color hairColor,
         color shirtColor, color pantColor, color shoeColor, float posX, int sceneIn) {
@@ -314,7 +314,7 @@ class Human extends Thing {
         this.rested = false;
         this.friction = 1;
         this.sceneIn = sceneIn;
-        this.groundHeightOffset = 114.144f;
+        this.groundHeightOffset = 72f;
         this.hasPhysics = true;
         this.show = true;
     }
@@ -612,19 +612,24 @@ class Human extends Thing {
         } else if (this.position.x < width * Constants.Physics.LEFT_BOUNDARY) {
             this.position.x = width * 0.09;
         }
+        
         float groundY = height * gameManager.window.getGroundHeightAt(position.x);
-        if (this.position.y >= groundY - groundHeightOffset) {
-            this.position.y = groundY - groundHeightOffset;
+        float effectiveGroundY = groundY - groundHeightOffset;
+        
+        if (this.position.y > effectiveGroundY) {
+            this.position.y = effectiveGroundY;
         }
+        
         if (this.position.y <= height * Constants.Physics.CEILING_HEIGHT) {
             this.position.y = height * Constants.Physics.CEILING_HEIGHT;
+            if (this.velocity.y < 0) this.velocity.y = 0;  // Stop upward momentum at ceiling
         }
     }
 
     void checkThings() {      
         // Update grabbed thing position
         if (this.grabbed && grabThing != null) {
-            grabThing.position.set(this.position.x, this.position.y + 135);
+            grabThing.position.set(this.position.x, this.position.y);
             grabThing.held = true;
         }
     }

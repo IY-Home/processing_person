@@ -22,6 +22,8 @@ class GameHuman extends Human {
     float bobAmount = 3;    // How many pixels to bob
     boolean wasMoving = false;
 
+    float chairHeightOffset = groundHeightOffset + 100;
+
     StatBar hungerBar;
 
     GameHuman(String firstName, String lastName, color hairColor,
@@ -57,9 +59,9 @@ class GameHuman extends Human {
 
     // Update hunger over time
     void updateHunger() {
-        if (!hasHungerAndMoney) { this.trackedIndicatorHeight = 165; return; };
+        if (!hasHungerAndMoney) { this.trackedIndicatorHeight = 216; return; };
 
-        this.trackedIndicatorHeight = 165 + 48;
+        this.trackedIndicatorHeight = 216 + 36;
 
         // Increase hunger based on velocity (more movement = more hunger)
         hunger += abs(this.velocity.x / velocityHungerUsed);
@@ -162,7 +164,7 @@ class GameHuman extends Human {
         
         // Ensure proper position
         this.position.x = chair.position.x;
-        this.position.y = chair.position.y - 260;
+        this.position.y = chair.position.y - chairHeightOffset;
     }
 
     // Draw money display
@@ -279,7 +281,7 @@ class GameHuman extends Human {
         // If standing on chair, maintain position
         if (standingOnChair != null) {
             this.position.x = standingOnChair.position.x;
-            this.position.y = standingOnChair.position.y - 260;
+            this.position.y = standingOnChair.position.y - chairHeightOffset;
             this.velocity.set(0, 0);
             this.rested = true;
         }
