@@ -6,7 +6,7 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 ## **Features**
 
 ### **Core Systems**
-- **Game Manager** - Central manager of things and humans, window and scenes, and constants
+- **Game Manager** - Central manager of things and humans, UI, scenes, and constants
 - **Physics Engine** - Gravity, collision detection, velocity, and friction
 - **Scene Management** - Multiple scenes with day/night transitions
 - **Input System** - Customizable input boxes for text/password entry
@@ -49,8 +49,7 @@ A modular, object-oriented 2D game framework built in Processing. This project p
   - Global variables and physics constants
   - Collections of all things, humans, and input boxes
   - Main update loop
-  - References to Window, KeyManager, ImageManager, and SaveManager systems
-- **`Window`** - Display/background and scene management
+  - References to ThingManager, UIManager, SceneManager, KeyManager, ImageManager, and SaveManager systems
 - **`Other Managers`** - Manages different systems, all controlled by `GameManager`
 
 #### **BaseClasses.pde**
@@ -96,7 +95,7 @@ class GameManager {
     SaveManager saveManager;    // Persistence
     ImageManager imageManager;  // Assets
     KeyManager keyManager;      // Input
-    Window window;              // Display & scenes
+    SceneManager sceneManager;              // Display & scenes
 }
 ```
 
@@ -307,9 +306,9 @@ Boolean initLoadingScreen(LoadingManager loader) {
 }
 ```
 
-### **`void createScenes(Window window)`**
+### **`void createScenes(SceneManager sceneManager)`**
 
-Sets up all game scenes, backgrounds, and window properties.
+Sets up all game scenes, backgrounds, and ground height properties.
 
 You must define:
 - The scenes themselves (colors or images)
@@ -318,7 +317,7 @@ You must define:
 - The trash scene (where deleted things go)
 - Cursor color
 
-window.addScenes() takes two parallel arrays:
+sceneManager.addScenes() takes two parallel arrays:
 - First array: Object[] containing colors (Integer) or image paths (String) - both can coexist
 - Second array: Boolean[] indicating whether each scene has ground
 
@@ -327,11 +326,11 @@ You can freely mix solid colors and images. For images:
 - Use just the filename (e.g., "beach.png")
 - ImageManager automatically loads them in the background
 
-You can also change the ground height across the scene like a terrain. Use `window.addGroundKeyframe(int scene, float xPosition, float height)`.
+You can also change the ground height across the scene like a terrain. Use `sceneManager.addGroundKeyframe(int scene, float xPosition, float height)`.
 - int scene sets which scene to add the keyframe.
 - float xPosition sets the x position of the keyframe (vertex).
 - float height sets the height of that vertex, in a normalized value between 0 and 1, multipled by the screen height (height).
-- If you want to have a uniform ground height, set window.defaultGroundHeight.
+- If you want to have a uniform ground height, set sceneManager.defaultGroundHeight.
 
 Additional window properties you can set:
 - groundColor: Color of the ground
@@ -341,25 +340,25 @@ Additional window properties you can set:
 - scenes.setDefaultReturnValue(): Fallback color for invalid scenes
 
 Parameters:
-    window - Window instance to configure
+    sceneManager - SceneManager instance to configure
 
 Example:
 ```java
-void createScenes(Window window) {
-    window.addScenes(
+void createScenes(SceneManager sceneManager) {
+    sceneManager.addScenes(
         new Object[]{color(90,210,255), "beach.png", color(18,19,65)},
         new Boolean[]{true, false, true}
     );
     
-    window.addGroundKeyframe(2, 0, 0.8);    // Start at 80%
-    window.addGroundKeyframe(2, 200, 0.8);  // Still 80%, slope starts
-    window.addGroundKeyframe(2, 750, 0.5);  // Top of the hill
-    window.addGroundKeyframe(2, 1000, 0.8); // Back to 80% at end of the hill
+    sceneManager.addGroundKeyframe(2, 0, 0.8);    // Start at 80%
+    sceneManager.addGroundKeyframe(2, 200, 0.8);  // Still 80%, slope starts
+    sceneManager.addGroundKeyframe(2, 750, 0.5);  // Top of the hill
+    sceneManager.addGroundKeyframe(2, 1000, 0.8); // Back to 80% at end of the hill
     
-    window.scene = 0;
-    window.trashScene = 999;
-    window.cursorColor = color(0, 120, 255);
-    window.scenes.setLoop(true);
+    sceneManager.scene = 0;
+    sceneManager.trashScene = 999;
+    sceneManager.cursorColor = color(0, 120, 255);
+    sceneManager.scenes.setLoop(true);
 }
 ```
 
