@@ -63,7 +63,7 @@ class Debug {
         yPos += lineHeight;
         
         text("Scene:", 20, yPos);
-        text(gameManager.window.scene, 20 + col2, yPos);
+        text(gameManager.sceneManager.scene, 20 + col2, yPos);
         yPos += lineHeight + 5;
         
         // ===== OBJECT COUNTS =====
@@ -77,7 +77,7 @@ class Debug {
         text("Active in scene:", 20, yPos);
         int activeInScene = 0;
         for (Thing t : gameManager.thingManager.things) {
-            if (t.show && t.sceneIn == gameManager.window.scene) activeInScene++;
+            if (t.show && t.sceneIn == gameManager.sceneManager.scene) activeInScene++;
         }
         text(activeInScene, 20 + col2, yPos);
         yPos += lineHeight + 5;
@@ -112,7 +112,7 @@ class Debug {
             text("State:", 20, yPos);
             String state = "";
             if (trackedHuman.held) state = "HELD";
-            else if (trackedHuman.position.y != height*gameManager.window.getGroundHeightAt(trackedHuman.position.x) - trackedHuman.groundHeightOffset) state = "JUMPING"; 
+            else if (trackedHuman.position.y != height*gameManager.sceneManager.getGroundHeightAt(trackedHuman.position.x) - trackedHuman.groundHeightOffset) state = "JUMPING"; 
             // MAX_VELOCITY because human is constantly accelerating downwards due to gravity
             else if (trackedHuman.velocity.x != 0) state = "MOVING";
             else state = "IDLE";
@@ -242,7 +242,7 @@ class Debug {
         
         pop();
 
-        gameManager.window.drawKeyframeMarkers();
+        gameManager.sceneManager.drawKeyframeMarkers();
     }
 
     void printSystemDump() {

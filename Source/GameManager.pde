@@ -8,7 +8,7 @@ class GameManager {
          
     // Systems
     ThingManager thingManager; 
-    Window window;
+    SceneManager sceneManager;
     KeyManager keyManager;
     ImageManager imageManager;
     SaveManager saveManager;
@@ -27,7 +27,7 @@ class GameManager {
         startupMessage = "### " + programName + " v" + version + " ###";  
         uiManager = new UIManager();
         imageManager = new ImageManager();
-        window = new Window(imageManager, color(255), color(50), 1);
+        sceneManager = new SceneManager(imageManager, color(255), color(50), 1);
         thingManager = new ThingManager(this);
         keyManager = new KeyManager();
         saveManager = new SaveManager();
@@ -51,11 +51,11 @@ class GameManager {
         // Clear existing state
         thingManager.things.clear();
         thingManager.mainHumans.clear();
-        window.scenes.clear();
+        sceneManager.scenes.clear();
         keyManager.resetAllKeys();
         
         // Initialize game
-        createScenes(window);
+        createScenes(sceneManager);
         createHumans(thingManager.mainHumans);
         createThings(thingManager.things);
         if (useSaveSystem) {
@@ -68,9 +68,9 @@ class GameManager {
     }
     
     void update() {
-        window.drawBackground();
+        sceneManager.drawBackground();
         thingManager.updateThings();
-        window.drawCursor(window.cursorSize, window.cursorColor);
+        sceneManager.drawCursor(sceneManager.cursorSize, sceneManager.cursorColor);
         uiManager.update();
         loop();
         if (autoSave && millis() - lastSaveMs > autoSaveInterval) { 
@@ -162,7 +162,7 @@ public class CircularArrayList<E> extends ArrayList<E> {
 
 
 
-class Window {
+class SceneManager {
     CircularArrayList<Object> scenes;  // Can hold colors (Integer) or STRING IDs for images
     ArrayList<Boolean> sceneHasGround; // Parallel list to scenes
     
@@ -186,7 +186,7 @@ class Window {
     ImageManager imageManager; // Reference to ImageManager
 
     // Constructor
-    Window(ImageManager imageManager, color backgroundColor, color groundColor, float speed) {
+    SceneManager(ImageManager imageManager, color backgroundColor, color groundColor, float speed) {
         this.groundColor = groundColor;
         this.frameSpeed = speed;
         this.scenes = new CircularArrayList<Object>();
@@ -594,8 +594,8 @@ class ThingManager {
         // Update humans
         for (Human human : mainHumans) {
             if (human == trackedHuman) {                     
-                if (human.sceneIn != gm.window.scene) {
-                    gm.window.goToScene(human.sceneIn);
+                if (human.sceneIn != gm.sceneManager.scene) {
+                    gm.sceneManager.goToScene(human.sceneIn);
                 }
             }
             if (human.inScene()) {
@@ -662,7 +662,7 @@ class ThingManager {
                         human.checkTouch(thing);
                     }
                 }
-            } else if (thing != null && thing.sceneIn == gm.window.trashScene) {
+            } else if (thing != null && thing.sceneIn == gm.sceneManager.trashScene) {
                 thing.show = false;
             } else if (thing != null && !thing.inScene() && thing.updateInBackground) {
                 thing.backgroundUpdate();
@@ -901,7 +901,7 @@ class SaveManager {
         saveData.setLong("timestamp", System.currentTimeMillis());
         saveData.setString("saveDate", LocalDateTime.now().toString());
         saveData.setInt("currentMaxID", currentMaxID);
-        saveData.setInt("currentScene", gameManager.window.scene);
+        saveData.setInt("currentScene", gameManager.sceneManager.scene);
         saveData.setInt("saveID", currentMaxSaveID);
         
         currentMaxSaveID++;
@@ -1156,7 +1156,7 @@ class SaveManager {
         }
         
         // Set current scene
-        gameManager.window.scene = savedScene;
+        gameManager.sceneManager.scene = savedScene;
         
         println("   Updated " + thingsArray.size() + " things");
         println("   Updated " + humansArray.size() + " humans");

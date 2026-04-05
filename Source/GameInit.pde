@@ -40,7 +40,7 @@ Boolean initLoadingScreen(LoadingManager loader) {
     return true; // Enable loading screen
 }
 
-void createScenes(Window window) {
+void createScenes(SceneManager window) {
     // Colors for different times of day
     color day = color(90, 210, 255);
     color evening = color(50, 95, 135);
@@ -69,7 +69,7 @@ void createScenes(Window window) {
     // Make ground bumpy like real mountain
     for (float x = 0; x < width; x += 20) {
           float shake = random(-0.02, 0.02);
-          float current = gameManager.window.getGroundHeightAt(2, x);
+          float current = window.getGroundHeightAt(2, x);
           window.addGroundKeyframe(2, x, current + shake);
     }
     
@@ -90,7 +90,7 @@ void createScenes(Window window) {
     // Make ground bumpy like real terrain
     for (float x = 0; x < width; x += 20) {
           float shake = random(-0.01, 0.01);
-          float current = gameManager.window.getGroundHeightAt(5, x);
+          float current = window.getGroundHeightAt(5, x);
           window.addGroundKeyframe(5, x, current + shake);
     }
     
@@ -219,7 +219,7 @@ void loop() {
             }
         }
     }
-    gameManager.window.drawCustomCursor(() -> {
+    gameManager.sceneManager.drawCustomCursor(() -> {
         drawCustomCursor();
     });
 }

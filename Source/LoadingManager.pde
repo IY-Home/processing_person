@@ -57,14 +57,14 @@ class LoadingManager {
     
     // References to game components (injected)
     GameManager gm;
-    Window window;
+    SceneManager sceneManager;
     ImageManager im;
     ArrayList<Thing> things;
     ArrayList<Human> humans;
     
     LoadingManager(GameManager gameManager) {
         this.gm = gameManager;
-        this.window = gameManager.window;
+        this.sceneManager = gameManager.sceneManager;
         this.things = gameManager.thingManager.things;
         this.humans = gameManager.thingManager.mainHumans;
         this.im = gameManager.imageManager;
@@ -206,13 +206,13 @@ class LoadingManager {
           case 1: // Clear old state
               things.clear();
               humans.clear();
-              window.scenes.clear();
+              sceneManager.scenes.clear();
               gm.keyManager.resetAllKeys();
               println("  ✓ Resources cleared ");
               break;
               
           case 2: // Load scenes
-              createScenes(window);
+              createScenes(sceneManager);
               println("  ✓ Scenes loaded ");
               break;
               

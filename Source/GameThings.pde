@@ -182,7 +182,7 @@ class Chair extends Thing implements Interactable {
     Chair(color chairColor, float posX, int sceneIn) {
         this.chairColor = chairColor;
         this.initialize();
-        this.position = new PVector(posX, height*gameManager.window.getGroundHeightAt(sceneIn, posX));
+        this.position = new PVector(posX, height*gameManager.sceneManager.getGroundHeightAt(sceneIn, posX));
         this.velocity = new PVector(0, 0);
         this.elasticity = 0;
         this.grabbable = true;
@@ -221,7 +221,7 @@ class Chair extends Thing implements Interactable {
                 putObjOnChair(other);
             } else if (millis() - other.lastReleasedMs < 360) {
                 if (this.occupied) {
-                    other.position.y = height*gameManager.window.getGroundHeightAt(position.x);
+                    other.position.y = height*gameManager.sceneManager.getGroundHeightAt(position.x);
                     if (other.velocity.x == 0) {
                         other.position.x = other.position.x <= this.position.x ? this.position.x - 110 : this.position.x + 110;
                         other.velocity.x = other.position.x <= this.position.x ? -1.2 : 1.2;
@@ -346,7 +346,7 @@ class Door extends Thing implements Interactable {
 
     Door(float posX, float posXDes, color frameColor, int sceneIn, int sceneDes) {
         this.initialize();
-        this.position = new PVector(posX, height*gameManager.window.getGroundHeightAt(sceneIn, posX));
+        this.position = new PVector(posX, height*gameManager.sceneManager.getGroundHeightAt(sceneIn, posX));
         this.velocity = new PVector(0, 0);
         this.elasticity = 0;
         this.grabbable = false;
@@ -379,7 +379,7 @@ class Door extends Thing implements Interactable {
             rect(this.position.x + 30, this.position.y - 255, 15, 292);
             rect(this.position.x - 45, this.position.y - 255, 90, 15);
             rect(this.position.x - 45, this.position.y + 26, 90, 15);
-            fill(gameManager.window.scenes.getAs(targetScene, Integer.class, this.frameColor));
+            fill(gameManager.sceneManager.scenes.getAs(targetScene, Integer.class, this.frameColor));
             rect(this.position.x - 30, this.position.y - 240, 60, 265);
             strokeWeight(1);
             pop();
@@ -422,18 +422,18 @@ class Door extends Thing implements Interactable {
     }
     
     void backgroundUpdate() {
-        if (gameManager.window.scene == sceneFrom || (gameManager.window.scene == sceneDes && !isOneWay)) {
-            if (this.sceneIn != gameManager.window.scene) {
-                this.sceneIn = gameManager.window.scene;
+        if (gameManager.sceneManager.scene == sceneFrom || (gameManager.sceneManager.scene == sceneDes && !isOneWay)) {
+            if (this.sceneIn != gameManager.sceneManager.scene) {
+                this.sceneIn = gameManager.sceneManager.scene;
                 
                 // Set correct position based on which scene we're in
-                if (gameManager.window.scene == sceneFrom) {
+                if (gameManager.sceneManager.scene == sceneFrom) {
                     this.position.x = posXFrom;
-                    if (this.sittingOnGround) this.position.y = height*gameManager.window.getGroundHeightAt(this.position.x);
+                    if (this.sittingOnGround) this.position.y = height*gameManager.sceneManager.getGroundHeightAt(this.position.x);
 
                 } else {
                     this.position.x = posXDes;
-                    if (this.sittingOnGround) this.position.y = height*gameManager.window.getGroundHeightAt(this.position.x);
+                    if (this.sittingOnGround) this.position.y = height*gameManager.sceneManager.getGroundHeightAt(this.position.x);
                 }
                 
                 this.showDoor = true;
@@ -443,7 +443,7 @@ class Door extends Thing implements Interactable {
     
     void update() {
         super.update();
-        this.currentDisplayScene = gameManager.window.scene;
+        this.currentDisplayScene = gameManager.sceneManager.scene;
         // When in scene, make sure position is correct
         if (currentDisplayScene == sceneFrom) {
             this.position.x = posXFrom;
@@ -491,7 +491,7 @@ class Cupboard extends Thing implements Interactable {
     Cupboard(color woodColor, float x, float cupboardHeight, float cupboardWidth, int sceneIn, int sceneDes) {
         this.woodColor = woodColor;
         this.initialize();
-        this.position = new PVector(x, height*gameManager.window.getGroundHeightAt(sceneIn, x));
+        this.position = new PVector(x, height*gameManager.sceneManager.getGroundHeightAt(sceneIn, x));
         this.velocity = new PVector(0, 0);
         this.acceleration = new PVector(0, 0);
         this.elasticity = 0.4;

@@ -39,7 +39,7 @@ abstract class Thing implements Saveable {
     PVector followingOffset;
 
     Thing() {
-        position = new PVector(width / 2, gameManager.window.getGroundHeightAt(width/2));
+        position = new PVector(width / 2, gameManager.sceneManager.getGroundHeightAt(width/2));
         velocity = new PVector();
         acceleration = new PVector();
     }
@@ -49,7 +49,7 @@ abstract class Thing implements Saveable {
     
     // Initialize with default position
     void initialize() {
-        position.set(width / 2, gameManager.window.getGroundHeightAt(width/2));
+        position.set(width / 2, gameManager.sceneManager.getGroundHeightAt(width/2));
         velocity.set(0, 0);
         acceleration.set(0, 0);
     }
@@ -80,7 +80,7 @@ abstract class Thing implements Saveable {
         position.x = constrain(position.x, width * Constants.Physics.LEFT_BOUNDARY, width * Constants.Physics.RIGHT_BOUNDARY);
         
         // Get dynamic ground height at current X position
-        float groundY = height * gameManager.window.getGroundHeightAt(position.x);
+        float groundY = height * gameManager.sceneManager.getGroundHeightAt(position.x);
         float effectiveGroundY = groundY - groundHeightOffset;
         
         position.y = constrain(position.y, height * Constants.Physics.CEILING_HEIGHT, effectiveGroundY);
@@ -270,14 +270,14 @@ abstract class Thing implements Saveable {
 
     // Check if Thing is in current scene
     boolean inScene() {
-        return this.sceneIn == gameManager.window.scene;
+        return this.sceneIn == gameManager.sceneManager.scene;
     }
     void hide() {
-        this.sceneIn = gameManager.window.trashScene;
+        this.sceneIn = gameManager.sceneManager.trashScene;
         this.show = false;
     }
     void show() {
-        this.sceneIn = gameManager.window.scene;
+        this.sceneIn = gameManager.sceneManager.scene;
         this.show = true;
     }
 }
@@ -318,7 +318,7 @@ class Human extends Thing {
         this.shoeColor = shoeColor;
         
         this.initialize();
-        this.position = new PVector(posX, gameManager.window.getGroundHeightAt(posX) * 0.6);
+        this.position = new PVector(posX, gameManager.sceneManager.getGroundHeightAt(posX) * 0.6);
         this.velocity = new PVector(0, 0);
         this.acceleration = new PVector(0, 0);
         this.grabbed = false;
@@ -477,7 +477,7 @@ class Human extends Thing {
 
     // Draw name above human
     void drawName() {
-        fill(brightness(gameManager.window.scenes.getAs(sceneIn, Integer.class, color(255))) < 128 ? 255 : 0);
+        fill(brightness(gameManager.sceneManager.scenes.getAs(sceneIn, Integer.class, color(255))) < 128 ? 255 : 0);
         textSize(24);
         text(name, position.x - 17 - name.length() * 2.5, position.y - 174);
     }
@@ -533,7 +533,7 @@ class Human extends Thing {
         this.acceleration.x = 3f;
     }
     void upKeyDown() {
-        if (this.position.y >= height*gameManager.window.getGroundHeightAt(position.x) - groundHeightOffset) {
+        if (this.position.y >= height*gameManager.sceneManager.getGroundHeightAt(position.x) - groundHeightOffset) {
             this.velocity.y = -50;
         }
     }
@@ -624,7 +624,7 @@ class Human extends Thing {
             this.position.x = width * 0.09;
         }
         
-        float groundY = height * gameManager.window.getGroundHeightAt(position.x);
+        float groundY = height * gameManager.sceneManager.getGroundHeightAt(position.x);
         float effectiveGroundY = groundY - groundHeightOffset;
         
         if (this.position.y > effectiveGroundY) {
