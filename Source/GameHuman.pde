@@ -377,7 +377,6 @@ class GameHuman extends Human {
         this.update();
         this.updateHunger();
         hungerBar.visible = false;
-        println(hungerBar.visible);
     }
 }
 

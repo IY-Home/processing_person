@@ -5,7 +5,7 @@ GameManager createGameManager() {
     // If you need to, put any other code you want to have executed at the very start of the program here.
     
     // Change Game Manager variables, e.g.
-    GameManagerWithLoading gm = new GameManagerWithLoading("Person_City", "3.1");
+    GameManager gm = new GameManager("Person_City", "3.1");
     
     gm.messageBox.visible = true;
     
