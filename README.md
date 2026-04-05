@@ -85,6 +85,7 @@ Manages all user interface elements:
 - **SaveManager** - Handles JSON serialization and game state persistence
 - **ImageManager** - Manages asynchronous asset loading and caching
 - **KeyManager** - Tracks keyboard state for all input sources
+- **LoadingManager** - Manages game loading screen
 
 ### **GameManager - The Orchestrator**
 
@@ -100,12 +101,6 @@ class GameManager {
 ```
 
 ### **Examples**
-
-#### **LoadingManager.pde**
-- Example of extending GameManager to add custom features
-- `GameManagerWithLoading` adds splash screen with progress bar
-- `LoadingManager` handles staged loading with background image loading
-- `SplashScreen` animated loading display with tips
 
 #### **Classes (GameHuman.pde and GameThings.pde)**
 - **`GameHuman`** - Game player character with hunger/money systems and background updates
@@ -238,7 +233,7 @@ class GameManager {
 
 - To start building your game with this framework, you only need to edit GameInit.pde and create your own files to contain your classes.
 
-1. Import all files into Processing (download their IDE on [their website](https://processing.org)), either by cloning this repository or downloading the individual files (in `/Source`): `BaseClasses.pde` (base classes), `GameHuman.pde` (Human extensions), `GameThings.pde` (sample thing classes), `GameManager.pde` (core systems), `KeyHandlers.pde` (input), `LoadingManager.pde` (optional loading screen), `Main.pde` (main setup/draw), and `GameInit.pde` (your game configuration).
+1. Import all files into Processing (download their IDE on [their website](https://processing.org)), either by cloning this repository or downloading the individual files (in `/Source`): `BaseClasses.pde` (base classes), `GameHuman.pde` (Human extensions), `GameThings.pde` (sample thing classes), `GameManager.pde` (core systems), `KeyHandlers.pde` (input), `Main.pde` (main setup/draw), and `GameInit.pde` (your game configuration).
 2. You can edit, rename, or remove the example GameInit.pde and GameThings.pde/GameHuman.pde files. (You are recommended to use them as templates.)
 3. In your **`GameInit.pde`,** implement the following functions:
 
@@ -246,7 +241,7 @@ class GameManager {
 
 Creates and returns the main GameManager instance. Called at the very start of the program to define the global gameManager instance.
 
-You return a GameManager object here (default is `return new GameManager("myName", "myVersion")`). This is useful if you extend GameManager to create your own custom manager (e.g. GameManagerWithLoading).
+You return a GameManager object here (default is `return new GameManager("myName", "myVersion")`). This is useful if you extend GameManager to create your own custom manager (e.g. NetworkingGameManager).
 
 You can configure the GameManager before returning it:
 - Change the program name and version
@@ -265,7 +260,7 @@ Returns: GameManager - Any class that extends GameManager
 Example:
 ```java
 GameManager createGameManager() {
-    GameManager gm = new GameManagerWithLoading("My Game", "2.0");
+    GameManager gm = new GameManager("My Game", "2.0");
     gm.startupMessage = "Welcome to my game!";
     return gm;
 }
@@ -273,7 +268,7 @@ GameManager createGameManager() {
 
 ### **`Boolean initLoadingScreen(LoadingManager loader)`**
 
-Configures the optional loading/splash screen (for if you used the provided GameManagerWithLoading). Called during GameManager initialization.
+Configures the optional loading/splash screen. Called during GameManager initialization.
 
 To disable the splash screen entirely, just `return false`.
 
@@ -759,7 +754,6 @@ class MyButton extends UIElement {
 1. **GameInit.pde** - Complete game setup with scenes, characters, and Things
 2. **GameThings.pde** - Various thing types demonstrating different features including save/load
 3. **GameHuman.pde** - Extended human with hunger/money and background updates
-4. **LoadingManager.pde** - Custom GameManager extension with loading screen
 
 **Need a specific example?**
 - Simple physics object: See `Ball` class
