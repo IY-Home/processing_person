@@ -144,27 +144,22 @@ class GameHuman extends Human {
         
     }
 
+    void standOnChair(Chair chair) {
+        this.followThing(chair, 0, -chairHeightOffset);
+        this.standingOnChair = chair;
+        this.velocity.set(0, 0);
+        this.jumping = false;
+    }
+
     // Get off a chair
     void getOffChair() {
         if (standingOnChair != null) {
+            this.unfollowThing();
             standingOnChair.occupied = false;
             standingOnChair.restedThing = null;
             this.position.y -= 20; // Move slightly up when getting off
             standingOnChair = null;
-            this.rested = false;
         }
-    }
-
-    // Stand on a chair
-    void standOnChair(Chair chair) {
-        this.standingOnChair = chair;
-        this.rested = true;
-        this.velocity.set(0, 0);
-        this.jumping = false;
-        
-        // Ensure proper position
-        this.position.x = chair.position.x;
-        this.position.y = chair.position.y - chairHeightOffset;
     }
 
     // Draw money display
@@ -268,9 +263,10 @@ class GameHuman extends Human {
     @Override
     void upKeyDown() {
         super.upKeyDown();
-
+        gameManager.messageBox.showEvent("press the up key, " + standingOnChair);
         // If standing on chair, get off when jumping
         if (standingOnChair != null) {
+                    gameManager.messageBox.showEvent("get off da chair");
             this.getOffChair();
         }
     }
@@ -283,7 +279,6 @@ class GameHuman extends Human {
             this.position.x = standingOnChair.position.x;
             this.position.y = standingOnChair.position.y - chairHeightOffset;
             this.velocity.set(0, 0);
-            this.rested = true;
         }
     }
     

@@ -22,27 +22,26 @@ interface Saveable {
 abstract class Thing implements Saveable {
     int id = 0;
     PVector position, velocity, acceleration; // Physics properties
-    boolean held, grabbable, rested;
-    boolean show = true; // Default is true
-    boolean hasPhysics = true; 
+    boolean held = false, grabbable = true, show = true, hasPhysics = true;
     float elasticity = 0, friction = 0.98f;
     int sceneIn = 0; // Scene this Thing belongs to
     float groundHeightOffset = 0;
     float checkTouchRadius = 0;
-    boolean checkTouchY = false;
-    boolean checkTouchWide = false;
+    boolean checkTouchY = false, checkTouchWide = false;
     boolean drawBehindHumans = false;
     boolean drawInBackground = false;
     boolean drawInForeground = false;
     boolean updateInBackground = false;
     float lastReleasedMs = 0;
 
+    boolean followingThing = false;
+    Thing leader;
+    PVector followingOffset;
+
     Thing() {
         position = new PVector(width / 2, gameManager.window.getGroundHeightAt(width/2));
         velocity = new PVector();
         acceleration = new PVector();
-        held = rested = false;
-        grabbable = true;
     }
 
     // Abstract methods - must be implemented by subclasses
@@ -64,13 +63,14 @@ abstract class Thing implements Saveable {
 
     // Update Thing physics
     void update() {
-        if (hasPhysics && !this.held && !this.rested) {
+        if (hasPhysics && !this.held && !this.followingThing) {
             acceleration.y = Constants.Physics.GRAVITY;
             velocity.add(acceleration);
             velocity.limit(Constants.Physics.MAX_VELOCITY);
             position.add(velocity);
         }
         checkEdges();
+        checkHuman();
     }
 
     // Check and handle screen boundaries
@@ -105,7 +105,7 @@ abstract class Thing implements Saveable {
 
     void checkTouch(Thing other) {
         if (checkTouchRadius <= 0) return;
-        if (other.held || this.held || other.rested || this.rested || !this.show || !other.show || !(other.sceneIn == this.sceneIn)) return;
+        if (other.held || this.held || !this.show || !other.show || !(other.sceneIn == this.sceneIn)) return;
         
         float dist;
         if (checkTouchY) {
@@ -118,7 +118,24 @@ abstract class Thing implements Saveable {
             this.onTouch(other, dist);
         }
     }
-    
+
+    void checkHuman() {
+        if (this.followingThing) {
+            if (this.leader != null && this.followingOffset != null) {
+                this.position.set(leader.position);
+                this.position.add(followingOffset);
+                this.velocity.set(0, 0);
+            }
+        }
+    }
+
+    void moveTo(float x, float y) { this.position.x = x; this.position.y = y; }
+    void moveToX(float x) {this.position.x = x; }
+    void moveToY(float y) {this.position.y = y; }
+    void followThing(Thing leader) { this.leader = leader; this.followingThing = true; this.followingOffset = new PVector(0,0); }
+    void followThing(Thing leader, float x, float y) { this.followThing(leader); this.followingOffset.set(x, y); }
+    void unfollowThing() { this.leader = null; this.followingThing = false; this.followingOffset.set(0, 0); }
+
     // Executes this if updateInBackground is true and Thing not in current scene
     void backgroundUpdate() {}
     
@@ -146,7 +163,6 @@ abstract class Thing implements Saveable {
         // Boolean flags
         data.put("held", this.held);
         data.put("grabbable", this.grabbable);
-        data.put("rested", this.rested);
         data.put("show", this.show);
         data.put("hasPhysics", this.hasPhysics);
         data.put("checkTouchY", this.checkTouchY);
@@ -197,7 +213,6 @@ abstract class Thing implements Saveable {
         // Boolean flags
         if (data.containsKey("held")) this.held = (boolean) data.get("held");
         if (data.containsKey("grabbable")) this.grabbable = (boolean) data.get("grabbable");
-        if (data.containsKey("rested")) this.rested = (boolean) data.get("rested");
         if (data.containsKey("show")) this.show = (boolean) data.get("show");
         if (data.containsKey("hasPhysics")) this.hasPhysics = (boolean) data.get("hasPhysics");
         if (data.containsKey("checkTouchY")) this.checkTouchY = (boolean) data.get("checkTouchY");
@@ -311,7 +326,6 @@ class Human extends Thing {
         this.grabms = 0;
         this.grabRange = 300f;
         this.grabbable = false;
-        this.rested = false;
         this.friction = 1;
         this.sceneIn = sceneIn;
         this.groundHeightOffset = 72f;
@@ -336,8 +350,7 @@ class Human extends Thing {
     void setGrabThing(Thing thing) {
       this.grabbed = true;
       this.grabThing = thing;
-      grabThing.position.set(this.position.x, this.position.y + 135);
-      grabThing.velocity.set(this.velocity);
+      grabThing.followThing(this, 0, 135);
       grabThing.held = true;
     }
 
@@ -501,8 +514,7 @@ class Human extends Thing {
         this.grabbed = false;
         if (grabThing != null) {
             grabThing.held = false;
-            grabThing.rested = false;
-
+            grabThing.unfollowThing();
             grabThing.lastReleasedMs = millis();
 
             // Call onRelease if the Thing is Interactable
@@ -521,9 +533,8 @@ class Human extends Thing {
         this.acceleration.x = 3f;
     }
     void upKeyDown() {
-        if (this.rested || this.position.y >= height*gameManager.window.getGroundHeightAt(position.x) - groundHeightOffset) {
+        if (this.position.y >= height*gameManager.window.getGroundHeightAt(position.x) - groundHeightOffset) {
             this.velocity.y = -50;
-            this.rested = false;
         }
     }
     void downKeyDown() {
@@ -627,10 +638,12 @@ class Human extends Thing {
     }
 
     void checkThings() {      
-        // Update grabbed thing position
+        // Update grabbed thing
         if (this.grabbed && grabThing != null) {
-            grabThing.position.set(this.position.x, this.position.y);
             grabThing.held = true;
+        } else {
+            this.grabbed = false;
+            grabThing = null;
         }
     }
 

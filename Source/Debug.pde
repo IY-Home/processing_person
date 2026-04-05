@@ -111,8 +111,7 @@ class Debug {
             // State
             text("State:", 20, yPos);
             String state = "";
-            if (trackedHuman.rested) state = "RESTING";
-            else if (trackedHuman.held) state = "HELD";
+            if (trackedHuman.held) state = "HELD";
             else if (trackedHuman.position.y != height*gameManager.window.getGroundHeightAt(trackedHuman.position.x) - trackedHuman.groundHeightOffset) state = "JUMPING"; 
             // MAX_VELOCITY because human is constantly accelerating downwards due to gravity
             else if (trackedHuman.velocity.x != 0) state = "MOVING";

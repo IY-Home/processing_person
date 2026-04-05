@@ -206,13 +206,10 @@ class Chair extends Thing implements Interactable {
     }
 
     void putObjOnChair(Thing other) {
-          other.rested = true;
-          other.position.x = this.position.x;
-          other.position.y = this.position.y - (other instanceof Ball ? (36 + ((Ball)other).radius * 1.075) : 80);
-          other.velocity.x = 0;
-          this.occupied = true;
-          this.restedThing = other;
-          this.held = false;
+        other.followThing(this, 0, -(other instanceof Ball ? (36 + ((Ball)other).radius * 1.075) : 80));
+        this.occupied = true;
+        this.restedThing = other;
+        this.held = false;
     }
 
     void onTouch(Thing other, float distance) {
@@ -239,7 +236,7 @@ class Chair extends Thing implements Interactable {
         }
 
         // Clear occupied status if rested Thing is no longer resting
-        if (restedThing == null || !restedThing.rested || restedThing.held) {
+        if (restedThing == null || restedThing.held) {
             this.occupied = false;
             this.humanOnChair = false;
             this.restedThing = null;
@@ -248,7 +245,7 @@ class Chair extends Thing implements Interactable {
 
     void update() {
       super.update();
-      if (restedThing == null || !restedThing.rested || restedThing.held || !restedThing.show) {
+      if (restedThing == null || restedThing.held || !restedThing.show) {
             this.occupied = false;
             this.humanOnChair = false;
             this.restedThing = null;
@@ -265,15 +262,8 @@ class Chair extends Thing implements Interactable {
         GameHuman gameHuman = (GameHuman) human;
         gameManager.messageBox.showEvent("Human standing on chair!");
         
-        // Calculate proper standing position
-        float standX = this.position.x;
-        float standY = this.position.y - gameHuman.chairHeightOffset; // Standing on the chair seat
-        
-        // Set human position properly
-        gameHuman.position.x = standX;
-        gameHuman.position.y = standY;
-        
         gameHuman.standOnChair(this);
+        
         this.occupied = true;
         this.restedThing = gameHuman;
         this.humanOnChair = true;
@@ -584,7 +574,6 @@ class Cupboard extends Thing implements Interactable {
                 other.position.x = this.position.x;
                 cupboardItems.add(other);
                 other.sceneIn = this.sceneDes;
-                other.rested = false;
                 other.velocity.x = 0;
             } else {
                 cupboardItems.remove(other);
@@ -1256,7 +1245,6 @@ class PreFilledCupboard extends Cupboard {
                     // Give a good toss so it's visible
                     item.velocity.set(random(-10, 10), random(-20, -30));
                     item.held = false;
-                    item.rested = false;
                     
                     // Make sure items are drawn after cupboard by reordering in Things list
                     reorderItemsInFront();
