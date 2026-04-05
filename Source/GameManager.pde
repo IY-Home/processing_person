@@ -17,7 +17,7 @@ class GameManager {
     MessageBox messageBox;
     
     boolean useSaveSystem = true;
-    boolean autoSave = false;
+    boolean autoSave = true;
     int autoSaveInterval = 10000; // 10 seconds
     private int lastSaveMs = 0;
     
@@ -1394,4 +1394,3 @@ public static class Constants {
 void setTrackedHuman(Human human) {
     gameManager.thingManager.trackedHuman = human;
 }
-

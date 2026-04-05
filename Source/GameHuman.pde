@@ -263,10 +263,8 @@ class GameHuman extends Human {
     @Override
     void upKeyDown() {
         super.upKeyDown();
-        gameManager.messageBox.showEvent("press the up key, " + standingOnChair);
         // If standing on chair, get off when jumping
         if (standingOnChair != null) {
-                    gameManager.messageBox.showEvent("get off da chair");
             this.getOffChair();
         }
     }
@@ -276,8 +274,6 @@ class GameHuman extends Human {
         super.checkThings();
         // If standing on chair, maintain position
         if (standingOnChair != null) {
-            this.position.x = standingOnChair.position.x;
-            this.position.y = standingOnChair.position.y - chairHeightOffset;
             this.velocity.set(0, 0);
         }
     }
@@ -357,6 +353,7 @@ class GameHuman extends Human {
             for (Thing thing : things) {
                 if (thing instanceof Chair && thing.id == chairId) {
                     this.standingOnChair = (Chair) thing;
+                    thing.followThing(this);
                     break;
                 }
             }

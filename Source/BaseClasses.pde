@@ -70,7 +70,7 @@ abstract class Thing implements Saveable {
             position.add(velocity);
         }
         checkEdges();
-        checkHuman();
+        checkFollow();
     }
 
     // Check and handle screen boundaries
@@ -119,7 +119,7 @@ abstract class Thing implements Saveable {
         }
     }
 
-    void checkHuman() {
+    void checkFollow() {
         if (this.followingThing) {
             if (this.leader != null && this.followingOffset != null) {
                 this.position.set(leader.position);
@@ -350,7 +350,7 @@ class Human extends Thing {
     void setGrabThing(Thing thing) {
       this.grabbed = true;
       this.grabThing = thing;
-      grabThing.followThing(this, 0, 135);
+      grabThing.followThing(this);
       grabThing.held = true;
     }
 
@@ -721,6 +721,7 @@ class Human extends Thing {
             for (Thing obj : objects) {
                 if (obj instanceof Saveable && obj.id == objId) {
                     this.grabThing = obj;
+                    grabThing.followThing(this);
                     break;
                 }
             }
