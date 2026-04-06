@@ -75,7 +75,6 @@ class GameManager {
             thingManager.clearAll();
             sceneManager.scenes.clear();
             keyManager.resetAllKeys();
-            println("just cleared old stage");
             break;
             
         case 1: // Load scenes
@@ -1143,7 +1142,7 @@ class SaveManager {
             
             // Find the existing thing with this ID
             Thing existingThing = existingThings.get(objId);
-            if (existingThing != null) {
+            if (existingThing != null && existingThing.getClass().getName().equals(objData.getString("class"))) {
                 // Convert JSONObject to HashMap and load
                 HashMap<String, Object> dataMap = jsonToHashMap(dataJSON);
                 existingThing.load(dataMap);
@@ -1159,38 +1158,39 @@ class SaveManager {
             
             println("   Loading mainHumans...");
             
-            // First, find the human data from thingsArray
+            // First, build a map of object data by ID
             HashMap<Integer, JSONObject> thingDataMap = new HashMap<Integer, JSONObject>();
+            HashMap<Integer, String> thingClassMap = new HashMap<Integer, String>();
+            
             for (int i = 0; i < thingsArray.size(); i++) {
                 JSONObject objData = thingsArray.getJSONObject(i);
+                String className = objData.getString("class");
                 JSONObject dataJSON = objData.getJSONObject("data");
                 int objId = dataJSON.getInt("id");
+                
                 thingDataMap.put(objId, dataJSON);
+                thingClassMap.put(objId, className);
             }
             
             for (int i = 0; i < humansArray.size(); i++) {
                 int humanID = humansArray.getInt(i);
                 
-                Thing human = existingThings.get(humanID);
-                if (human == null) {
-                    println("   Human not found in existingThings!");
-                    continue;
-                }
+                Thing thing = existingThings.get(humanID);
+                String savedClass = thingClassMap.get(humanID);
                 
-                // Load the human's data
-                JSONObject humanData = thingDataMap.get(humanID);
-                if (humanData != null) {
-                    HashMap<String, Object> dataMap = jsonToHashMap(humanData);
-                    human.load(dataMap);
-                    
-                    gameManager.thingManager.mainHumans.add((Human) human);
-                    println("   Loaded " + human.getClass().getSimpleName() + " (ID " + humanID + ")");
+                if (thing != null && thing.getClass().getName().equals(savedClass)) {
+                    JSONObject humanData = thingDataMap.get(humanID);
+                    if (humanData != null) {
+                        HashMap<String, Object> dataMap = jsonToHashMap(humanData);
+                        thing.load(dataMap);
+                        
+                        gameManager.thingManager.mainHumans.add((Human) thing);
+                        println("   Loaded " + thing.getClass().getSimpleName() + " (ID " + humanID + ")");
+                    }
                 } else {
-                    println("   No save data found for human ID " + humanID);
+                    println("   WARNING: Human not found for ID: " + humanID);
                 }
             }
-        } else {
-          println("   No mainHumans were found!");
         }
         
         // Load tracked human
