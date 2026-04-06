@@ -655,7 +655,7 @@ The framework includes a comprehensive save/load system that persists the entire
 
 #### **Built-in Save/Load**
 - Press **'S'** to save the game (creates `gameSave.json` in the `saves/` folder)
-- Game can auto-save if you configure the `autoSave` boolean and `autoSaveInterval` int in gameManager.
+- Game can auto-save if you configure the `autoSave` boolean and `autoSaveInterval` int in saveManager.
 - Loading happens automatically at startup (if a save file exists)
 - All Things and humans restore their exact state including:
   - Positions and velocities

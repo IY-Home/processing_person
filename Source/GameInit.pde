@@ -12,7 +12,8 @@ GameManager createGameManager() {
     // You can change constants too, e.g.
     // gm.startupMessage = "Welcome to my game!"; 
     // gm.keyManager = new myCustomKeyManager();
-    // gm.useSaveSystem = false;
+    // gm.useSaveSystem = true;
+    // gm.saveManager.autoSave = false;
     
     // Return any object of a class that extends GameManager. Default: return new GameManager().
     return gm; 

@@ -17,12 +17,8 @@ class GameManager {
 
     MessageBox messageBox;
     
-    boolean useSaveSystem = true;
-    boolean autoSave = true;
-    int autoSaveInterval = 10000; // 10 seconds
-    private int lastSaveMs = 0;
-    
     boolean showLoadingScreen = true;
+    boolean useSaveSystem = true;
     
     GameManager(String programName, String programVersion) {
         this.programName = programName;
@@ -112,11 +108,11 @@ class GameManager {
         sceneManager.drawBackground();
         thingManager.updateThings();
         sceneManager.drawCursor(sceneManager.cursorSize, sceneManager.cursorColor);
+        if (useSaveSystem) {
+          if (saveManager.autoSave()) messageBox.showEvent("Game auto-saved!");
+        }
         uiManager.update();
         loop();
-        if (autoSave && millis() - lastSaveMs > autoSaveInterval) { 
-            saveGame(); lastSaveMs = millis(); messageBox.showEvent("Game auto-saved!");
-        }
     }
     
     
@@ -895,6 +891,10 @@ class SaveManager {
     String savePath = "saves";
     String defaultSaveName = "gameSave";
 
+    boolean autoSave = true;
+    int autoSaveInterval = 10000; // 10 seconds
+    private int lastSaveMs = 0;
+
     // Ensure saves directory exists
     SaveManager() {
         File savesDir = new File(getSavePath());
@@ -1263,6 +1263,14 @@ class SaveManager {
         }
         
         return map;
+    }
+    
+    boolean autoSave() {
+        if (autoSave && millis() - lastSaveMs > autoSaveInterval) { 
+            saveGame(); lastSaveMs = millis(); 
+            return true;
+        }
+        return false;
     }
 }
 
