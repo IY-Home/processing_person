@@ -63,7 +63,12 @@ class GameManager {
     }
     
     String performInitStage(int stage) {
-      String message = loadingManager.loadingMessages[stage];
+        String message = "";
+        try {
+            message = loadingManager.loadingMessages[stage];
+        } catch (ArrayIndexOutOfBoundsException e) {
+            message = "[Message not found]...";
+        }
       println("> " + message + " (stage " + stage + ")");
       switch(stage) {
         case 0: // Clear old state
