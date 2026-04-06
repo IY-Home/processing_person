@@ -58,7 +58,10 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 - **`Interactable`** - Interface for interactive things
 - **`KeyEvents`** - Interface for things that respond to keyboard input
 - **`Saveable`** - Interface for things that can be saved/loaded
-- **`InputBox`** - Text input UI with password support and callbacks
+
+#### **UIElements.pde**
+- **`UIElement`** - Abstract base class for all UI elements, managed through `UIManager`
+- **`Other UI elements`** - See in _Examples_ section
 
 ### **Manager Architecture**
 
@@ -113,6 +116,13 @@ class GameManager {
 - **`Drone`** - Controllable flying device with battery and recharging
 - **`Lunchbox`** - Consumable food items with price and hunger restoration
 - **`CashBag`** - Password-protected money bags with cooldown system
+
+#### **UI elements (UIElements.pde)**
+- **`Label`** - Text on screen with customizations
+- **`Button`** - Button with callbacks
+- **`InputBox`** - Pop-up prompt input box
+- **`MessageBox`** - Draggable console output box
+- **`StatBar`** - Progress bar
 
 #### **Debug.pde**
 - **`Debug`** - Debugging HUD with tracked human info
@@ -233,7 +243,7 @@ class GameManager {
 
 - To start building your game with this framework, you only need to edit GameInit.pde and create your own files to contain your classes.
 
-1. Import all files into Processing (download their IDE on [their website](https://processing.org)), either by cloning this repository or downloading the individual files (in `/Source`): `BaseClasses.pde` (base classes), `GameHuman.pde` (Human extensions), `GameThings.pde` (sample thing classes), `GameManager.pde` (core systems), `KeyHandlers.pde` (input), `Main.pde` (main setup/draw), and `GameInit.pde` (your game configuration).
+1. Import all files into Processing (download their IDE on [their website](https://processing.org)), either by cloning this repository or downloading the individual files (in `/Source`): `GameManager.pde` (core systems), `BaseClasses.pde` (base classes), `GameHuman.pde` (Human extensions), `GameThings.pde` (sample thing classes), `UIElements.pde` (UI elements), `KeyHandlers.pde` (input), `Main.pde` (main setup/draw), and `GameInit.pde` (your game configuration).
 2. You can edit, rename, or remove the example GameInit.pde and GameThings.pde/GameHuman.pde files. (You are recommended to use them as templates.)
 3. In your **`GameInit.pde`,** implement the following functions:
 
@@ -686,7 +696,7 @@ The framework includes a comprehensive, object-oriented UI system with automatic
 - **Fluent API** - Chain methods for clean configuration
 - **Global management** - All UI elements managed in `gameManager.uiManager`
 
-#### **Built-in UI Components**
+#### **Built-in example UI Components**
 
 ##### **InputBox**
 Modal text input with password masking and validation:
@@ -754,6 +764,7 @@ class MyButton extends UIElement {
 1. **GameInit.pde** - Complete game setup with scenes, characters, and Things
 2. **GameThings.pde** - Various thing types demonstrating different features including save/load
 3. **GameHuman.pde** - Extended human with hunger/money and background updates
+4. **UIElements.pde** - Different UI elements
 
 **Need a specific example?**
 - Simple physics object: See `Ball` class
@@ -765,4 +776,5 @@ class MyButton extends UIElement {
 - Background updates: See `GameHuman` or `Door`
 - Asynchronous loading: See `ImageManager` and `LoadingManager`
 - Save/load implementation: See any class extending `Thing`
+- Custom UI elements: See classes extending `UIElement` in `UIElements.pde`
 
