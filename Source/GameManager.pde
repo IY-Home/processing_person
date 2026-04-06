@@ -64,11 +64,13 @@ class GameManager {
     
     String performInitStage(int stage) {
       String message = loadingManager.loadingMessages[stage];
+      println("> " + message + " (stage " + stage + ")");
       switch(stage) {
         case 0: // Clear old state
             thingManager.clearAll();
             sceneManager.scenes.clear();
             keyManager.resetAllKeys();
+            println("just cleared old stage");
             break;
             
         case 1: // Load scenes
@@ -98,7 +100,6 @@ class GameManager {
             }
             break;
       }
-      println("> " + message);
       return message;
     }
     
@@ -1429,6 +1430,7 @@ class LoadingManager {
     
     // Special image loading state
     boolean waitingForImages = false;
+    int imageStage = 5;
     
     // Loading content
     String[] loadingMessages;
@@ -1445,7 +1447,6 @@ class LoadingManager {
         
         // Default messages
         loadingMessages = new String[] {
-            "Initializing...",
             "Clearing resources...", 
             "Loading scenes...",
             "Creating humans...",
@@ -1480,7 +1481,7 @@ class LoadingManager {
         frameCounter++;
         
         // SPECIAL HANDLING: Waiting for images to load in background
-        if (loadingStage == 6) {
+        if (waitingForImages) {
             updateImageLoading();
             return;
         }
@@ -1525,8 +1526,12 @@ class LoadingManager {
         // Check if image loading is complete
         if (im.isComplete()) {
             waitingForImages = false;
-            loadingStage++;  // Move to next stage
-            frameCounter = 0;
+            if (loadingStage >= maxStages) {
+                finishLoading();
+            } else {
+                loadingStage++;
+                frameCounter = 0;
+            }
             println("  ✓ All " + im.totalAssets + " images loaded (" + 
                    (int)(imageProgress * 100) + "%)");
         }
@@ -1536,6 +1541,9 @@ class LoadingManager {
         // Perform actual loading work at start of each stage
         if (framesPerStage == 0 || frameCounter % framesPerStage == 1) {
             gm.performInitStage(loadingStage);
+            if (loadingStage == imageStage) {
+                waitingForImages = true;
+            }
         }
         
         // Calculate current progress through this stage
