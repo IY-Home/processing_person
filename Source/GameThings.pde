@@ -501,6 +501,7 @@ class Cupboard extends Thing implements Interactable {
         this.sceneDes = sceneDes;
         this.cupboardHeight = cupboardHeight;
         this.cupboardWidth = cupboardWidth;
+        this.drawInBackground = true;
         // this.isStatic = true; // Cupboard is *not* static - you pick it up to open it
     }
 
@@ -1224,65 +1225,9 @@ class PreFilledCupboard extends Cupboard {
         this.cupboardItems = new ArrayList<Thing>(Arrays.asList(customThings));
         this.label = label;
         for (int i = 0; i < cupboardItems.size(); i++) {
-          gameManager.thingManager.things.add(cupboardItems.get(i));
+          if (!gameManager.thingManager.things.contains(cupboardItems.get(i))) gameManager.thingManager.things.add(cupboardItems.get(i));
+          cupboardItems.get(i).sceneIn = sceneDes;
         }
-    }
-    
-    void onGrab(Human human) {};
-    void onInteract(Human human) {
-        if (!opened) {
-            opened = true;
-            
-            for (Thing item : cupboardItems) {
-                if (item != null && (item.sceneIn == this.sceneDes)) {
-                    item.sceneIn = this.sceneIn;
-                    item.show = true;
-                    float angle = random(TWO_PI);
-                    float radius = random(100, 150);
-                    item.position.x = this.position.x + cos(angle) * radius;
-                    item.position.y = this.position.y + sin(angle) * 30;
-                    
-                    // Give a good toss so it's visible
-                    item.velocity.set(random(-10, 10), random(-20, -30));
-                    item.held = false;
-                    
-                    // Make sure items are drawn after cupboard by reordering in Things list
-                    reorderItemsInFront();
-                    
-                }
-            }
-        } else {
-            gameManager.messageBox.showEvent("Cupboard closed. Collecting surrounding items...");
-            
-            // Collect nearby items like normal cupboard
-            for (Thing thing : gameManager.thingManager.things) {
-                    Thing item = thing;
-                    if (item.sceneIn == this.sceneIn) {
-                        float distance = PVector.dist(this.position, item.position);
-                        if (distance < 150 && !item.held && item.hasPhysics) {
-                          if (!cupboardItems.contains(item)) cupboardItems.add(item);
-                            item.sceneIn = this.sceneDes;
-                            item.show = false;
-                            item.velocity.set(0, 0);
-                            item.position.x = this.position.x;
-                            item.position.y = this.position.y - 30;
-                        }
-                    }
-            }
-            
-            this.opened = false;
-        }
-    }
-    
-    // Reorder items to be drawn after cupboard in Things list
-    void reorderItemsInFront() {
-        // Remove cupboard from Things temporarily
-        gameManager.thingManager.things.remove(this);
-        
-        // Re-add cupboard FIRST (so it draws first, in background)
-        gameManager.thingManager.things.add(0, this);
-        
-        // Now items will be drawn after cupboard
     }
     
     @Override
@@ -1329,47 +1274,6 @@ class PreFilledCupboard extends Cupboard {
         textAlign(CENTER);
         text(this.label, position.x, position.y - cupboardHeight + 20);
         textAlign(LEFT);
-    }
-    
-    @Override
-    HashMap<String, Object> save() {
-        HashMap<String, Object> data = super.save();
-        data.put("label", this.label);
-        
-        // Save cupboard item IDs
-        ArrayList<Integer> itemIDs = new ArrayList<Integer>();
-        for (Thing item : cupboardItems) {
-            if (item instanceof Saveable) {
-                itemIDs.add((item).id);
-            }
-        }
-        data.put("cupboardItemIDs", itemIDs);
-        
-        return data;
-    }
-    
-    @Override
-    void load(HashMap<String, Object> data) {
-        super.load(data);
-        if (data.containsKey("label")) this.label = (String) data.get("label");
-        
-        // Load cupboard item references
-        if (data.containsKey("cupboardItemIDs")) {
-            ArrayList<Integer> itemIDs = (ArrayList<Integer>) data.get("cupboardItemIDs");
-            this.loadCupboardItems(gameManager.thingManager.things, itemIDs);
-        }
-    }
-    
-    void loadCupboardItems(ArrayList<Thing> things, ArrayList<Integer> itemIDs) {
-        this.cupboardItems.clear();
-        for (int id : itemIDs) {
-            for (Thing thing : things) {
-                if (thing instanceof Saveable && (thing).id == id) {
-                    this.cupboardItems.add(thing);
-                    break;
-                }
-            }
-        }
     }
 }
 
