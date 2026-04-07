@@ -902,13 +902,7 @@ class SaveManager {
     int autoSaveInterval = 10000; // 10 seconds
     private int lastSaveMs = 0;
 
-    // Ensure saves directory exists
     SaveManager() {
-        File savesDir = new File(getSavePath());
-        if (!savesDir.exists()) {
-            savesDir.mkdir();
-            println("Made /saves directory");
-        }
     }
     
     String getFolderNames(String path) {
@@ -949,6 +943,14 @@ class SaveManager {
     }
 
     void saveGame(String filename) {
+        int startTime = millis();
+
+        File savesDir = new File(getSavePath());
+        if (!savesDir.exists()) {
+            savesDir.mkdir();
+            println("SaveManager: Created /saves directory");
+        }
+
         JSONObject saveData = new JSONObject();
 
         // Save metadata
@@ -1012,7 +1014,7 @@ class SaveManager {
         
         // Write to file
         saveJSONObject(saveData, getSavePath() + filename + ".json");
-        println("Game saved to " + getSavePath() + filename + ".json");
+        println("Game saved to " + getSavePath() + filename + ".json (" + (millis() - startTime) + " ms)");
     }
     
     void addThingToArray(Thing thing, JSONArray array) {
@@ -1071,6 +1073,8 @@ class SaveManager {
     }
     
     void loadGame(String filename) {
+        int startTime = millis();
+
         String fullPath = getSavePath() + filename + ".json";
         File file = new File(fullPath);
         
@@ -1215,8 +1219,7 @@ class SaveManager {
         
         println("   Updated " + thingsArray.size() + " things");
         println("   Updated " + humansArray.size() + " humans");
-        println("   Game loaded from " + getSavePath() + filename + ".json!");
-        gameManager.messageBox.showEvent("Game loaded from " + filename + ".json!");
+        println("   Game loaded from " + getSavePath() + filename + ".json (" + (millis() - startTime) + "ms)");
     }
     
     void loadGame() {
