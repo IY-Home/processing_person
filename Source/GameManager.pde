@@ -1747,7 +1747,7 @@ class LoadingManager {
 public static class Constants { 
     public static final class Framework {
         public static final String NAME = "Person Framework"; 
-        public static final String FRAMEWORK_VERSION = "4.5.2";
+        public static final String FRAMEWORK_VERSION = "4.6.0";
         public static final boolean BETA = false;
     }
 
