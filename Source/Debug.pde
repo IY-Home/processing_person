@@ -35,7 +35,7 @@ class Debug {
         // Dark semi-transparent background
         fill(0, 0, 0, 200);
         noStroke();
-        rect(10, 10, 350, trackedHuman != null ? 480 : 360, 10);
+        rect(10, 10, 350, trackedHuman != null ? 500 : 280, 10);
         
         fill(debugColor);
         textSize(14);
@@ -62,6 +62,14 @@ class Debug {
         text(nf(frameRate, 0, 1), 20 + col2, yPos);
         yPos += lineHeight;
         
+        text("Mouse Position:", 20, yPos);
+        text("(" + mouseX + ", " + mouseY + ")", 20 + col2, yPos);
+        yPos += lineHeight;
+        
+        text("KeyPressed:", 20, yPos);
+        text(key + " (keyCode " + keyCode + ")", 20 + col2, yPos);
+        yPos += lineHeight;
+        
         text("Scene:", 20, yPos);
         text(gameManager.sceneManager.scene, 20 + col2, yPos);
         yPos += lineHeight + 5;
@@ -85,6 +93,11 @@ class Debug {
         // ===== TRACKED HUMAN INFO =====
         if (trackedHuman != null) {
             text("=== TRACKED HUMAN: " + trackedHuman.name + " ===", 20, yPos);
+            yPos += lineHeight;
+            
+            String humanType = trackedHuman.getClass().getSimpleName();
+            text("Type:", 20, yPos);
+            text(humanType, 20 + col2, yPos);
             yPos += lineHeight;
             
             // Position
@@ -124,38 +137,12 @@ class Debug {
             text("Grabbed:", 20, yPos);
             if (trackedHuman.grabbed && trackedHuman.grabThing != null) {
                 String objInfo = trackedHuman.grabThing.getClass().getSimpleName();
-                if (trackedHuman.grabThing instanceof CashBag) {
-                    CashBag cb = (CashBag) trackedHuman.grabThing;
-                    objInfo += " $" + cb.cashAmount;
-                } else if (trackedHuman.grabThing instanceof Lunchbox) {
-                    Lunchbox lb = (Lunchbox) trackedHuman.grabThing;
-                    objInfo += " " + lb.label;
-                }
                 text(objInfo, 20 + col2, yPos);
             } else {
                 text("None", 20 + col2, yPos);
             }
-            yPos += lineHeight;
-            
-            // If GameHuman, show stats
-            if (trackedHuman instanceof GameHuman) {
-                GameHuman gh = (GameHuman) trackedHuman;
-                
-                text("Hunger:", 20, yPos);
-                float hungerPercent = gh.hunger;
-                if (hungerPercent > 75) fill(errorColor);
-                else if (hungerPercent > 50) fill(warningColor);
-                else fill(debugColor);
-                text(nf(gh.hunger, 0, 1) + "%", 20 + col2, yPos);
-                yPos += lineHeight;
-                
-                fill(debugColor);
-                text("Money:", 20, yPos);
-                text("$" + nf(gh.money, 0, 2), 20 + col2, yPos);
-                yPos += lineHeight;
-            }
-            yPos += 5;
-            
+            yPos += lineHeight + 5;
+
             // ===== CLOSEST OBJECT =====
             text("=== CLOSEST OBJECT (within grabRange - " + nf(trackedHuman.grabRange, 0, 0) + "px) ===", 20, yPos);
             yPos += lineHeight;
@@ -200,7 +187,6 @@ class Debug {
             fill(warningColor);
             text("=== NO HUMAN TRACKED ===", 20, yPos);
             yPos += lineHeight;
-            text("Set debug.trackedHuman in GameInit!", 20, yPos);
         }
         
         yPos = height - 40;

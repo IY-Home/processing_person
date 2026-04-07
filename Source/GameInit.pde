@@ -14,6 +14,7 @@ GameManager createGameManager() {
     // gm.keyManager = new myCustomKeyManager();
     // gm.useSaveSystem = true;
     // gm.saveManager.autoSave = false;
+    // gm.loadOnStart = false;
     
     // Return any object of a class that extends GameManager. Default: return new GameManager().
     return gm; 

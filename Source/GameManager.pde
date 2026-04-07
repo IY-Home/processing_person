@@ -19,6 +19,7 @@ class GameManager {
     
     boolean showLoadingScreen = true;
     boolean useSaveSystem = true;
+    boolean loadGameOnStart = true;
     
     GameManager(String programName, String programVersion) {
         this.programName = programName;
@@ -88,7 +89,7 @@ class GameManager {
         case 4: // Load objects
             if (useSaveSystem) {
                 saveManager.setObjectIDs(thingManager.things, thingManager.mainHumans);
-                loadGame();
+                if (loadGameOnStart) loadGame();
             }
             break;
                        
@@ -126,10 +127,16 @@ class GameManager {
     
     void handleKeyPress(char key, int keyCode) {
         // 1. Special global shortcuts (always work)
-        if (useSaveSystem && (key == 's' || key == 'S')) {
+        if (useSaveSystem) {
+          if (key == 's' || key == 'S') {
             saveGame();
             messageBox.showEvent("Game saved!");
             return; // Save takes priority
+          } else if (key == 'l' || key == 'L') {
+            loadGame();
+            messageBox.showEvent("Game loaded!");
+            return; // Save takes priority
+          }
         }
         
         // 2. UI gets first
