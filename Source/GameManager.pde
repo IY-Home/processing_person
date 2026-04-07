@@ -128,15 +128,20 @@ class GameManager {
     void handleKeyPress(char key, int keyCode) {
         // 1. Special global shortcuts (always work)
         if (useSaveSystem) {
-          if (key == 's' || key == 'S') {
-            saveGame();
-            messageBox.showEvent("Game saved!");
-            return; // Save takes priority
-          } else if (key == 'l' || key == 'L') {
-            loadGame();
-            messageBox.showEvent("Game loaded!");
-            return; // Save takes priority
-          }
+            boolean ctrlPressed = keyManager.isKeyPressed(CONTROL);
+            boolean sPressed = keyManager.isKeyPressed(83);
+            boolean lPressed = keyManager.isKeyPressed(76);
+            if (ctrlPressed && sPressed) {
+                saveGame();
+                messageBox.showEvent("Game saved!");
+                return;
+            }
+            
+            if (ctrlPressed && lPressed) {
+                loadGame();
+                messageBox.showEvent("Game loaded!");
+                return;
+            }
         }
         
         // 2. UI gets first

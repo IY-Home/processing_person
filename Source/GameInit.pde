@@ -129,6 +129,7 @@ void createHumans(ArrayList <Human> humans) {
     GameHuman isaac = new GameHuman(humanName[0], humanName[1],
                       color(0), color(0, 0, 255), color(50), color(0), 
                       humanSpeed, humanMoney, width * 0.68, humanScene);
+    isaac.shiftKey = ENTER; // Press ENTER instead of SHIFT to interact!
     humans.add(isaac);
     setTrackedHuman(isaac);
 
