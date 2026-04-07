@@ -209,15 +209,13 @@ void loop() {
         if (human instanceof GameHuman) {  // Only game humans die
             if (human.position.y > height*0.9 - human.groundHeightOffset) {
                 GameHuman gh = (GameHuman) human;
+                gh.starve();
+                delay(100); // Make whole game freeze for effect
                 gameManager.messageBox.showAlert("Oops, " + gh.firstName + " fell into a hole and died!");
                 gameManager.messageBox.showAlert("Remember, the prize awaits behind that golden door!");
+                gh.respawn();
                 gh.sceneIn = 0;
-                gh.position.y = 0;
-                gh.velocity.x = -40;
-                gh.acceleration.x = -40;
-                gh.hunger += gh.maxHunger / 3;
                 gameManager.messageBox.showAlert(gh.firstName + " has respawned at the starting scene. Be careful this time!");
-                delay(100);
             }
         }
     }
