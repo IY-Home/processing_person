@@ -133,8 +133,8 @@ class GameManager {
 - **Arrow Keys/Mouse** - Move left/right
 - **Up Arrow/Middle Click** - Jump
 - **Down Arrow/Space/Right Click** - Grab/release things
-- **SHIFT Key** - Special interactions (eat food, stand on chair, throw balls, etc.)
-- **S Key** - Save game (creates `saves/gameSave.json`)
+- **ENTER Key** - Special interactions (eat food, stand on chair, throw balls, etc.)
+- **Ctrl+S Key** - Save game (creates `saves/gameSave.json`)
 
 ### **Thing Interactions**
 
@@ -178,7 +178,7 @@ class GameManager {
 - **JSON serialization**: Human-readable save files in the `saves/` folder
 - **Reference resolution**: Things store IDs of referenced things (e.g., `grabThingID`, `restedThingID`) for proper relationship restoration
 - **Transient state handling**: Temporary variables like grab cooldowns are reset on load
-- **Press 'S' to save** - Creates `gameSave.json` in the `saves/` directory
+- **Press 'Ctrl+S' to save** - Creates `gameSave.json` in the `saves/` directory
 - **Automatic saving** - Optional with configurable auto-save interval
 - **Automatic loading** - Game state restores from save file at startup if one exists
 
@@ -303,7 +303,7 @@ Boolean initLoadingScreen(LoadingManager loader) {
         "Press DOWN to grab objects",
         "SHIFT interacts with held objects",
         "Find cash bags with hidden passwords!",
-        "Press S to save your game"
+        "Press Ctrl+S to save your game"
     };
     loader.loadingTips = tips;
     loader.progressBarColor = color(255, 200, 100);
@@ -654,7 +654,7 @@ The framework includes a comprehensive save/load system that persists the entire
 - **Transient state handling**: Temporary variables like grab cooldowns are reset on load
 
 #### **Built-in Save/Load**
-- Press **'S'** to save the game (creates `gameSave.json` in the `saves/` folder)
+- Press **'Ctrl+S'** to save the game (creates `gameSave.json` in the `saves/` folder)
 - Game can auto-save if you configure the `autoSave` boolean and `autoSaveInterval` int in saveManager.
 - Loading happens automatically at startup (if a save file exists)
 - All Things and humans restore their exact state including:
