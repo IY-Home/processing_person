@@ -172,7 +172,7 @@ class GameManager {
 - Encapsulated game state management with GameManager
 - Composition over inheritance where appropriate
 
-### **Save/Load System (v4.1.0+)**
+### **Save/Load System**
 - **Automatic ID assignment**: Every thing gets a sequential ID based on creation order in `GameInit.pde`
 - **Saveable interface**: Things implement `save()` and `load()` methods to serialize their state
 - **JSON serialization**: Human-readable save files in the `saves/` folder
@@ -245,19 +245,24 @@ class GameManager {
 
 1. Import all files into Processing (download their IDE on [their website](https://processing.org)), either by cloning this repository or downloading the individual files (in `/Source`): `GameManager.pde` (core systems), `BaseClasses.pde` (base classes), `GameHuman.pde` (Human extensions), `GameThings.pde` (sample thing classes), `UIElements.pde` (UI elements), `KeyHandlers.pde` (input), `Main.pde` (main setup/draw), and `GameInit.pde` (your game configuration).
 2. You can edit, rename, or remove the example GameInit.pde and GameThings.pde/GameHuman.pde files. (You are recommended to use them as templates.)
-3. In your **`GameInit.pde`,** implement the following functions:
+3. In your **`GameInit.pde`'s `GameConfig` class,** implement the following fields and functions:
+
+### `programName` and `programVersion`
+
+Define `programName` -> `String` and `programVersion` -> `String` for the name and version of your own game, initialized by the GameManager and displayed on the LoadingScreen.
+
 
 ### **`GameManager createGameManager()`**
 
-Creates and returns the main GameManager instance. Called at the very start of the program to define the global gameManager instance.
+Creates and returns the main GameManager instance with your config. Called at the very start of the program to define the global gameManager instance.
 
-You return a GameManager object here (default is `return new GameManager("myName", "myVersion")`). This is useful if you extend GameManager to create your own custom manager (e.g. NetworkingGameManager).
+You return a GameManager object here (default is `return new GameManager(this)`). This is useful if you extend GameManager to create your own custom manager (e.g. NetworkingGameManager).
 
-You can configure the GameManager before returning it:
-- Change the program name and version
-- Modify physics constants (GRAVITY, MAX_VELOCITY, etc.)
-- Adjust gameplay settings (GRAB_RANGE, GROUND_HEIGHT, etc.)
-- Enable/disable save system (`gm.useSaveSystem = false`)
+You can configure the GameManager and its Managers before returning it:
+- Enable/disable save system (`useSaveSystem` -> `boolean`)
+- Configure `loadGameOnStart` -> `boolean`, which configures loading the game from a save file on start or not
+- Configure AutoSave with `gm.saveManager.autoSave` -> `boolean`
+- Change its `Manager`s, e.g. `gm.keyManager = new myCustomKeyManager();`
 
 You may also put any code that needs to execute at program startup here:
 - Initialize libraries (Minim, Network, etc.)
