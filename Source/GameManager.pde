@@ -7,6 +7,7 @@ class GameManager {
     String startupMessage;
          
     // Systems
+    GameConfig gameConfig;
     ThingManager thingManager; 
     SceneManager sceneManager;
     KeyManager keyManager;
@@ -21,9 +22,10 @@ class GameManager {
     boolean useSaveSystem = true;
     boolean loadGameOnStart = true;
     
-    GameManager(String programName, String programVersion) {
-        this.programName = programName;
-        this.version = programVersion;
+    GameManager(GameConfig gameConfig) {
+        this.gameConfig = gameConfig;
+        this.programName = gameConfig.programName;
+        this.version = gameConfig.programVersion;
         startupMessage = "### " + programName + " v" + version + " ###";  
         uiManager = new UIManager();
         imageManager = new ImageManager();
@@ -32,7 +34,7 @@ class GameManager {
         keyManager = new KeyManager();
         saveManager = new SaveManager();
         loadingManager = new LoadingManager(this);
-        showLoadingScreen = initLoadingScreen(loadingManager);
+        showLoadingScreen = gameConfig.initLoadingScreen(loadingManager);
         messageBox = new MessageBox(
             width * 0.15,  // 15% from left
             height * 0.10, // 75% from top (near bottom)
@@ -75,15 +77,15 @@ class GameManager {
             break;
             
         case 1: // Load scenes
-            createScenes(sceneManager);
+            gameConfig.createScenes(sceneManager);
             break;
             
         case 2: // Create humans
-            createHumans(thingManager.mainHumans);
+            gameConfig.createHumans(thingManager.mainHumans);
             break;
             
         case 3: // Create things
-            createThings(thingManager.things);
+            gameConfig.createThings(thingManager.things);
             break;
             
         case 4: // Load objects
@@ -1755,11 +1757,11 @@ class LoadingManager {
 public static class Constants { 
     public static final class Framework {
         public static final String NAME = "Person Framework"; 
-        public static final String FRAMEWORK_VERSION = "4.6.0";
+        public static final String FRAMEWORK_VERSION = "4.6.1";
         public static final boolean BETA = false;
     }
 
-    // Physics constants - not final, as game may need changing gravity, groundHeight, grabRange, etc.
+    // Physics constants - not final, as game may need changing them at runtime.
     public static class Physics {
         public static float CEILING_HEIGHT = 0.2f;
         public static float LEFT_BOUNDARY = 0.08f;
@@ -1769,6 +1771,7 @@ public static class Constants {
     }
 }
 
+// Helper function to set tracked human.
 void setTrackedHuman(Human human) {
     gameManager.thingManager.trackedHuman = human;
 }
