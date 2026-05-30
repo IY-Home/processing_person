@@ -128,7 +128,7 @@ public final class GameConfig {
 
     void createHumans(ArrayList <Human> humans) {
         // Create main human character with $200 starting money
-        String[] humanName = {"Isaac", "Tan"};
+        String[] humanName = {"Demo", "Human"};
         float humanSpeed = 2.5;
         float humanMoney = 200;
         int humanScene = 0;
