@@ -132,26 +132,26 @@ public final class GameConfig {
         float humanSpeed = 2.5;
         float humanMoney = 200;
         int humanScene = 0;
-        GameHuman isaac = new GameHuman(humanName[0], humanName[1],
+        GameHuman demo1 = new GameHuman(humanName[0], humanName[1],
                         color(0), color(0, 0, 255), color(50), color(0), 
                         humanSpeed, humanMoney, width * 0.68, humanScene);
-        isaac.shiftKey = ENTER; // Press ENTER instead of SHIFT to interact.
-        humans.add(isaac);
-        setTrackedHuman(isaac);
+        demo.shiftKey = ENTER; // Press ENTER instead of SHIFT to interact.
+        humans.add(demo);
+        setTrackedHuman(demo);
 
         debugger = new Debug();
-        debugger.setDebug(isaac, false); // Set to true to show debug
+        debugger.setDebug(demo, false); // Set to true to show debug
 
-        String humanName2 = "Nick";
+        String humanName2 = "Demo2";
         humanScene = 0;
-        Human nick = new Human(humanName2, color(200, 200, 0), color(255, 0, 0), color(50), color(0), width * 0.3, humanScene);
-        // Hide Nick for now, so comment out: humans.add(nick);
+        Human demo2 = new Human(humanName2, color(200, 200, 0), color(255, 0, 0), color(50), color(0), width * 0.3, humanScene);
+        // Hide demo2 for now, so comment out: humans.add(demo2);
         
-        String humanName3 = "Joe";
+        String humanName3 = "Demo3";
         humanScene = 3;
-        ImageHuman joe = new ImageHuman(humanName3, "objects/person.png", width * 0.3, humanScene);
-        joe.setControls(65, 68, 87, 83, 88, false); // W=left, S=down, A=left, D=right, X=shift(interact)
-        humans.add(joe);
+        ImageHuman demo3 = new ImageHuman(humanName3, "objects/person.png", width * 0.3, humanScene);
+        demo3.setControls(65, 68, 87, 83, 88, false); // W=left, S=down, A=left, D=right, X=shift(interact)
+        humans.add(demo3);
     }
 
     void createThings(ArrayList <Thing> things) {
