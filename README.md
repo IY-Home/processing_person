@@ -7,6 +7,7 @@ A modular, object-oriented 2D game framework built in Processing. This project p
 
 ### **Core Systems**
 - **Game Manager** - Central manager of things and humans, UI, scenes, and constants
+- **GameConfig (v4.6+)** - Game configurations that can be swapped
 - **Physics Engine** - Gravity, collision detection, velocity, and friction
 - **Scene Management** - Multiple scenes with day/night transitions
 - **Input System** - Customizable input boxes for text/password entry
