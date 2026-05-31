@@ -4,11 +4,11 @@ void setup() {
     fullScreen();
     pixelDensity(displayDensity()); 
 
-    GameConfig gameConfig = new GameConfig();
+    GameConfig gameConfig = getGameConfig();
 
     // Create and initialize game manager 
     gameManager = gameConfig.createGameManager();
-    windowTitle(gameManager.programName + " v" + gameManager.version);
+    windowTitle(gameConfig.programName + " v" + gameConfig.programVersion);
     gameManager.init();
 }
 

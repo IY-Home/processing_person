@@ -245,7 +245,8 @@ class GameManager {
 
 1. Import all files into Processing (download their IDE on [their website](https://processing.org)), either by cloning this repository or downloading the individual files (in `/Source`): `GameManager.pde` (core systems), `BaseClasses.pde` (base classes), `GameHuman.pde` (Human extensions), `GameThings.pde` (sample thing classes), `UIElements.pde` (UI elements), `KeyHandlers.pde` (input), `Main.pde` (main setup/draw), and `GameInit.pde` (your game configuration).
 2. You can edit, rename, or remove the example GameInit.pde and GameThings.pde/GameHuman.pde files. (You are recommended to use them as templates.)
-3. In your **`GameInit.pde`'s `GameConfig` class,** implement the following fields and functions:
+3. In your **`GameInit.pde`**, extend the abstract class **`GameConfig`** to configure your game, e.g. `public final class MyGameConfig extends GameConfig`.
+3. In your `MyGameConfig` class, implement the following fields and functions:
 
 ### `programName` and `programVersion`
 
@@ -281,7 +282,7 @@ GameManager createGameManager() {
 }
 ```
 
-### **`Boolean initLoadingScreen(LoadingManager loader)`**
+### **`boolean initLoadingScreen(LoadingManager loader)`**
 
 Configures the optional loading/splash screen. Called during GameManager initialization.
 
@@ -452,6 +453,10 @@ void loop() {
     myThing.customUpdate();
 }
 ```
+
+---
+
+Finally, define the function `public GameConfig getGameConfig()`, where you return an instance of your own `MyGameConfig` class, e.g. `return new MyGameConfig()`.
 
 ---
 

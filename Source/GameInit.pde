@@ -1,8 +1,18 @@
-public final class GameConfig {
+public abstract class GameConfig {
     String programName, programVersion;
 
+    abstract GameManager createGameManager();
+    abstract boolean initLoadingScreen(LoadingManager loader);
+    abstract void createScenes(SceneManager sceneManager);
+    abstract void createHumans(ArrayList<Human> humans);
+    abstract void createThings(ArrayList<Thing> things);
+    abstract void loop();
+}
+
+public final class MyGameConfig extends GameConfig {
     Debug debugger;
 
+    @Override
     GameManager createGameManager() {
         // Executed at the very start of the program, with definition gameManager = createGameManager. 
         // If you need to, put any other code you want to have executed at the very start of the program here.
@@ -26,7 +36,8 @@ public final class GameConfig {
         return gm; 
     }
 
-    Boolean initLoadingScreen(LoadingManager loader) {
+    @Override
+    boolean initLoadingScreen(LoadingManager loader) {
         String[] loadingTips = new String[] {
             "Press DOWN to grab objects",
             "Press SHIFT to interact with held objects",
@@ -48,6 +59,7 @@ public final class GameConfig {
         return true; // Enable loading screen
     }
 
+    @Override
     void createScenes(SceneManager sceneManager) {
         // Colors for different times of day
         color day = color(90, 210, 255);
@@ -126,6 +138,7 @@ public final class GameConfig {
 
     }
 
+    @Override
     void createHumans(ArrayList <Human> humans) {
         // Create main human character with $200 starting money
         String[] humanName = {"Demo", "Human"};
@@ -135,12 +148,12 @@ public final class GameConfig {
         GameHuman demo1 = new GameHuman(humanName[0], humanName[1],
                         color(0), color(0, 0, 255), color(50), color(0), 
                         humanSpeed, humanMoney, width * 0.68, humanScene);
-        demo.shiftKey = ENTER; // Press ENTER instead of SHIFT to interact.
-        humans.add(demo);
-        setTrackedHuman(demo);
+        demo1.shiftKey = ENTER; // Press ENTER instead of SHIFT to interact.
+        humans.add(demo1);
+        setTrackedHuman(demo1);
 
         debugger = new Debug();
-        debugger.setDebug(demo, false); // Set to true to show debug
+        debugger.setDebug(demo1, false); // Set to true to show debug
 
         String humanName2 = "Demo2";
         humanScene = 0;
@@ -154,6 +167,7 @@ public final class GameConfig {
         humans.add(demo3);
     }
 
+    @Override
     void createThings(ArrayList <Thing> things) {
         color woodColor = color(200, 100, 0);  
 
@@ -206,6 +220,7 @@ public final class GameConfig {
         things.add(new CashBag(color(255, 200, 0), width*0.75, 6, 1000, "Iwon!", "You found the prize! The password is 'Iwon!'.")); // $1000, prize at scene 6. After the 'holey' scene 5.
     }
 
+    @Override
     void loop() {
         debugger.display();
         debugger.drawVisualHelpers();
@@ -242,4 +257,8 @@ public final class GameConfig {
         line(mouseX - 6, mouseY, mouseX + 6, mouseY);
         line(mouseX, mouseY - 6, mouseX, mouseY + 6);
     }
+}
+
+public GameConfig getGameConfig() {
+    return new MyGameConfig();
 }
